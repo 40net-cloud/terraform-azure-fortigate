@@ -88,7 +88,7 @@ variable "external_loadbalancer_backend_address_pool_name" {
 data "azurerm_lb_backend_address_pool" "elb_backend" {
   count           = var.external_loadbalancer_name == "" ? 0 : 1
   name            = var.external_loadbalancer_backend_address_pool_name
-  loadbalancer_id = data.azurerm_lb.elb.id
+  loadbalancer_id = data.azurerm_lb.elb[count.index].id
 }
 
 variable "internal_loadbalancer_name" {
@@ -110,7 +110,7 @@ variable "internal_loadbalancer_backend_address_pool_name" {
 data "azurerm_lb_backend_address_pool" "ilb_backend" {
   count           = var.internal_loadbalancer_name == "" ? 0 : 1
   name            = var.internal_loadbalancer_backend_address_pool_name
-  loadbalancer_id = data.azurerm_lb.ilb.id
+  loadbalancer_id = data.azurerm_lb.ilb[count.index].id
 }
 
 ##############################################################################################################
