@@ -1,0 +1,22 @@
+##############################################################################################################
+#
+# FortiGate a standalone FortiGate VM
+# Terraform deployment template for Microsoft Azure
+#
+# The FortiGate VMs are reachable on the public IP on port HTTPS/443 and SSH/22.
+#
+# BEWARE: The state files contain sensitive data like passwords and others. After the demo clean up your
+#         clouddrive directory.
+#
+# Deployment location: ${location}
+# Username: ${username}
+#
+# Management FortiGate : https://${fgt_public_ip_address}/
+#
+##############################################################################################################
+
+fgt_private_ip_address_ext = ${fgt_private_ip_address_ext}
+fgt_private_ip_address_int = ${fgt_private_ip_address_int}
+fgt_public_ip_address = ${fgt_public_ip_address}
+
+##############################################################################################################
