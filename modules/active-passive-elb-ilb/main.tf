@@ -39,6 +39,8 @@ locals {
     fgt_ha_priority            = "255"
     vnet_network               = data.azurerm_virtual_network.vnet.address_space[0]
     fgt_additional_custom_data = var.fgt_additional_custom_data
+    fgt_fortimanager_ip        = var.fgt_fortimanager_ip
+    fgt_fortimanager_serial    = var.fgt_fortimanager_serial
   }
   fgt_a_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", local.fgt_a_vars))
   fgt_b_vars = {
@@ -64,6 +66,8 @@ locals {
     fgt_ha_priority            = "1"
     vnet_network               = data.azurerm_virtual_network.vnet.address_space[0]
     fgt_additional_custom_data = var.fgt_additional_custom_data
+    fgt_fortimanager_ip        = var.fgt_fortimanager_ip
+    fgt_fortimanager_serial    = var.fgt_fortimanager_serial
   }
   fgt_b_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", local.fgt_b_vars))
 }

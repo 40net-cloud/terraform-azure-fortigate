@@ -22,6 +22,9 @@ locals {
     fgt_internal_gw            = tostring(cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 1))
     vnet_network               = data.azurerm_virtual_network.vnet.address_space[0]
     fgt_additional_custom_data = var.fgt_additional_custom_data
+    fgt_fortimanager_ip        = var.fgt_fortimanager_ip
+    fgt_fortimanager_serial    = var.fgt_fortimanager_serial
+
   }
   fgt_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", local.fgt_vars))
 }

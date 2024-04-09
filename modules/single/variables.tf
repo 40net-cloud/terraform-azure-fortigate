@@ -99,8 +99,18 @@ variable "fgt_additional_custom_data" {
 }
 
 variable "fgt_serial_console" {
-  description = "Enabled serial console for FortiGate VM"
+  description = "Enable serial console for FortiGate VM"
   default     = "true"
+}
+
+variable "fgt_fortimanager_ip" {
+  description = "FortiManager Central Management IP address"
+  default     = ""
+}
+
+variable "fgt_fortimanager_serial" {
+  description = "FortiManager Central Management serial number for registration"
+  default     = ""
 }
 
 variable "fortinet_tags" {
