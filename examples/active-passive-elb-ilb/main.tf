@@ -81,7 +81,8 @@ module "ilb" {
 # FortiGate Group
 ##############################################################################################################
 module "fgt" {
-  source = "../../modules/active-passive-elb-ilb"
+  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-elb-ilb"
+#  source = "../../modules/active-passive-elb-ilb"
 
   prefix                                          = var.prefix
   location                                        = var.location

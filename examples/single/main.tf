@@ -35,6 +35,7 @@ module "vnet" {
 # FortiGate
 ##############################################################################################################
 module "fgt" {
+  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/single"
   source = "../../modules/single-vm"
 
   prefix                                          = var.prefix
