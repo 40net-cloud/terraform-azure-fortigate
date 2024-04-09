@@ -102,7 +102,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcex
   count = var.external_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtaifcext.id
   ip_configuration_name   = "interface1"
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend.id
+  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
 }
 
 resource "azurerm_network_interface" "fgtaifcint" {
@@ -128,7 +128,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcin
   count = var.internal_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtaifcint.id
   ip_configuration_name   = "interface1"
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend.id
+  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
 }
 
 resource "azurerm_network_interface" "fgtaifchasync" {
@@ -272,7 +272,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "fgtbifcex
   count = var.external_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtbifcext.id
   ip_configuration_name   = "interface1"
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend.id
+  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
 }
 
 resource "azurerm_network_interface" "fgtbifcint" {
@@ -299,7 +299,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "fgtbifcin
   count = var.internal_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtbifcint.id
   ip_configuration_name   = "interface1"
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend.id
+  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
 }
 
 resource "azurerm_network_interface" "fgtbifchasync" {
