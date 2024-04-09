@@ -71,36 +71,44 @@ data "azurerm_subnet" "subnet4" {
 
 variable "external_loadbalancer_name" {
   description = "Name of the External Load Balancer"
+  default     = ""
 }
 
 data "azurerm_lb" "elb" {
+  count               = var.external_loadbalancer_name == "" ? 0 : 1
   name                = var.external_loadbalancer_name
   resource_group_name = var.resource_group_name
 }
 
 variable "external_loadbalancer_backend_address_pool_name" {
   description = "Name of the External Load Balancer Backend Address Pool Name"
+  default     = ""
 }
 
 data "azurerm_lb_backend_address_pool" "elb_backend" {
+  count           = var.external_loadbalancer_name == "" ? 0 : 1
   name            = var.external_loadbalancer_backend_address_pool_name
   loadbalancer_id = data.azurerm_lb.elb.id
 }
 
 variable "internal_loadbalancer_name" {
   description = "Name of the Internal Load Balancer"
+  default     = ""
 }
 
 data "azurerm_lb" "ilb" {
+  count               = var.internal_loadbalancer_name == "" ? 0 : 1
   name                = var.internal_loadbalancer_name
   resource_group_name = var.resource_group_name
 }
 
 variable "internal_loadbalancer_backend_address_pool_name" {
   description = "Name of the Internal Load Balancer Backend Address Pool Name"
+  default     = ""
 }
 
 data "azurerm_lb_backend_address_pool" "ilb_backend" {
+  count           = var.internal_loadbalancer_name == "" ? 0 : 1
   name            = var.internal_loadbalancer_backend_address_pool_name
   loadbalancer_id = data.azurerm_lb.ilb.id
 }
