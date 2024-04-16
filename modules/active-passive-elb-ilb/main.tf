@@ -226,7 +226,7 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
   tags = var.fortinet_tags
 
   lifecycle {
-    ignore_changes = var.ignore_changes
+    ignore_changes = [custom_data]
   }
 }
 
@@ -398,7 +398,7 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
   tags = var.fortinet_tags
 
   lifecycle {
-    ignore_changes = var.ignore_changes
+    ignore_changes = [custom_data]
   }
 }
 

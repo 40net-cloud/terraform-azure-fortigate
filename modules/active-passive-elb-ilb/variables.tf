@@ -190,11 +190,6 @@ variable "fgt_fortimanager_serial" {
   default     = ""
 }
 
-variable "fgt_ignore_changes" {
-  description = "Ignore changes on certain parameters and variables"
-  default     = [custom_data]
-}
-
 variable "fortinet_tags" {
   type = map(string)
   default = {
