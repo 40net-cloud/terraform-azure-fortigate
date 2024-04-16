@@ -98,11 +98,12 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcextnsg" 
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcext2elbbackendpool" {
+resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
   count                   = var.external_loadbalancer_name == "" ? 0 : 1
-  network_interface_id    = azurerm_network_interface.fgtaifcext.id
-  ip_configuration_name   = azurerm_network_interface.fgtaifcint.ip_configuration[0].name 
+  name                    = "${var.prefix}-fgtaifcext2elbbackendpool"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
+  virtual_network_id      = data.azurerm_virtual_network.vnet.id
+  ip_address              = local.fgt_a_external_ipaddr
 }
 
 resource "azurerm_network_interface" "fgtaifcint" {
@@ -124,11 +125,11 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcintnsg" 
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_network_interface_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
-  count                   = var.external_loadbalancer_name == "" ? 0 : 1
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
-  virtual_network_id      = data.azurerm_virtual_network.vnet.id
-  ip_address              = local.fgt_a_external_ipaddr
+resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcint2elbbackendpool" {
+  count                   = var.internal_loadbalancer_name == "" ? 0 : 1
+  network_interface_id    = azurerm_network_interface.fgtaifcint.id
+  ip_configuration_name   = azurerm_network_interface.fgtaifcint.ip_configuration[0].name
+  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
 }
 
 resource "azurerm_network_interface" "fgtaifchasync" {
@@ -270,6 +271,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" 
 
 resource "azurerm_network_interface_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
   count                   = var.external_loadbalancer_name == "" ? 0 : 1
+  name                    = "${var.prefix}-fgtbifcext2elbbackendpool"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
   virtual_network_id      = data.azurerm_virtual_network.vnet.id
   ip_address              = local.fgt_b_external_ipaddr
@@ -298,7 +300,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcintnsg" 
 resource "azurerm_network_interface_backend_address_pool_association" "fgtbifcint2ilbbackendpool" {
   count                   = var.internal_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtbifcint.id
-  ip_configuration_name   = azurerm_network_interface.fgtbifcint.ip_configuration[0].name 
+  ip_configuration_name   = azurerm_network_interface.fgtbifcint.ip_configuration[0].name
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
 }
 
