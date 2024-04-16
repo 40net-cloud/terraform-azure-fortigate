@@ -269,7 +269,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" 
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_network_interface_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
+resource "azurerm_lb_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
   count                   = var.external_loadbalancer_name == "" ? 0 : 1
   name                    = "${var.prefix}-fgtbifcext2elbbackendpool"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
