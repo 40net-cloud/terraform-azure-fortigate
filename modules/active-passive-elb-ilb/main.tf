@@ -99,7 +99,7 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcextnsg" 
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcext2elbbackendpool" {
-  count = var.external_loadbalancer_name == "" ? 0 : 1
+  count                   = var.external_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtaifcext.id
   ip_configuration_name   = "interface1"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
@@ -125,7 +125,7 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcintnsg" 
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcint2ilbbackendpool" {
-  count = var.internal_loadbalancer_name == "" ? 0 : 1
+  count                   = var.internal_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtaifcint.id
   ip_configuration_name   = "interface1"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
@@ -226,7 +226,7 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
   tags = var.fortinet_tags
 
   lifecycle {
-    ignore_changes = [custom_data]
+    ignore_changes = var.ignore_changes
   }
 }
 
@@ -269,7 +269,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" 
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "fgtbifcext2elbbackendpool" {
-  count = var.external_loadbalancer_name == "" ? 0 : 1
+  count                   = var.external_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtbifcext.id
   ip_configuration_name   = "interface1"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
@@ -296,7 +296,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcintnsg" 
 }
 
 resource "azurerm_network_interface_backend_address_pool_association" "fgtbifcint2ilbbackendpool" {
-  count = var.internal_loadbalancer_name == "" ? 0 : 1
+  count                   = var.internal_loadbalancer_name == "" ? 0 : 1
   network_interface_id    = azurerm_network_interface.fgtbifcint.id
   ip_configuration_name   = "interface1"
   backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
@@ -388,10 +388,18 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
   disable_password_authentication = false
   custom_data                     = local.fgt_b_customdata
 
-  boot_diagnostics {
+  dynamic "boot_diagnostics" {
+    for_each = var.fgt_serial_console ? [1] : []
+
+    content {
+    }
   }
 
   tags = var.fortinet_tags
+
+  lifecycle {
+    ignore_changes = var.ignore_changes
+  }
 }
 
 resource "azurerm_managed_disk" "fgtbvm-datadisk" {
