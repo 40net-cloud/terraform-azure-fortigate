@@ -9,18 +9,6 @@
 #
 ##############################################################################################################
 
-data "azurerm_public_ip" "fgtamgmtpip" {
-  name                = azurerm_public_ip.fgtamgmtpip.name
-  resource_group_name = var.resource_group_name
-  depends_on          = [azurerm_linux_virtual_machine.fgtavm]
-}
-
-data "azurerm_public_ip" "fgtbmgmtpip" {
-  name                = azurerm_public_ip.fgtbmgmtpip.name
-  resource_group_name = var.resource_group_name
-  depends_on          = [azurerm_linux_virtual_machine.fgtbvm]
-}
-
 output "fgt_a_private_ip_address_external" {
   value = azurerm_network_interface.fgtaifcext.private_ip_address
 }
