@@ -178,8 +178,6 @@ variable "fgt_ip_configuration" {
         public_ip_address_resource_id = optional(string)
     ***REMOVED***))
   ***REMOVED***))
-
-  default = {***REMOVED***
 ***REMOVED***
 
 variable "fortinet_tags" {

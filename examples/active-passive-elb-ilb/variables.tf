@@ -21,7 +21,7 @@ variable "password" {
 ***REMOVED***
 
 ##############################################################################################################
-# FortiGate license type
+# FortiGate
 ##############################################################################################################
 
 variable "fgt_image_sku" {
@@ -79,6 +79,10 @@ variable "fgt_additional_custom_data" {
   default     = ""
 ***REMOVED***
 
+variable "fgt_vmsize" {
+  default = "Standard_F4s"
+***REMOVED***
+
 ##############################################################################################################
 # Deployment in Microsoft Azure
 ##############################################################################################################
@@ -87,7 +91,7 @@ provider "azurerm" {
 ***REMOVED***
 
 ##############################################################################################################
-# Static variables
+# Networking
 ##############################################################################################################
 variable "vnet" {
   description = ""
@@ -107,10 +111,6 @@ variable "subnets" {
     { name = "subnet-hasync", cidr = ["172.16.136.128/26", "2001:db8:4:3::/64"] ***REMOVED***,  # HASYNC
     { name = "subnet-hamgmt", cidr = ["172.16.136.192/26", "2001:db8:4:4::/64"] ***REMOVED***
   ]
-***REMOVED***
-
-variable "fgt_vmsize" {
-  default = "Standard_F4s"
 ***REMOVED***
 
 variable "fortinet_tags" {
@@ -190,6 +190,11 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-external"].id
           is_primary_ipconfiguration    = true
+          load_balancer_backend_pools = {
+            lb_pool_1 = {
+              load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
+            ***REMOVED***
+          ***REMOVED***
         ***REMOVED***
       ***REMOVED***
       fgt-b = {
@@ -199,6 +204,10 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-external"].id
           is_primary_ipconfiguration    = true
+          load_balancer_backend_pools = {
+            lb_pool_1 = {
+              load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
+            ***REMOVED***
         ***REMOVED***
       ***REMOVED***
     ***REMOVED***, # External
@@ -212,10 +221,8 @@ locals {
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
             lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
+              load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
             ***REMOVED***
-          ***REMOVED***
-        ***REMOVED***
       ***REMOVED***
       fgt-b = {
         ipconfig1 = {
@@ -226,7 +233,7 @@ locals {
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
             lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
+              load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
             ***REMOVED***
           ***REMOVED***
         ***REMOVED***
@@ -240,11 +247,6 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-hasync"].id
           is_primary_ipconfiguration    = true
-          load_balancer_backend_pools = {
-            lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
-            ***REMOVED***
-          ***REMOVED***
         ***REMOVED***
       ***REMOVED***
       fgt-b = {
@@ -255,10 +257,6 @@ locals {
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-hasync"].id
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
-            lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
-            ***REMOVED***
-          ***REMOVED***
         ***REMOVED***
       ***REMOVED***
     ***REMOVED***, # HASYNC
