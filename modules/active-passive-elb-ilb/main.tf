@@ -122,15 +122,6 @@ resource "azurerm_network_interface_security_group_association" "fgtaifchasyncns
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_public_ip" "fgtamgmtpip" {
-  name                = "${local.fgt_a_name}-mgmt-pip"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  domain_name_label   = format("%s-%s", lower(local.fgt_a_name), "mgmt-pip")
-}
-
 resource "azurerm_network_interface" "fgtaifcmgmt" {
   name                          = "${local.fgt_a_name}-nic4-mgmt"
   location                      = var.location
@@ -305,15 +296,6 @@ resource "azurerm_network_interface" "fgtbifchasync" {
 resource "azurerm_network_interface_security_group_association" "fgtbifchasyncnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifchasync.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-}
-
-resource "azurerm_public_ip" "fgtbmgmtpip" {
-  name                = "${local.fgt_b_name}-mgmt-pip"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  domain_name_label   = format("%s-%s", lower(local.fgt_b_name), "mgmt-pip")
 }
 
 resource "azurerm_network_interface" "fgtbifcmgmt" {
