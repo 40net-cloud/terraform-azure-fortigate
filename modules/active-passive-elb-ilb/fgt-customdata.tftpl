@@ -69,10 +69,10 @@ config system interface
         set allowaccess ping https ssh ftm
     next
 end
-%{ if fgt_ssh_public_key != "" }
+%{ if fgt_ssh_public_key_file != "" }
 config system admin
     edit "${fgt_username}"
-        set ssh-public-key1 "${trimspace(file(fgt_ssh_public_key))}"
+        set ssh-public-key1 "${trimspace(file(fgt_ssh_public_key_file))}"
     next
 end
 %{ endif }
