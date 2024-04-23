@@ -8,68 +8,25 @@ locals {
   fgt_name              = "${var.prefix}-fgt"
   fgt_a_name            = "${var.prefix}-fgt-a"
   fgt_b_name            = "${var.prefix}-fgt-b"
-  fgt_a_external_ipaddr = cidrhost(data.azurerm_subnet.subnet1.address_prefixes[0], 5)
-  fgt_a_internal_ipaddr = cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 5)
-  fgt_a_hasync_ipaddr   = cidrhost(data.azurerm_subnet.subnet3.address_prefixes[0], 5)
-  fgt_a_mgmt_ipaddr     = cidrhost(data.azurerm_subnet.subnet4.address_prefixes[0], 5)
-  fgt_b_external_ipaddr = cidrhost(data.azurerm_subnet.subnet1.address_prefixes[0], 6)
-  fgt_b_internal_ipaddr = cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 6)
-  fgt_b_hasync_ipaddr   = cidrhost(data.azurerm_subnet.subnet3.address_prefixes[0], 6)
-  fgt_b_mgmt_ipaddr     = cidrhost(data.azurerm_subnet.subnet4.address_prefixes[0], 6)
-  fgt_a_vars = {
-    fgt_vm_name                = "${local.fgt_a_name}"
-    fgt_license_file           = var.fgt_byol_license_file_a
-    fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_a
-    fgt_username               = var.username
-    fgt_ssh_public_key         = var.fgt_ssh_public_key_file
-    fgt_config_ha              = var.fgt_config_ha
-    fgt_external_ipaddr        = local.fgt_a_external_ipaddr
-    fgt_external_mask          = cidrnetmask(data.azurerm_subnet.subnet1.address_prefixes[0])
-    fgt_external_gw            = cidrhost(data.azurerm_subnet.subnet1.address_prefixes[0], 1)
-    fgt_internal_ipaddr        = local.fgt_a_internal_ipaddr
-    fgt_internal_mask          = tostring(cidrnetmask(data.azurerm_subnet.subnet2.address_prefixes[0]))
-    fgt_internal_gw            = tostring(cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 1))
-    fgt_hasync_ipaddr          = local.fgt_a_hasync_ipaddr
-    fgt_hasync_mask            = tostring(cidrnetmask(data.azurerm_subnet.subnet3.address_prefixes[0]))
-    fgt_hasync_gw              = tostring(cidrhost(data.azurerm_subnet.subnet3.address_prefixes[0], 1))
-    fgt_mgmt_ipaddr            = local.fgt_a_mgmt_ipaddr
-    fgt_mgmt_mask              = tostring(cidrnetmask(data.azurerm_subnet.subnet4.address_prefixes[0]))
-    fgt_mgmt_gw                = tostring(cidrhost(data.azurerm_subnet.subnet4.address_prefixes[0], 1))
-    fgt_ha_peerip              = local.fgt_b_hasync_ipaddr
-    fgt_ha_priority            = "255"
-    vnet_network               = data.azurerm_virtual_network.vnet.address_space[0]
-    fgt_additional_custom_data = var.fgt_additional_custom_data
-    fgt_fortimanager_ip        = var.fgt_fortimanager_ip
-    fgt_fortimanager_serial    = var.fgt_fortimanager_serial
-  }
-  fgt_a_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", local.fgt_a_vars))
-  fgt_b_vars = {
-    fgt_vm_name                = "${local.fgt_b_name}"
-    fgt_license_file           = var.fgt_byol_license_file_b
-    fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_b
-    fgt_username               = var.username
-    fgt_ssh_public_key         = var.fgt_ssh_public_key_file
-    fgt_config_ha              = var.fgt_config_ha
-    fgt_external_ipaddr        = local.fgt_b_external_ipaddr
-    fgt_external_mask          = cidrnetmask(data.azurerm_subnet.subnet1.address_prefixes[0])
-    fgt_external_gw            = cidrhost(data.azurerm_subnet.subnet1.address_prefixes[0], 1)
-    fgt_internal_ipaddr        = local.fgt_b_internal_ipaddr
-    fgt_internal_mask          = cidrnetmask(data.azurerm_subnet.subnet2.address_prefixes[0])
-    fgt_internal_gw            = cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 1)
-    fgt_hasync_ipaddr          = local.fgt_b_hasync_ipaddr
-    fgt_hasync_mask            = cidrnetmask(data.azurerm_subnet.subnet3.address_prefixes[0])
-    fgt_hasync_gw              = cidrhost(data.azurerm_subnet.subnet3.address_prefixes[0], 1)
-    fgt_mgmt_ipaddr            = local.fgt_b_mgmt_ipaddr
-    fgt_mgmt_mask              = cidrnetmask(data.azurerm_subnet.subnet4.address_prefixes[0])
-    fgt_mgmt_gw                = cidrhost(data.azurerm_subnet.subnet4.address_prefixes[0], 1)
-    fgt_ha_peerip              = local.fgt_a_hasync_ipaddr
-    fgt_ha_priority            = "1"
-    vnet_network               = data.azurerm_virtual_network.vnet.address_space[0]
-    fgt_additional_custom_data = var.fgt_additional_custom_data
-    fgt_fortimanager_ip        = var.fgt_fortimanager_ip
-    fgt_fortimanager_serial    = var.fgt_fortimanager_serial
-  }
-  fgt_b_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", local.fgt_b_vars))
+  fgt_a_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_a_customdata_variables))
+  fgt_b_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_b_customdata_variables))
+
+  lb_pools_ip_addresses = { for lb_pool in flatten([
+    for zonek, zonev in var.fgt_ip_configuration : [
+      for fgtk, fgtv in zonev : [
+        for ipck, ipcv in fgtv : [
+          for lbk, lbv in ipcv.load_balancer_backend_pools : {
+            name                    = fgtk
+            ip_address              = ipcv.private_ip_address
+            backend_address_pool_id = lbv.load_balancer_backend_pool_resource_id
+            zone_key                = zonek
+            ipconfig_key            = ipck
+            lb_key                  = lbk
+          }
+        ]
+      ]
+    ]
+  ]) : "${lb_pool.name}-${lb_pool.zone_key}-${lb_pool.ipconfig_key}-${lb_pool.lb_key}" => lb_pool }
 }
 
 resource "azurerm_availability_set" "fgtavset" {
@@ -79,17 +36,32 @@ resource "azurerm_availability_set" "fgtavset" {
   resource_group_name = var.resource_group_name
 }
 
+resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
+  for_each = local.lb_pools_ip_addresses
+  name                    = each.key
+  backend_address_pool_id = each.value.backend_address_pool_id
+  virtual_network_id      = var.virtual_network_id
+  ip_address              = each.value.ip_address
+}
+
 resource "azurerm_network_interface" "fgtaifcext" {
   name                 = "${local.fgt_a_name}-nic1-ext"
   location             = var.location
   resource_group_name  = var.resource_group_name
   enable_ip_forwarding = true
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet1.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_a_external_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["external"]["fgt-a"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id 
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -98,25 +70,24 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcextnsg" 
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
-  count                   = var.external_loadbalancer_name == "" ? 0 : 1
-  name                    = "${var.prefix}-fgtaifcext2elbbackendpool"
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
-  virtual_network_id      = data.azurerm_virtual_network.vnet.id
-  ip_address              = local.fgt_a_external_ipaddr
-}
-
 resource "azurerm_network_interface" "fgtaifcint" {
   name                 = "${local.fgt_a_name}-nic2-int"
   location             = var.location
   resource_group_name  = var.resource_group_name
   enable_ip_forwarding = true
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet2.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_a_internal_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["internal"]["fgt-a"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -125,24 +96,24 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcintnsg" 
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_network_interface_backend_address_pool_association" "fgtaifcint2elbbackendpool" {
-  count                   = var.internal_loadbalancer_name == "" ? 0 : 1
-  network_interface_id    = azurerm_network_interface.fgtaifcint.id
-  ip_configuration_name   = azurerm_network_interface.fgtaifcint.ip_configuration[0].name
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
-}
-
 resource "azurerm_network_interface" "fgtaifchasync" {
   name                 = "${local.fgt_a_name}-nic3-hasync"
   location             = var.location
   resource_group_name  = var.resource_group_name
   enable_ip_forwarding = true
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet3.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_a_hasync_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["hasync"]["fgt-a"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -167,12 +138,18 @@ resource "azurerm_network_interface" "fgtaifcmgmt" {
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.fgt_accelerated_networking
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet4.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_a_mgmt_ipaddr
-    public_ip_address_id          = azurerm_public_ip.fgtamgmtpip.id
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["hamgmt"]["fgt-a"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -256,25 +233,24 @@ resource "azurerm_network_interface" "fgtbifcext" {
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.fgt_accelerated_networking
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet1.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_b_external_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["external"]["fgt-b"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
 resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifcext.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-}
-
-resource "azurerm_lb_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
-  count                   = var.external_loadbalancer_name == "" ? 0 : 1
-  name                    = "${var.prefix}-fgtbifcext2elbbackendpool"
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.elb_backend[count.index].id
-  virtual_network_id      = data.azurerm_virtual_network.vnet.id
-  ip_address              = local.fgt_b_external_ipaddr
 }
 
 resource "azurerm_network_interface" "fgtbifcint" {
@@ -284,24 +260,24 @@ resource "azurerm_network_interface" "fgtbifcint" {
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.fgt_accelerated_networking
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet2.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_b_internal_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["internal"]["fgt-b"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
 resource "azurerm_network_interface_security_group_association" "fgtbifcintnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifcint.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-}
-
-resource "azurerm_network_interface_backend_address_pool_association" "fgtbifcint2ilbbackendpool" {
-  count                   = var.internal_loadbalancer_name == "" ? 0 : 1
-  network_interface_id    = azurerm_network_interface.fgtbifcint.id
-  ip_configuration_name   = azurerm_network_interface.fgtbifcint.ip_configuration[0].name
-  backend_address_pool_id = data.azurerm_lb_backend_address_pool.ilb_backend[count.index].id
 }
 
 resource "azurerm_network_interface" "fgtbifchasync" {
@@ -311,11 +287,18 @@ resource "azurerm_network_interface" "fgtbifchasync" {
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.fgt_accelerated_networking
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet3.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_b_hasync_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["hasync"]["fgt-b"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -340,12 +323,18 @@ resource "azurerm_network_interface" "fgtbifcmgmt" {
   enable_ip_forwarding          = true
   enable_accelerated_networking = var.fgt_accelerated_networking
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet4.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_b_mgmt_ipaddr
-    public_ip_address_id          = azurerm_public_ip.fgtbmgmtpip.id
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["hamgmt"]["fgt-b"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 

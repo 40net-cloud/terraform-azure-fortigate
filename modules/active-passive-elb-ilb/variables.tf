@@ -27,13 +27,12 @@ variable "password" {
 variable "resource_group_name" {
 }
 
-variable "virtual_network_name" {
-  description = "Name of the VNET to deploy the FortiGate into"
+variable "virtual_network_id" {
+  description = "Id of the VNET to deploy the FortiGate into"
 }
 
-data "azurerm_virtual_network" "vnet" {
-  name                = var.virtual_network_name
-  resource_group_name = var.resource_group_name
+variable "virtual_network_address_space" {
+  description = "Address space of the VNET to deploy the FortiGate into"
 }
 
 variable "subnet_names" {
@@ -43,74 +42,6 @@ variable "subnet_names" {
     condition     = length(var.subnet_names) == 4
     error_message = "Please provide exactly 4 subnet names (external, internal, heartbeat, management)."
   }
-}
-
-data "azurerm_subnet" "subnet1" {
-  name                 = var.subnet_names[0]
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.virtual_network_name
-}
-
-data "azurerm_subnet" "subnet2" {
-  name                 = var.subnet_names[1]
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.virtual_network_name
-}
-
-data "azurerm_subnet" "subnet3" {
-  name                 = var.subnet_names[2]
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.virtual_network_name
-}
-
-data "azurerm_subnet" "subnet4" {
-  name                 = var.subnet_names[3]
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = var.virtual_network_name
-}
-
-variable "external_loadbalancer_name" {
-  description = "Name of the External Load Balancer"
-  default     = ""
-}
-
-data "azurerm_lb" "elb" {
-  count               = var.external_loadbalancer_name == "" ? 0 : 1
-  name                = var.external_loadbalancer_name
-  resource_group_name = var.resource_group_name
-}
-
-variable "external_loadbalancer_backend_address_pool_name" {
-  description = "Name of the External Load Balancer Backend Address Pool Name"
-  default     = ""
-}
-
-data "azurerm_lb_backend_address_pool" "elb_backend" {
-  count           = var.external_loadbalancer_name == "" ? 0 : 1
-  name            = var.external_loadbalancer_backend_address_pool_name
-  loadbalancer_id = data.azurerm_lb.elb[count.index].id
-}
-
-variable "internal_loadbalancer_name" {
-  description = "Name of the Internal Load Balancer"
-  default     = ""
-}
-
-data "azurerm_lb" "ilb" {
-  count               = var.internal_loadbalancer_name == "" ? 0 : 1
-  name                = var.internal_loadbalancer_name
-  resource_group_name = var.resource_group_name
-}
-
-variable "internal_loadbalancer_backend_address_pool_name" {
-  description = "Name of the Internal Load Balancer Backend Address Pool Name"
-  default     = ""
-}
-
-data "azurerm_lb_backend_address_pool" "ilb_backend" {
-  count           = var.internal_loadbalancer_name == "" ? 0 : 1
-  name            = var.internal_loadbalancer_backend_address_pool_name
-  loadbalancer_id = data.azurerm_lb.ilb[count.index].id
 }
 
 ##############################################################################################################
@@ -175,6 +106,18 @@ variable "fgt_additional_custom_data" {
   default     = ""
 }
 
+variable "fgt_a_customdata_variables" {
+  type        = map(string)
+  description = "FortiGate variables used in default configuration."
+  default     = {}
+}
+
+variable "fgt_b_customdata_variables" {
+  type        = map(string)
+  description = "FortiGate variables used in default configuration."
+  default     = {}
+}
+
 variable "fgt_serial_console" {
   description = "Enable serial console for FortiGate VM"
   default     = "true"
@@ -188,6 +131,55 @@ variable "fgt_fortimanager_ip" {
 variable "fgt_fortimanager_serial" {
   description = "FortiManager Central Management serial number for registration"
   default     = ""
+}
+
+variable "fgt_ip_configuration" {
+  type        = map(object({
+    fgt-a  =   map(object({
+        name = string
+        app_gateway_backend_pools = optional(map(object({
+          app_gateway_backend_pool_resource_id = string
+        })), {})
+        gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
+        is_primary_ipconfiguration                                  = optional(bool, true)
+        load_balancer_backend_pools = optional(map(object({
+          load_balancer_backend_pool_resource_id = string
+        })), {})
+        load_balancer_nat_rules = optional(map(object({
+          load_balancer_nat_rule_resource_id = string
+        })), {})
+        private_ip_address            = optional(string)
+        private_ip_address_allocation = optional(string, "Dynamic")
+        private_ip_address_version    = optional(string, "IPv4")
+        private_ip_subnet_resource_id = optional(string)
+        public_ip_address_lock_name   = optional(string)
+        public_ip_address_name        = optional(string)
+        public_ip_address_resource_id = optional(string)
+      }))
+    fgt-b  =   map(object({
+        name = string
+        app_gateway_backend_pools = optional(map(object({
+          app_gateway_backend_pool_resource_id = string
+        })), {})
+        gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
+        is_primary_ipconfiguration                                  = optional(bool, true)
+        load_balancer_backend_pools = optional(map(object({
+          load_balancer_backend_pool_resource_id = string
+        })), {})
+        load_balancer_nat_rules = optional(map(object({
+          load_balancer_nat_rule_resource_id = string
+        })), {})
+        private_ip_address            = optional(string)
+        private_ip_address_allocation = optional(string, "Dynamic")
+        private_ip_address_version    = optional(string, "IPv4")
+        private_ip_subnet_resource_id = optional(string)
+        public_ip_address_lock_name   = optional(string)
+        public_ip_address_name        = optional(string)
+        public_ip_address_resource_id = optional(string)
+    }))
+  }))
+
+  default = {}
 }
 
 variable "fortinet_tags" {

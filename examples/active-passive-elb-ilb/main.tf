@@ -16,18 +16,20 @@ resource "azurerm_resource_group" "resourcegroup" {
 ##############################################################################################################
 # Virtual Network - VNET
 ##############################################################################################################
-module "vnet" {
-  source              = "Azure/vnet/azurerm"
-  version             = "4.1.0"
+resource "azurerm_virtual_network" "vnet" {
+  name                = "${var.prefix}-vnet"
+  address_space       = var.vnet
+  location            = azurerm_resource_group.resourcegroup.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-  use_for_each        = true
-  address_space       = [var.vnet]
-  subnet_prefixes     = var.subnets
-  subnet_names        = ["${var.prefix}-subnet-external", "${var.prefix}-subnet-internal", "${var.prefix}-subnet-hasync", "${var.prefix}-subnet-hamgmt"]
-  vnet_name           = "${var.prefix}-vnet"
-  vnet_location       = var.location
+}
 
-  tags = var.fortinet_tags
+resource "azurerm_subnet" "subnets" {
+  for_each = { for s in var.subnets : s.name => s }
+
+  name                 = each.key
+  resource_group_name  = azurerm_resource_group.resourcegroup.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = each.value.cidr
 }
 
 ##############################################################################################################
@@ -37,12 +39,12 @@ module "elb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
   name                         = "${var.prefix}-externalloadbalancer"
-  type = "public"
+  type                         = "public"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
   lb_probe_unhealthy_threshold = 2
   lb_sku                       = "Standard"
-  pip_name                     = "jvh22-elb-pip"
+  pip_name                     = "${var.prefix}-elb-pip"
   pip_sku                      = "Standard"
 
   lb_port = {
@@ -52,7 +54,7 @@ module "elb" {
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
   }
-  tags = var.fortinet_tags
+  tags       = var.fortinet_tags
   depends_on = [azurerm_resource_group.resourcegroup]
 }
 
@@ -60,26 +62,28 @@ module "ilb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
   name                         = "${var.prefix}-internalloadbalancer"
-  type = "private"
+  type                         = "private"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
   lb_probe_unhealthy_threshold = 2
   lb_sku                       = "Standard"
-  frontend_subnet_id           = module.vnet.vnet_subnets_name_id["${var.prefix}-subnet-internal"]
+  frontend_subnet_id           = azurerm_subnet.subnets["subnet-internal"].id
 
   lb_port = {
-    haports     = ["0", "All", "0"]
+    haports = ["0", "All", "0"]
   }
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
   }
-  tags = var.fortinet_tags
+  tags       = var.fortinet_tags
   depends_on = [azurerm_resource_group.resourcegroup]
 }
 
 ##############################################################################################################
-# FortiGate Group
+# FortiGate
 ##############################################################################################################
+
+
 module "fgt" {
   source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-elb-ilb"
 #  source = "../../modules/active-passive-elb-ilb"
@@ -89,12 +93,9 @@ module "fgt" {
   resource_group_name                             = azurerm_resource_group.resourcegroup.name
   username                                        = var.username
   password                                        = var.password
-  virtual_network_name                            = module.vnet.vnet_name
-  subnet_names                                    = keys(module.vnet.vnet_subnets_name_id)
-  external_loadbalancer_name                      = "${var.prefix}-externalloadbalancer"
-  external_loadbalancer_backend_address_pool_name = reverse(split("/", module.elb.azurerm_lb_backend_address_pool_id))[0]
-  internal_loadbalancer_name                      = "${var.prefix}-internalloadbalancer"
-  internal_loadbalancer_backend_address_pool_name = reverse(split("/", module.ilb.azurerm_lb_backend_address_pool_id))[0]
+  virtual_network_id                              = azurerm_virtual_network.vnet.id
+  virtual_network_address_space                   = azurerm_virtual_network.vnet.address_space
+  subnet_names                                    = slice([for s in var.subnets : s.name], 0, 4)
   fgt_image_sku                                   = var.fgt_image_sku
   fgt_version                                     = var.fgt_version
   fgt_byol_license_file_a                         = var.fgt_byol_license_file_a
@@ -102,14 +103,9 @@ module "fgt" {
   fgt_byol_fortiflex_license_token_a              = var.fgt_byol_fortiflex_license_token_a
   fgt_byol_fortiflex_license_token_b              = var.fgt_byol_fortiflex_license_token_b
   fgt_accelerated_networking                      = var.fgt_accelerated_networking
-  fgt_config_ha                                   = var.fgt_config_ha
-
-  depends_on = [
-    module.vnet,
-    module.elb,
-    module.ilb
-  ]
-
+  fgt_ip_configuration                            = local.fgt_ip_configuration
+  fgt_a_customdata_variables = local.fgt_a_vars
+  fgt_b_customdata_variables = local.fgt_b_vars
 }
 
 ##############################################################################################################
