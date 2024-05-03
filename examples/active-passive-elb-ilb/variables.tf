@@ -60,8 +60,19 @@ variable "fgt_accelerated_networking" {
   default     = "true"
 }
 
+variable "fgt_availability_set" {
+  description = "Deploy FortiGate in a new Availability Set"
+  default     = "false"
+}
+
+variable "fgt_availability_zone" {
+  description = "Deploy FortiGate in a new Availability Zone"
+  default     = ["1", "2"]
+}
+
+
 variable "fgt_config_ha" {
-  default     = "true"
+  default = "true"
 }
 
 variable "fgt_fortimanager_ip" {
@@ -106,7 +117,7 @@ variable "subnets" {
   description = ""
 
   default = [
-    { name = "subnet-external", cidr = ["172.16.136.0/26", "2001:db8:4:1::/64"] },   # External
+    { name = "subnet-external", cidr = ["172.16.136.0/26", "2001:db8:4:1::/64"] },  # External
     { name = "subnet-internal", cidr = ["172.16.136.64/26", "2001:db8:4:2::/64"] }, # Internal
     { name = "subnet-hasync", cidr = ["172.16.136.128/26", "2001:db8:4:3::/64"] },  # HASYNC
     { name = "subnet-hamgmt", cidr = ["172.16.136.192/26", "2001:db8:4:4::/64"] }
@@ -125,16 +136,16 @@ variable "fortinet_tags" {
 ##############################################################################################################
 
 locals {
-  fgt_name              = "${var.prefix}-fgt"
-  fgt_a_name            = "${var.prefix}-fgt-a"
-  fgt_b_name            = "${var.prefix}-fgt-b"
-  
+  fgt_name   = "${var.prefix}-fgt"
+  fgt_a_name = "${var.prefix}-fgt-a"
+  fgt_b_name = "${var.prefix}-fgt-b"
+
   fgt_a_vars = {
     fgt_vm_name                = "${local.fgt_a_name}"
     fgt_license_file           = var.fgt_byol_license_file_a
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_a
     fgt_username               = var.username
-    fgt_ssh_public_key         = var.fgt_ssh_public_key_file
+    fgt_ssh_public_key_file    = var.fgt_ssh_public_key_file
     fgt_config_ha              = var.fgt_config_ha
     fgt_external_ipaddr        = local.fgt_ip_configuration["external"]["fgt-a"]["ipconfig1"].private_ip_address
     fgt_external_mask          = cidrnetmask(azurerm_subnet.subnets["subnet-external"].address_prefixes[0])
@@ -160,7 +171,7 @@ locals {
     fgt_license_file           = var.fgt_byol_license_file_b
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_b
     fgt_username               = var.username
-    fgt_ssh_public_key         = var.fgt_ssh_public_key_file
+    fgt_ssh_public_key_file    = var.fgt_ssh_public_key_file
     fgt_config_ha              = var.fgt_config_ha
     fgt_external_ipaddr        = local.fgt_ip_configuration["external"]["fgt-b"]["ipconfig1"].private_ip_address
     fgt_external_mask          = cidrnetmask(azurerm_subnet.subnets["subnet-external"].address_prefixes[0])
@@ -208,6 +219,7 @@ locals {
             lb_pool_1 = {
               load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
             }
+          }
         }
       }
     }, # External
@@ -223,6 +235,8 @@ locals {
             lb_pool_1 = {
               load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
             }
+          }
+        }
       }
       fgt-b = {
         ipconfig1 = {
@@ -256,7 +270,6 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-hasync"].id
           is_primary_ipconfiguration    = true
-          load_balancer_backend_pools = {
         }
       }
     }, # HASYNC
@@ -282,3 +295,5 @@ locals {
     } # HAMGMT
   }
 }
+
+##############################################################################################################

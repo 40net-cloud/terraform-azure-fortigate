@@ -5,9 +5,9 @@
 #
 ##############################################################################################################
 locals {
-  fgt_name              = "${var.prefix}-fgt"
-  fgt_a_name            = "${var.prefix}-fgt-a"
-  fgt_b_name            = "${var.prefix}-fgt-b"
+  fgt_name         = "${var.prefix}-fgt"
+  fgt_a_name       = "${var.prefix}-fgt-a"
+  fgt_b_name       = "${var.prefix}-fgt-b"
   fgt_a_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_a_customdata_variables))
   fgt_b_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_b_customdata_variables))
 
@@ -30,6 +30,7 @@ locals {
 }
 
 resource "azurerm_availability_set" "fgtavset" {
+  count               = var.fgt_availability_set ? 1 : 0
   name                = "${local.fgt_name}-availabilityset"
   location            = var.location
   managed             = true
@@ -37,7 +38,7 @@ resource "azurerm_availability_set" "fgtavset" {
 }
 
 resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
-  for_each = local.lb_pools_ip_addresses
+  for_each                = local.lb_pools_ip_addresses
   name                    = each.key
   backend_address_pool_id = each.value.backend_address_pool_id
   virtual_network_id      = var.virtual_network_id
@@ -51,11 +52,11 @@ resource "azurerm_network_interface" "fgtaifcext" {
   enable_ip_forwarding = true
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["external"]["fgt-a"] 
+    for_each = var.fgt_ip_configuration["external"]["fgt-a"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id 
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
       primary                                            = ip_configuration.value.is_primary_ipconfiguration
       private_ip_address                                 = ip_configuration.value.private_ip_address
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
@@ -77,7 +78,7 @@ resource "azurerm_network_interface" "fgtaifcint" {
   enable_ip_forwarding = true
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["internal"]["fgt-a"] 
+    for_each = var.fgt_ip_configuration["internal"]["fgt-a"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -103,7 +104,7 @@ resource "azurerm_network_interface" "fgtaifchasync" {
   enable_ip_forwarding = true
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["hasync"]["fgt-a"] 
+    for_each = var.fgt_ip_configuration["hasync"]["fgt-a"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -122,7 +123,7 @@ resource "azurerm_network_interface_security_group_association" "fgtaifchasyncns
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_network_interface" "fgtaifcmgmt" {
+resource "azurerm_network_interface" "fgtaifchamgmt" {
   name                          = "${local.fgt_a_name}-nic4-mgmt"
   location                      = var.location
   resource_group_name           = var.resource_group_name
@@ -130,7 +131,7 @@ resource "azurerm_network_interface" "fgtaifcmgmt" {
   enable_accelerated_networking = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["hamgmt"]["fgt-a"] 
+    for_each = var.fgt_ip_configuration["hamgmt"]["fgt-a"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -144,8 +145,8 @@ resource "azurerm_network_interface" "fgtaifcmgmt" {
   }
 }
 
-resource "azurerm_network_interface_security_group_association" "fgtaifcmgmtnsg" {
-  network_interface_id      = azurerm_network_interface.fgtaifcmgmt.id
+resource "azurerm_network_interface_security_group_association" "fgtaifchamgmtnsg" {
+  network_interface_id      = azurerm_network_interface.fgtaifchamgmt.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
@@ -153,9 +154,10 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
   name                  = local.fgt_a_name
   location              = var.location
   resource_group_name   = var.resource_group_name
-  network_interface_ids = [azurerm_network_interface.fgtaifcext.id, azurerm_network_interface.fgtaifcint.id, azurerm_network_interface.fgtaifchasync.id, azurerm_network_interface.fgtaifcmgmt.id]
+  network_interface_ids = [azurerm_network_interface.fgtaifcext.id, azurerm_network_interface.fgtaifcint.id, azurerm_network_interface.fgtaifchasync.id, azurerm_network_interface.fgtaifchamgmt.id]
   size                  = var.fgt_vmsize
-  availability_set_id   = azurerm_availability_set.fgtavset.id
+  availability_set_id   = var.fgt_availability_set ? azurerm_availability_set.fgtavset[0].id : null
+  zone                  = var.fgt_availability_set ? null : var.fgt_availability_zone[0]
 
   identity {
     type = "SystemAssigned"
@@ -203,6 +205,7 @@ resource "azurerm_managed_disk" "fgtavm-datadisk" {
   count                = var.fgt_datadisk_count
   name                 = "${local.fgt_a_name}-datadisk-${count.index}"
   location             = var.location
+  zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[0]
   resource_group_name  = var.resource_group_name
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"
@@ -225,7 +228,7 @@ resource "azurerm_network_interface" "fgtbifcext" {
   enable_accelerated_networking = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["external"]["fgt-b"] 
+    for_each = var.fgt_ip_configuration["external"]["fgt-b"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -252,7 +255,7 @@ resource "azurerm_network_interface" "fgtbifcint" {
   enable_accelerated_networking = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["internal"]["fgt-b"] 
+    for_each = var.fgt_ip_configuration["internal"]["fgt-b"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -279,7 +282,7 @@ resource "azurerm_network_interface" "fgtbifchasync" {
   enable_accelerated_networking = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["hasync"]["fgt-b"] 
+    for_each = var.fgt_ip_configuration["hasync"]["fgt-b"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -298,7 +301,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifchasyncns
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
-resource "azurerm_network_interface" "fgtbifcmgmt" {
+resource "azurerm_network_interface" "fgtbifchamgmt" {
   name                          = "${local.fgt_b_name}-nic4-mgmt"
   location                      = var.location
   resource_group_name           = var.resource_group_name
@@ -306,7 +309,7 @@ resource "azurerm_network_interface" "fgtbifcmgmt" {
   enable_accelerated_networking = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["hamgmt"]["fgt-b"] 
+    for_each = var.fgt_ip_configuration["hamgmt"]["fgt-b"]
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
@@ -320,8 +323,8 @@ resource "azurerm_network_interface" "fgtbifcmgmt" {
   }
 }
 
-resource "azurerm_network_interface_security_group_association" "fgtbifcmgmtnsg" {
-  network_interface_id      = azurerm_network_interface.fgtbifcmgmt.id
+resource "azurerm_network_interface_security_group_association" "fgtbifchamgmtnsg" {
+  network_interface_id      = azurerm_network_interface.fgtbifchamgmt.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
@@ -329,9 +332,10 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
   name                  = local.fgt_b_name
   location              = var.location
   resource_group_name   = var.resource_group_name
-  network_interface_ids = [azurerm_network_interface.fgtbifcext.id, azurerm_network_interface.fgtbifcint.id, azurerm_network_interface.fgtbifchasync.id, azurerm_network_interface.fgtbifcmgmt.id]
+  network_interface_ids = [azurerm_network_interface.fgtbifcext.id, azurerm_network_interface.fgtbifcint.id, azurerm_network_interface.fgtbifchasync.id, azurerm_network_interface.fgtbifchamgmt.id]
   size                  = var.fgt_vmsize
-  availability_set_id   = azurerm_availability_set.fgtavset.id
+  availability_set_id   = var.fgt_availability_set ? azurerm_availability_set.fgtavset[0].id : null
+  zone                  = var.fgt_availability_set ? null : var.fgt_availability_zone[1]
 
   identity {
     type = "SystemAssigned"
@@ -379,6 +383,7 @@ resource "azurerm_managed_disk" "fgtbvm-datadisk" {
   count                = var.fgt_datadisk_count
   name                 = "${local.fgt_b_name}-datadisk-${count.index}"
   location             = var.location
+  zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[1]
   resource_group_name  = var.resource_group_name
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"

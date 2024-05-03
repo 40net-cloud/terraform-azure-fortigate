@@ -84,8 +84,18 @@ variable "fgt_vmsize" {
 }
 
 variable "fgt_accelerated_networking" {
-  description = "Enables Accelerated Networking for the network interfaces of the FortiGate"
+  description = "Enables Accelerated Networking for the network interfaces of the FortiGate - https://learn.microsoft.com/en-us/azure/virtual-network/accelerated-networking-overview?tabs=redhat#limitations-and-constraints"
   default     = "true"
+}
+
+variable "fgt_availability_set" {
+  description = "Deploy FortiGate in a new Availability Set"
+  default     = "true"
+}
+
+variable "fgt_availability_zone" {
+  description = "Deploy FortiGate in Availability Zones"
+  default     = []
 }
 
 variable "fgt_datadisk_size" {
@@ -108,13 +118,13 @@ variable "fgt_additional_custom_data" {
 
 variable "fgt_a_customdata_variables" {
   type        = map(string)
-  description = "FortiGate variables used in default configuration."
+  description = "FortiGate variables used in default configuration custom data."
   default     = {}
 }
 
 variable "fgt_b_customdata_variables" {
   type        = map(string)
-  description = "FortiGate variables used in default configuration."
+  description = "FortiGate variables used in default configuration custom data."
   default     = {}
 }
 
@@ -134,48 +144,48 @@ variable "fgt_fortimanager_serial" {
 }
 
 variable "fgt_ip_configuration" {
-  type        = map(object({
-    fgt-a  =   map(object({
-        name = string
-        app_gateway_backend_pools = optional(map(object({
-          app_gateway_backend_pool_resource_id = string
-        })), {})
-        gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
-        is_primary_ipconfiguration                                  = optional(bool, true)
-        load_balancer_backend_pools = optional(map(object({
-          load_balancer_backend_pool_resource_id = string
-        })), {})
-        load_balancer_nat_rules = optional(map(object({
-          load_balancer_nat_rule_resource_id = string
-        })), {})
-        private_ip_address            = optional(string)
-        private_ip_address_allocation = optional(string, "Dynamic")
-        private_ip_address_version    = optional(string, "IPv4")
-        private_ip_subnet_resource_id = optional(string)
-        public_ip_address_lock_name   = optional(string)
-        public_ip_address_name        = optional(string)
-        public_ip_address_resource_id = optional(string)
-      }))
-    fgt-b  =   map(object({
-        name = string
-        app_gateway_backend_pools = optional(map(object({
-          app_gateway_backend_pool_resource_id = string
-        })), {})
-        gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
-        is_primary_ipconfiguration                                  = optional(bool, true)
-        load_balancer_backend_pools = optional(map(object({
-          load_balancer_backend_pool_resource_id = string
-        })), {})
-        load_balancer_nat_rules = optional(map(object({
-          load_balancer_nat_rule_resource_id = string
-        })), {})
-        private_ip_address            = optional(string)
-        private_ip_address_allocation = optional(string, "Dynamic")
-        private_ip_address_version    = optional(string, "IPv4")
-        private_ip_subnet_resource_id = optional(string)
-        public_ip_address_lock_name   = optional(string)
-        public_ip_address_name        = optional(string)
-        public_ip_address_resource_id = optional(string)
+  type = map(object({
+    fgt-a = map(object({
+      name = string
+      app_gateway_backend_pools = optional(map(object({
+        app_gateway_backend_pool_resource_id = string
+      })), {})
+      gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
+      is_primary_ipconfiguration                                  = optional(bool, true)
+      load_balancer_backend_pools = optional(map(object({
+        load_balancer_backend_pool_resource_id = string
+      })), {})
+      load_balancer_nat_rules = optional(map(object({
+        load_balancer_nat_rule_resource_id = string
+      })), {})
+      private_ip_address            = optional(string)
+      private_ip_address_allocation = optional(string, "Dynamic")
+      private_ip_address_version    = optional(string, "IPv4")
+      private_ip_subnet_resource_id = optional(string)
+      public_ip_address_lock_name   = optional(string)
+      public_ip_address_name        = optional(string)
+      public_ip_address_resource_id = optional(string)
+    }))
+    fgt-b = map(object({
+      name = string
+      app_gateway_backend_pools = optional(map(object({
+        app_gateway_backend_pool_resource_id = string
+      })), {})
+      gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
+      is_primary_ipconfiguration                                  = optional(bool, true)
+      load_balancer_backend_pools = optional(map(object({
+        load_balancer_backend_pool_resource_id = string
+      })), {})
+      load_balancer_nat_rules = optional(map(object({
+        load_balancer_nat_rule_resource_id = string
+      })), {})
+      private_ip_address            = optional(string)
+      private_ip_address_allocation = optional(string, "Dynamic")
+      private_ip_address_version    = optional(string, "IPv4")
+      private_ip_subnet_resource_id = optional(string)
+      public_ip_address_lock_name   = optional(string)
+      public_ip_address_name        = optional(string)
+      public_ip_address_resource_id = optional(string)
     }))
   }))
 }
