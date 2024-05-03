@@ -5,39 +5,42 @@
 #
 ##############################################################################################################
 #
-# Output summary of deployment
+# Output of deployment
 #
 ##############################################################################################################
 
-output "fgt_a_private_ip_address_external" {
-  value = azurerm_network_interface.fgtaifcext.private_ip_address
+output "fortigate-a-virtual-machine" {
+  value = azurerm_linux_virtual_machine.fgtavm
 ***REMOVED***
-
-output "fgt_b_private_ip_address_external" {
-  value = azurerm_network_interface.fgtbifcext.private_ip_address
+output "fortigate-a-network-interface-external" {
+  value = azurerm_network_interface.fgtaifcext
 ***REMOVED***
-
-output "fgt_a_private_ip_address_internal" {
-  value = azurerm_network_interface.fgtaifcint.private_ip_address
+output "fortigate-a-network-interface-internal" {
+  value = azurerm_network_interface.fgtaifcint
 ***REMOVED***
-
-output "fgt_b_private_ip_address_internal" {
-  value = azurerm_network_interface.fgtbifcint.private_ip_address
+output "fortigate-a-network-interface-hasync" {
+  value = azurerm_network_interface.fgtaifchasync
 ***REMOVED***
-
-output "deployment_summary" {
-  value = templatefile("${path.module***REMOVED***/summary.tftpl", {
-    username                        = var.username
-    location                        = var.location
-    fgt_a_private_ip_address_ext    = azurerm_network_interface.fgtaifcext.private_ip_address
-    fgt_a_private_ip_address_int    = azurerm_network_interface.fgtaifcint.private_ip_address
-    fgt_a_private_ip_address_hasync = azurerm_network_interface.fgtaifchasync.private_ip_address
-    fgt_a_private_ip_address_mgmt   = azurerm_network_interface.fgtaifcmgmt.private_ip_address
-    fgt_b_private_ip_address_ext    = azurerm_network_interface.fgtbifcext.private_ip_address
-    fgt_b_private_ip_address_int    = azurerm_network_interface.fgtbifcint.private_ip_address
-    fgt_b_private_ip_address_hasync = azurerm_network_interface.fgtbifchasync.private_ip_address
-    fgt_b_private_ip_address_mgmt   = azurerm_network_interface.fgtbifcmgmt.private_ip_address
-  ***REMOVED***)
+output "fortigate-a-network-interface-hamgmt" {
+  value = azurerm_network_interface.fgtaifchamgmt
+***REMOVED***
+output "fortigate-b-virtual-machine" {
+  value = azurerm_linux_virtual_machine.fgtbvm
+***REMOVED***
+output "fortigate-b-network-interface-external" {
+  value = azurerm_network_interface.fgtbifcext
+***REMOVED***
+output "fortigate-b-network-interface-internal" {
+  value = azurerm_network_interface.fgtbifcint
+***REMOVED***
+output "fortigate-b-network-interface-hasync" {
+  value = azurerm_network_interface.fgtbifchasync
+***REMOVED***
+output "fortigate-b-network-interface-hamgmt" {
+  value = azurerm_network_interface.fgtbifchamgmt
+***REMOVED***
+output "fortigate-network-security-group" {
+  value = azurerm_network_security_group.fgtnsg
 ***REMOVED***
 
 ##############################################################################################################
