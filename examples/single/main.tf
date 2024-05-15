@@ -4,7 +4,6 @@
 # Terraform deployment template for Microsoft Azure
 #
 ##############################################################################################################
-
 ##############################################################################################################
 # Resource Group
 ##############################################################################################################
@@ -17,44 +16,43 @@ resource "azurerm_resource_group" "resourcegroup" {
 ##############################################################################################################
 # Virtual Network - VNET
 ##############################################################################################################
-module "vnet" {
-  source              = "Azure/vnet/azurerm"
-  version             = "4.1.0"
+resource "azurerm_virtual_network" "vnet" {
+  name                = "${var.prefix}-vnet"
+  address_space       = var.vnet
+  location            = azurerm_resource_group.resourcegroup.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-  use_for_each        = true
-  address_space       = [var.vnet]
-  subnet_prefixes     = var.subnets
-  subnet_names        = ["${var.prefix}-subnet-external", "${var.prefix}-subnet-internal"]
-  vnet_name           = "${var.prefix}-vnet"
-  vnet_location       = var.location
+}
 
-  tags = var.fortinet_tags
+resource "azurerm_subnet" "subnets" {
+  for_each = { for s in var.subnets : s.name => s }
+
+  name                 = each.key
+  resource_group_name  = azurerm_resource_group.resourcegroup.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = each.value.cidr
 }
 
 ##############################################################################################################
 # FortiGate
 ##############################################################################################################
 module "fgt" {
-  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/single"
-#  source = "../../modules/single-vm"
+  #  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/single"
+  source = "../../modules/single"
 
-  prefix                                          = var.prefix
-  location                                        = var.location
-  resource_group_name                             = azurerm_resource_group.resourcegroup.name
-  username                                        = var.username
-  password                                        = var.password
-  virtual_network_name                            = module.vnet.vnet_name
-  subnet_names                                    = keys(module.vnet.vnet_subnets_name_id)
-  fgt_image_sku                                   = var.fgt_image_sku
-  fgt_version                                     = var.fgt_version
-  fgt_byol_license_file                         = var.fgt_byol_license_file
-  fgt_byol_fortiflex_license_token              = var.fgt_byol_fortiflex_license_token
-  fgt_accelerated_networking                      = var.fgt_accelerated_networking
-
-  depends_on = [
-    module.vnet
-  ]
-
+  prefix                           = var.prefix
+  location                         = var.location
+  resource_group_name              = azurerm_resource_group.resourcegroup.name
+  username                         = var.username
+  password                         = var.password
+  virtual_network_id               = azurerm_virtual_network.vnet.id
+  subnet_names                     = slice([for s in var.subnets : s.name], 0, 2)
+  fgt_image_sku                    = var.fgt_image_sku
+  fgt_version                      = var.fgt_version
+  fgt_byol_license_file            = var.fgt_byol_license_file
+  fgt_byol_fortiflex_license_token = var.fgt_byol_fortiflex_license_token
+  fgt_accelerated_networking       = var.fgt_accelerated_networking
+  fgt_ip_configuration             = local.fgt_ip_configuration
+  fgt_customdata_variables         = local.fgt_vars
 }
 
 ##############################################################################################################

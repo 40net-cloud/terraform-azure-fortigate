@@ -6,27 +6,7 @@
 ##############################################################################################################
 locals {
   fgt_name              = "${var.prefix}-fgt"
-  fgt_external_ipaddr = cidrhost(data.azurerm_subnet.subnet1.address_prefixes[0], 5)
-  fgt_internal_ipaddr = cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 5)
-  fgt_vars = {
-    fgt_vm_name                = "${local.fgt_name}"
-    fgt_license_file           = var.fgt_byol_license_file
-    fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token
-    fgt_username               = var.username
-    fgt_ssh_public_key         = var.fgt_ssh_public_key_file
-    fgt_external_ipaddr        = local.fgt_external_ipaddr
-    fgt_external_mask          = cidrnetmask(data.azurerm_subnet.subnet1.address_prefixes[0])
-    fgt_external_gw            = cidrhost(data.azurerm_subnet.subnet1.address_prefixes[0], 1)
-    fgt_internal_ipaddr        = local.fgt_internal_ipaddr
-    fgt_internal_mask          = tostring(cidrnetmask(data.azurerm_subnet.subnet2.address_prefixes[0]))
-    fgt_internal_gw            = tostring(cidrhost(data.azurerm_subnet.subnet2.address_prefixes[0], 1))
-    vnet_network               = data.azurerm_virtual_network.vnet.address_space[0]
-    fgt_additional_custom_data = var.fgt_additional_custom_data
-    fgt_fortimanager_ip        = var.fgt_fortimanager_ip
-    fgt_fortimanager_serial    = var.fgt_fortimanager_serial
-
-  }
-  fgt_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", local.fgt_vars))
+  fgt_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_customdata_variables))
 }
 
 resource "azurerm_public_ip" "fgtpip" {
@@ -44,12 +24,18 @@ resource "azurerm_network_interface" "fgtifcext" {
   resource_group_name  = var.resource_group_name
   enable_ip_forwarding = true
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet1.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_external_ipaddr
-    public_ip_address_id          = azurerm_public_ip.fgtpip.id
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["external"]["fgt"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id 
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -64,11 +50,18 @@ resource "azurerm_network_interface" "fgtifcint" {
   resource_group_name  = var.resource_group_name
   enable_ip_forwarding = true
 
-  ip_configuration {
-    name                          = "interface1"
-    subnet_id                     = data.azurerm_subnet.subnet2.id
-    private_ip_address_allocation = "Static"
-    private_ip_address            = local.fgt_internal_ipaddr
+  dynamic "ip_configuration" {
+    for_each = var.fgt_ip_configuration["internal"]["fgt"] 
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address                                 = ip_configuration.value.private_ip_address
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+    }
   }
 }
 
@@ -126,20 +119,22 @@ resource "azurerm_linux_virtual_machine" "fgtvm" {
   }
 }
 
-#resource "azurerm_managed_disk" "fgtvm-datadisk" {
-#  name                 = "${local.fgt_name}-datadisk"
-#  location             = var.location
-#  resource_group_name  = var.resource_group_name
-#  storage_account_type = "Standard_LRS"
-#  create_option        = "Empty"
-#  disk_size_gb         = 50
-#}
-#
-#resource "azurerm_virtual_machine_data_disk_attachment" "fgtvm-datadisk-attach" {
-#  managed_disk_id    = azurerm_managed_disk.fgtvm-datadisk.id
-#  virtual_machine_id = azurerm_linux_virtual_machine.fgtvm.id
-#  lun                = 0
-#  caching            = "ReadWrite"
-#}
+resource "azurerm_managed_disk" "fgtvm-datadisk" {
+  count                = var.fgt_datadisk_count
+  name                 = "${local.fgt_name}-datadisk-${count.index}"
+  location             = var.location
+  resource_group_name  = var.resource_group_name
+  storage_account_type = "Standard_LRS"
+  create_option        = "Empty"
+  disk_size_gb         = var.fgt_datadisk_size
+}
+
+resource "azurerm_virtual_machine_data_disk_attachment" "fgtvm-datadisk-attach" {
+  count              = var.fgt_datadisk_count
+  managed_disk_id    = element(azurerm_managed_disk.fgtvm-datadisk.*.id, count.index)
+  virtual_machine_id = azurerm_linux_virtual_machine.fgtvm.id
+  lun                = count.index
+  caching            = "ReadWrite"
+}
 
 ##############################################################################################################
