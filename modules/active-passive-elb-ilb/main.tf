@@ -199,6 +199,13 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
   lifecycle {
     ignore_changes = [custom_data]
   ***REMOVED***
+
+  depends_on = [ #set explicit depends on for each association to address delete order issues.
+    azurerm_network_interface_security_group_association.fgtaifcextnsg,
+    azurerm_network_interface_security_group_association.fgtaifcintnsg,
+    azurerm_network_interface_security_group_association.fgtaifchasyncnsg,
+    azurerm_network_interface_security_group_association.fgtaifchamgmtnsg
+  ]
 ***REMOVED***
 
 resource "azurerm_managed_disk" "fgtavm-datadisk" {
@@ -377,6 +384,13 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
   lifecycle {
     ignore_changes = [custom_data]
   ***REMOVED***
+
+  depends_on = [ #set explicit depends on for each association to address delete order issues.
+    azurerm_network_interface_security_group_association.fgtbifcextnsg,
+    azurerm_network_interface_security_group_association.fgtbifcintnsg,
+    azurerm_network_interface_security_group_association.fgtbifchasyncnsg,
+    azurerm_network_interface_security_group_association.fgtbifchamgmtnsg
+  ]
 ***REMOVED***
 
 resource "azurerm_managed_disk" "fgtbvm-datadisk" {
