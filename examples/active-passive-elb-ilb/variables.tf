@@ -70,7 +70,6 @@ variable "fgt_availability_zone" {
   default     = ["1", "2"]
 }
 
-
 variable "fgt_config_ha" {
   default = "true"
 }
