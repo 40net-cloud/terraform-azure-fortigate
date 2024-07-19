@@ -4,7 +4,6 @@
 # Terraform deployment template for Microsoft Azure
 #
 ##############################################################################################################
-
 ##############################################################################################################
 # Resource Group
 ##############################################################################################################
@@ -82,11 +81,9 @@ module "ilb" {
 ##############################################################################################################
 # FortiGate
 ##############################################################################################################
-
-
 module "fgt" {
-  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-elb-ilb"
-#  source = "../../modules/active-passive-elb-ilb"
+#  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-elb-ilb"
+  source = "../../modules/active-passive"
 
   prefix                             = var.prefix
   location                           = var.location
