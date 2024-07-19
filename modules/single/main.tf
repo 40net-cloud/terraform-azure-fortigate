@@ -9,15 +9,6 @@ locals {
   fgt_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_customdata_variables))
 }
 
-resource "azurerm_public_ip" "fgtpip" {
-  name                = "${local.fgt_name}-pip"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  allocation_method   = "Static"
-  sku                 = "Standard"
-  domain_name_label   = format("%s-%s", lower(local.fgt_name), "pip")
-}
-
 resource "azurerm_network_interface" "fgtifcext" {
   name                 = "${local.fgt_name}-nic1-ext"
   location             = var.location

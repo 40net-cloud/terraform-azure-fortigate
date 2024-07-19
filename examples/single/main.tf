@@ -33,6 +33,18 @@ resource "azurerm_subnet" "subnets" {
 }
 
 ##############################################################################################################
+# Public IP
+##############################################################################################################
+resource "azurerm_public_ip" "fgtpip" {
+  name                = "${var.prefix}-fgt-pip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  domain_name_label   = format("%s-%s", lower(var.prefix), "fgt-pip")
+}
+
+##############################################################################################################
 # FortiGate
 ##############################################################################################################
 module "fgt" {

@@ -139,6 +139,7 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-external"].id
           is_primary_ipconfiguration    = true
+          public_ip_address_resource_id = azurerm_public_ip.fgtpip.id
         }
       }
     }, # External
