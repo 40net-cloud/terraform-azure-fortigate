@@ -79,10 +79,32 @@ module "ilb" {
 ***REMOVED***
 
 ##############################################################################################################
+# Public IP for management interface of the FortiGate
+##############################################################################################################
+resource "azurerm_public_ip" "fgtamgmtpip" {
+  name                = "${var.prefix***REMOVED***-fgt-a-mgmt-pip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  allocation_method   = "Static"
+  domain_name_label   = "${var.prefix***REMOVED***-fgt-a-mgmt-pip"
+  sku                 = "Standard"
+***REMOVED***
+
+resource "azurerm_public_ip" "fgtbmgmtpip" {
+  name                = "${var.prefix***REMOVED***-fgt-b-mgmt-pip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  allocation_method   = "Static"
+  domain_name_label   = "${var.prefix***REMOVED***-fgt-b-mgmt-pip"
+  sku                 = "Standard"
+***REMOVED***
+
+
+##############################################################################################################
 # FortiGate
 ##############################################################################################################
 module "fgt" {
-#  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-elb-ilb"
+  #  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive"
   source = "../../modules/active-passive"
 
   prefix                             = var.prefix
@@ -105,10 +127,10 @@ module "fgt" {
   fgt_b_customdata_variables         = local.fgt_b_vars
 
   # Azure Availability Set - a change from set to zone or vice versa will result in a redeploy and loss of all data
-  fgt_availability_set               = true
+  fgt_availability_set = true
   # Azure Availability Zone
-#  fgt_availability_set               = false
-#  fgt_availability_zone              = ["2", "1"]
+  #  fgt_availability_set               = false
+  #  fgt_availability_zone              = ["2", "1"]
 ***REMOVED***
 
 ##############################################################################################################
