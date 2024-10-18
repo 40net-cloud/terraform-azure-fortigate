@@ -1,1 +1,1 @@
-# terraform-azure-fortigate
+# FortiGate Terraform modules for Microsoft Azure
