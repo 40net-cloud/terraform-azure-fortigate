@@ -46,12 +46,12 @@ provider "azurerm" {
 
 # FortiGate deployment type in Azure Virtual WAN: SDWAN + NGFW (Hybrid) 'sdfw' or NGFW 'ngfw'
 variable "fgt_vwan_deployment_type" {
-  default = "ngfw"
+  default = "sdfw"
 }
 
 # FortiGate License Type: Bring Your Own License or FortiFlex 'byol' or Pay As You Go 'payg'
 variable "fgt_image_sku" {
-  default = "payg"
+  default = "byol"
 }
 
 variable "fgt_scaleunit" {

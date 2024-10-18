@@ -13,3 +13,7 @@ tags = {
   "environment"  = "AzureVirtualWAN-FortiGate"
   "publisher"    = "Fortinet"
 }
+# FortiGate deployment type in Azure Virtual WAN: SDWAN + NGFW (Hybrid) 'sdfw' or NGFW 'ngfw'
+fgt_vwan_deployment_type = "sdfw"
+# FortiGate License Type: Bring Your Own License or FortiFlex 'byol' or Pay As You Go 'payg'
+fgt_image_sku = "byol"
