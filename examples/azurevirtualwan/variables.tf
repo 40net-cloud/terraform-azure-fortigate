@@ -46,12 +46,12 @@ provider "azurerm" {
 
 ***REMOVED***
 variable "fgt_vwan_deployment_type" {
-  default = "ngfw"
+  default = "sdfw"
 ***REMOVED***
 
 ***REMOVED***
 variable "fgt_image_sku" {
-  default = "payg"
+  default = "byol"
 ***REMOVED***
 
 variable "fgt_scaleunit" {

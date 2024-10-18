@@ -13,3 +13,7 @@ password = "Q1w2e34567890--"
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
+***REMOVED***
+fgt_vwan_deployment_type = "sdfw"
+***REMOVED***
+fgt_image_sku = "byol"
