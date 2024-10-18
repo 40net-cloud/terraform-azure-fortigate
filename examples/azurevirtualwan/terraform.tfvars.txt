@@ -1,0 +1,15 @@
+# Required variables for deployment of the FortiGate in Azure Virtual WAN
+prefix = ""
+location = "westeurope"
+# Do no use reserved usernames like admin, root, administrator
+username = ""
+# Use a password that has at least 12 characters and use lowercase, uppercase, numbers and non-alphanumeric characters
+password = "Q1w2e34567890--"
+subscription_id = ""
+fortimanager_host = ""
+fortimanager_serial = ""
+# add your required tags using a map type
+tags = {
+  "environment"  = "AzureVirtualWAN-FortiGate"
+  "publisher"    = "Fortinet"
+}
