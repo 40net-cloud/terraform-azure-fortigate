@@ -99,37 +99,37 @@ module "fgt_nva" {
 #
 ##############################################################################################################
 
-#resource "azurerm_virtual_network" "spoke1" {
-#  name                = "${var.prefix}-spoke1-vnet"
-#  address_space       = [var.vnet["spoke1"]]
-#  location            = azurerm_resource_group.resourcegroup.location
-#  resource_group_name = azurerm_resource_group.resourcegroup.name
-#
-#  tags = var.tags
-#}
+# resource "azurerm_virtual_network" "spoke1" {
+#   name                = "${var.prefix}-spoke1-vnet"
+#   address_space       = [var.vnet["spoke1"]]
+#   location            = azurerm_resource_group.resourcegroup.location
+#   resource_group_name = azurerm_resource_group.resourcegroup.name
 
-#resource "azurerm_subnet" "spoke1subnet1" {
-#  name                 = "Subnet1"
-#  resource_group_name  = azurerm_resource_group.resourcegroup.name
-#  virtual_network_name = azurerm_virtual_network.spoke1.name
-#  address_prefixes     = [var.spoke_subnet["spoke1"]]
-#}
+#   tags = var.tags
+# }
 
-#resource "azurerm_virtual_network" "spoke2" {
-#  name                = "${var.prefix}-spoke2-vnet"
-#  address_space       = [var.vnet["spoke2"]]
-#  location            = azurerm_resource_group.resourcegroup.location
-#  resource_group_name = azurerm_resource_group.resourcegroup.name
-#
-#  tags = var.tags
-#}
+# resource "azurerm_subnet" "spoke1subnet1" {
+#   name                 = "Subnet1"
+#   resource_group_name  = azurerm_resource_group.resourcegroup.name
+#   virtual_network_name = azurerm_virtual_network.spoke1.name
+#   address_prefixes     = [var.spoke_subnet["spoke1"]]
+# }
 
-#resource "azurerm_subnet" "spoke2subnet1" {
-#  name                 = "Subnet1"
-#  resource_group_name  = azurerm_resource_group.resourcegroup.name
-#  virtual_network_name = azurerm_virtual_network.spoke2.name
-#  address_prefixes     = [var.spoke_subnet["spoke2"]]
-#}
+# resource "azurerm_virtual_network" "spoke2" {
+#   name                = "${var.prefix}-spoke2-vnet"
+#   address_space       = [var.vnet["spoke2"]]
+#   location            = azurerm_resource_group.resourcegroup.location
+#   resource_group_name = azurerm_resource_group.resourcegroup.name
+
+#   tags = var.tags
+# }
+
+# resource "azurerm_subnet" "spoke2subnet1" {
+#   name                 = "Subnet1"
+#   resource_group_name  = azurerm_resource_group.resourcegroup.name
+#   virtual_network_name = azurerm_virtual_network.spoke2.name
+#   address_prefixes     = [var.spoke_subnet["spoke2"]]
+# }
 
 ##############################################################################################################
 #
@@ -231,3 +231,39 @@ module "fgt_nva" {
 
 #   tags = var.tags
 # }
+
+##############################################################################################################
+#
+# Example: Routing Intent
+# Takes the first FortiGate deployment in the managed resource group. 
+# Should only be adapted when using multiple FortiGate or NVA deployments.
+#
+##############################################################################################################
+resource "azurerm_virtual_hub_routing_intent" "vwan_hub" {
+  name           = "routing-intent"
+  virtual_hub_id = azurerm_virtual_hub.vhub.id
+
+  routing_policy {
+    name         = "AllTrafficPolicy"
+    destinations = ["Internet", "PrivateTraffic"]
+    next_hop     = [for s in data.azapi_resource_list.listNVA.output.value : s if length(regexall(".*${var.prefix}-vwan-fgt.*", s.properties.cloudInitConfiguration)) > 0][0].id
+  }
+}
+
+data "azurerm_resource_group" "managedresourcegroup" {
+  name = "${azurerm_resource_group.resourcegroup.name}-mrg"
+
+  depends_on = [module.fgt_nva]
+}
+
+data "azapi_resource_list" "listNVA" {
+  type                   = "Microsoft.Network/networkVirtualAppliances@2023-11-01"
+  parent_id              = data.azurerm_resource_group.managedresourcegroup.id
+  response_export_values = ["*"]
+
+  depends_on             = [module.fgt_nva]
+}
+
+#output "fortigate-azurevirtualwan-nva" {
+#  value = [for s in data.azapi_resource_list.listNVA.output.value : s if length(regexall(".*${var.prefix}-vwan-fgt.*", s.properties.cloudInitConfiguration)) > 0][0].id
+#}
