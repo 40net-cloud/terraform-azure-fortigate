@@ -49,7 +49,7 @@ resource "azurerm_network_interface" "fgtaifcext" {
   name                 = "${local.fgt_a_name}-nic1-ext"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  enable_ip_forwarding = true
+  ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["external"]["fgt-a"]
@@ -75,7 +75,7 @@ resource "azurerm_network_interface" "fgtaifcint" {
   name                 = "${local.fgt_a_name}-nic2-int"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  enable_ip_forwarding = true
+  ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["internal"]["fgt-a"]
@@ -101,7 +101,7 @@ resource "azurerm_network_interface" "fgtaifchasync" {
   name                 = "${local.fgt_a_name}-nic3-hasync"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  enable_ip_forwarding = true
+  ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hasync"]["fgt-a"]
@@ -127,8 +127,8 @@ resource "azurerm_network_interface" "fgtaifchamgmt" {
   name                          = "${local.fgt_a_name}-nic4-mgmt"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.fgt_accelerated_networking
+  ip_forwarding_enabled          = true
+  accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hamgmt"]["fgt-a"]
@@ -231,8 +231,8 @@ resource "azurerm_network_interface" "fgtbifcext" {
   name                          = "${local.fgt_b_name}-nic1-ext"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.fgt_accelerated_networking
+  ip_forwarding_enabled          = true
+  accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["external"]["fgt-b"]
@@ -258,8 +258,8 @@ resource "azurerm_network_interface" "fgtbifcint" {
   name                          = "${local.fgt_b_name}-nic2-int"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.fgt_accelerated_networking
+  ip_forwarding_enabled          = true
+  accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["internal"]["fgt-b"]
@@ -285,8 +285,8 @@ resource "azurerm_network_interface" "fgtbifchasync" {
   name                          = "${local.fgt_b_name}-nic3-hasync"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.fgt_accelerated_networking
+  ip_forwarding_enabled          = true
+  accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hasync"]["fgt-b"]
@@ -312,8 +312,8 @@ resource "azurerm_network_interface" "fgtbifchamgmt" {
   name                          = "${local.fgt_b_name}-nic4-mgmt"
   location                      = var.location
   resource_group_name           = var.resource_group_name
-  enable_ip_forwarding          = true
-  enable_accelerated_networking = var.fgt_accelerated_networking
+  ip_forwarding_enabled          = true
+  accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hamgmt"]["fgt-b"]

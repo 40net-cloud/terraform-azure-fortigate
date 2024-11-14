@@ -13,7 +13,7 @@ resource "azurerm_network_interface" "fgtifcext" {
   name                 = "${local.fgt_name}-nic1-ext"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  enable_ip_forwarding = true
+  ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["external"]["fgt"] 
@@ -39,7 +39,7 @@ resource "azurerm_network_interface" "fgtifcint" {
   name                 = "${local.fgt_name}-nic2-int"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  enable_ip_forwarding = true
+  ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["internal"]["fgt"] 
