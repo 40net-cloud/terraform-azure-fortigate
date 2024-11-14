@@ -33,7 +33,7 @@ resource "azurerm_managed_application" "fgtinvhub" {
       value = var.deployment_type
     ***REMOVED***
     fortiGateImageVersion = {
-      value = "7.4.4"
+      value = "7.4.5"
     ***REMOVED***,
     hubId = {
       value = var.vhub_id
@@ -88,7 +88,7 @@ resource "azurerm_managed_application" "fgtinvhub" {
     name      = "fortigate-managedvwan"
     product   = "fortigate_vwan_nva"
     publisher = "fortinet"
-    version   = "7.4.410240925"
+    version   = "7.4.500241025"
   ***REMOVED***
 
   tags = var.tags
