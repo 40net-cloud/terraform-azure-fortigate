@@ -28,6 +28,11 @@ variable "internet_inbound_enabled" {}
 variable "internet_inbound_public_ip_rg" {}
 variable "internet_inbound_public_ip_name" {}
 
+variable "managed_resource_group_name" {
+  description = "Managed Resource Group Name - defaults to [resource group name]-mrg if nothing provided"
+  default = ""
+}
+
 ##############################################################################################################
 # Provider
 ##############################################################################################################

@@ -11,7 +11,7 @@ resource "azurerm_managed_application" "fgtinvhub" {
   location                    = var.location
   resource_group_name         = var.resource_group_name
   kind                        = "MarketPlace"
-  managed_resource_group_name = "${var.resource_group_name}-mrg"
+  managed_resource_group_name = var.managed_resource_group_name != "" ? var.managed_resource_group_name : "${var.resource_group_name}-mrg"
 
   parameter_values = jsonencode({
     adminUsername = {
