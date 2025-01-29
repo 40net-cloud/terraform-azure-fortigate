@@ -88,7 +88,7 @@ resource "azurerm_managed_application" "fgtinvhub" {
     name      = "fortigate-managedvwan"
     product   = "fortigate_vwan_nva"
     publisher = "fortinet"
-    version   = "7.4.500241025"
+    version   = "7.4.500250129"
   }
 
   tags = var.tags

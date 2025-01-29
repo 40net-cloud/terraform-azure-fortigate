@@ -37,17 +37,17 @@ resource "azurerm_virtual_hub" "vhub" {
   tags = var.tags
 }
 
-resource "azurerm_virtual_hub_connection" "spoke1" {
-  name                      = "${var.prefix}-spoke1"
-  virtual_hub_id            = azurerm_virtual_hub.vhub.id
-  remote_virtual_network_id = azurerm_virtual_network.spoke1.id
-}
+#resource "azurerm_virtual_hub_connection" "spoke1" {
+#  name                      = "${var.prefix}-spoke1"
+#  virtual_hub_id            = azurerm_virtual_hub.vhub.id
+#  remote_virtual_network_id = azurerm_virtual_network.spoke1.id
+#}
 
-resource "azurerm_virtual_hub_connection" "spoke2" {
-  name                      = "${var.prefix}-spoke2"
-  virtual_hub_id            = azurerm_virtual_hub.vhub.id
-  remote_virtual_network_id = azurerm_virtual_network.spoke2.id
-}
+#resource "azurerm_virtual_hub_connection" "spoke2" {
+#  name                      = "${var.prefix}-spoke2"
+#  virtual_hub_id            = azurerm_virtual_hub.vhub.id
+#  remote_virtual_network_id = azurerm_virtual_network.spoke2.id
+#}
 
 ##############################################################################################################
 # Inbound Public IP for FortiGate in Azure Virtual WAN
