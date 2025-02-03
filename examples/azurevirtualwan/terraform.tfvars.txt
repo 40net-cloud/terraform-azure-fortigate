@@ -4,7 +4,7 @@ location = "westeurope"
 # Do no use reserved usernames like admin, root, administrator
 username = ""
 # Use a password that has at least 12 characters and use lowercase, uppercase, numbers and non-alphanumeric characters
-password = "Q1w2e34567890--"
+password = "xxxxxxxxxxxx"
 subscription_id = ""
 fortimanager_host = ""
 fortimanager_serial = ""
