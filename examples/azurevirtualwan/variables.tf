@@ -22,6 +22,8 @@ variable "password" {***REMOVED***
 
 variable "subscription_id" {***REMOVED***
 
+variable "managed_resource_group_name" {***REMOVED***
+
 ##############################################################################################################
 # Deployment in Microsoft Azure
 ##############################################################################################################

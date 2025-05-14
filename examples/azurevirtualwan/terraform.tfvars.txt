@@ -17,3 +17,5 @@ password = "xxxxxxxxxxxx"
 fgt_vwan_deployment_type = "sdfw"
 ***REMOVED***
 fgt_image_sku = "byol"
+***REMOVED***
+***REMOVED***
