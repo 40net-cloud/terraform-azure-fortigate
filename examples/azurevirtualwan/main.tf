@@ -74,6 +74,8 @@ module "fgt_nva" {
   name                            = "${var.prefix}-vwan-fgt"
   location                        = azurerm_resource_group.resourcegroup.location
   resource_group_name             = azurerm_resource_group.resourcegroup.name
+  resource_group_id               = azurerm_resource_group.resourcegroup.id
+  subscription_id                 = "/subscriptions/${var.subscription_id}"
   username                        = var.username
   password                        = var.password
   deployment_type                 = var.fgt_vwan_deployment_type
@@ -91,6 +93,7 @@ module "fgt_nva" {
   internet_inbound_enabled        = true
   internet_inbound_public_ip_rg   = azurerm_public_ip.elb-pip.resource_group_name
   internet_inbound_public_ip_name = azurerm_public_ip.elb-pip.name
+  managed_resource_group_name     = var.managed_resource_group_name
 }
 
 ##############################################################################################################
@@ -251,7 +254,7 @@ resource "azurerm_virtual_hub_routing_intent" "vwan_hub" {
 }
 
 data "azurerm_resource_group" "managedresourcegroup" {
-  name = "${azurerm_resource_group.resourcegroup.name}-mrg"
+  name = var.managed_resource_group_name
 
   depends_on = [module.fgt_nva]
 }
@@ -261,7 +264,7 @@ data "azapi_resource_list" "listNVA" {
   parent_id              = data.azurerm_resource_group.managedresourcegroup.id
   response_export_values = ["*"]
 
-  depends_on             = [module.fgt_nva]
+  depends_on = [module.fgt_nva]
 }
 
 #output "fortigate-azurevirtualwan-nva" {

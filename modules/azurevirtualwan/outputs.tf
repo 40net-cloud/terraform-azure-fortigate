@@ -8,7 +8,7 @@
 ##############################################################################################################
 
 output "fortigate-azurevirtualwan-managed_application" {
-  value = azurerm_managed_application.fgtinvhub
+  value = azapi_resource.fgtinvhub
 }
 
 ##############################################################################################################

@@ -17,3 +17,5 @@ tags = {
 fgt_vwan_deployment_type = "sdfw"
 # FortiGate License Type: Bring Your Own License or FortiFlex 'byol' or Pay As You Go 'payg'
 fgt_image_sku = "byol"
+# Managed resource group name - a resource group used to deploy the FortiGate NVA into. It will be created during deployment and should not exist
+managed_resource_group_name = "xxxxxxxxxxx-mrg"
