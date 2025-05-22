@@ -70,30 +70,34 @@ module "fgt_nva" {
   #  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/azurevirtualwan"
   source = "../../modules/azurevirtualwan"
 
-  prefix                          = var.prefix
-  name                            = "${var.prefix}-vwan-fgt"
-  location                        = azurerm_resource_group.resourcegroup.location
-  resource_group_name             = azurerm_resource_group.resourcegroup.name
-  resource_group_id               = azurerm_resource_group.resourcegroup.id
-  subscription_id                 = "/subscriptions/${var.subscription_id}"
-  username                        = var.username
-  password                        = var.password
-  deployment_type                 = var.fgt_vwan_deployment_type
-  sku                             = var.fgt_image_sku
-  scaleunit                       = var.fgt_scaleunit
-  mpversion                       = var.fgt_version
-  asn                             = var.fgt_asn
-  tags                            = var.tags
-  fortimanager_host               = var.fortimanager_host
-  fortimanager_serial             = var.fortimanager_serial
-  vhub_id                         = azurerm_virtual_hub.vhub.id
-  vhub_virtual_router_ip1         = azurerm_virtual_hub.vhub.virtual_router_ips[0]
-  vhub_virtual_router_ip2         = azurerm_virtual_hub.vhub.virtual_router_ips[1]
-  vhub_virtual_router_asn         = azurerm_virtual_hub.vhub.virtual_router_asn
-  internet_inbound_enabled        = true
-  internet_inbound_public_ip_rg   = azurerm_public_ip.elb-pip.resource_group_name
-  internet_inbound_public_ip_name = azurerm_public_ip.elb-pip.name
-  managed_resource_group_name     = var.managed_resource_group_name
+  prefix   = var.prefix
+  name     = "${var.prefix}-vwan-fgt"
+  location = azurerm_resource_group.resourcegroup.location
+  resource_group = {
+    name = azurerm_resource_group.resourcegroup.name
+    id   = azurerm_resource_group.resourcegroup.id
+  }
+  managed_resource_group_name = var.managed_resource_group_name
+  subscription_id             = "/subscriptions/${var.subscription_id}"
+  username                    = var.username
+  password                    = var.password
+  fgt_vwan_deployment_type    = var.fgt_vwan_deployment_type
+  fgt_image_sku               = var.fgt_image_sku
+  fgt_scaleunit               = var.fgt_scaleunit
+  fgt_version                 = var.fgt_version
+  fgt_asn                     = var.fgt_asn
+  tags                        = var.tags
+  fortimanager_host           = var.fortimanager_host
+  fortimanager_serial         = var.fortimanager_serial
+  vhub_id                     = azurerm_virtual_hub.vhub.id
+  vhub_virtual_router_ip1     = azurerm_virtual_hub.vhub.virtual_router_ips[0]
+  vhub_virtual_router_ip2     = azurerm_virtual_hub.vhub.virtual_router_ips[1]
+  vhub_virtual_router_asn     = azurerm_virtual_hub.vhub.virtual_router_asn
+  internet_inbound = {
+    enabled        = true
+    public_ip_rg   = azurerm_public_ip.elb-pip.resource_group_name
+    public_ip_name = azurerm_public_ip.elb-pip.name
+  }
 }
 
 ##############################################################################################################

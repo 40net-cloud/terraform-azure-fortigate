@@ -10,53 +10,37 @@
 resource "azurerm_user_assigned_identity" "managedidentity" {
   location            = var.location
   name                = "${var.prefix}-managed-identity"
-  resource_group_name = var.resource_group_name
+  resource_group_name = var.resource_group.name
 }
 
-## Requires further cleanup to reduce the permissions
-resource "azurerm_role_assignment" "contributor" {
+resource "azurerm_role_assignment" "reader" {
   depends_on           = [azurerm_user_assigned_identity.managedidentity]
-  scope                = var.subscription_id
-  role_definition_name = "Contributor"
+  scope                = "${var.subscription_id}/resourceGroups/${var.resource_group.name}"
+  role_definition_name = "Reader"
   principal_id         = azurerm_user_assigned_identity.managedidentity.principal_id
 }
 
-#resource "azurerm_role_assignment" "reader" {
-#  depends_on           = [azurerm_user_assigned_identity.managedidentity]
-#  scope                = var.subscription_id
-#  role_definition_name = "Reader"
-#  principal_id         = azurerm_user_assigned_identity.managedidentity.principal_id
-#}
+resource "azurerm_role_definition" "joinpublicip" {
+  name  = "${var.prefix} - Public IP join role"
+  scope = "${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"
+  permissions {
+    actions     = ["Microsoft.Network/publicIPAddresses/join/action"]
+    not_actions = []
+  }
+  assignable_scopes = ["${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"]
+}
 
-#resource "azurerm_role_assignment" "custom" {
-#  depends_on           = [azurerm_user_assigned_identity.managedidentity]
-#  scope                = var.subscription_id
-#  role_definition_name = "Virtual WAN Administrator - ${var.prefix}"
-#  principal_id         = azurerm_user_assigned_identity.managedidentity.principal_id
-#}
-
-#resource "azurerm_role_definition" "vwanadministrator" {
-#  name  = "Virtual WAN Administrator - ${var.prefix}"
-#  scope = var.subscription_id
-#  permissions {
-#    actions     = ["Microsoft.Network/virtualWans/*",
-#                    "Microsoft.Network/virtualHubs/*",
-#                    "Microsoft.Network/azureFirewalls/read",
-#                    "Microsoft.Network/networkVirtualAppliances/*/read",
-#                    "Microsoft.Network/securityPartnerProviders/*/read",
-#                    "Microsoft.Network/expressRouteGateways/*",
-#                    "Microsoft.Network/vpnGateways/*",
-#                    "Microsoft.Network/p2sVpnGateways/*",
-#                    "Microsoft.Network/virtualNetworks/peer/action"]
-#    not_actions = []
-#  }
-#  assignable_scopes = [var.subscription_id]
-#}
+resource "azurerm_role_assignment" "joinpublicipassignment" {
+  depends_on           = [azurerm_user_assigned_identity.managedidentity]
+  scope                = "${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"
+  role_definition_name = azurerm_role_definition.joinpublicip.name
+  principal_id         = azurerm_user_assigned_identity.managedidentity.principal_id
+}
 
 resource "azapi_resource" "fgtinvhub" {
   type      = "Microsoft.Solutions/applications@2021-07-01"
   name      = var.name
-  parent_id = var.resource_group_id
+  parent_id = var.resource_group.id
   location  = var.location
   identity {
     type = "UserAssigned"
@@ -67,10 +51,10 @@ resource "azapi_resource" "fgtinvhub" {
   body = {
     kind = "MarketPlace",
     plan = {
-      name      = var.plan_name
-      product   = var.product
-      publisher = var.publisher
-      version   = var.plan_version
+      name      = var.plan.name
+      product   = var.plan.product
+      publisher = var.plan.publisher
+      version   = var.plan.version
     },
     properties = {
       managedResourceGroupId = "${var.subscription_id}/resourcegroups/${var.managed_resource_group_name}",
@@ -85,28 +69,28 @@ resource "azapi_resource" "fgtinvhub" {
           value = var.prefix
         }
         vwandeploymentSKU = {
-          value = "${var.deployment_type}-${var.sku}"
+          value = "${var.fgt_vwan_deployment_type}-${var.fgt_image_sku}"
         }
         managedApplicationPlan = {
-          value = var.plan_name
+          value = var.plan.name
         }
         vwandeploymentType = {
-          value = var.deployment_type
+          value = var.fgt_vwan_deployment_type
         }
         fortiGateImageVersion = {
-          value = var.mpversion
+          value = var.fgt_version
         }
         hubId = {
           value = var.vhub_id
         }
         fortiGateASN = {
-          value = tostring(var.asn)
+          value = tostring(var.fgt_asn)
         }
         tags = {
           value = var.tags
         }
         scaleUnit = {
-          value = var.scaleunit
+          value = var.fgt_scaleunit
         }
         hubRouters = {
           value = [
@@ -127,13 +111,13 @@ resource "azapi_resource" "fgtinvhub" {
           value = var.fortimanager_serial
         }
         internetInboundCheck = {
-          value = var.internet_inbound_enabled
+          value = var.internet_inbound.enabled
         }
         slbpiprg = {
-          value = var.internet_inbound_public_ip_rg
+          value = var.internet_inbound.public_ip_rg
         }
         slbpipname = {
-          value = var.internet_inbound_public_ip_name
+          value = var.internet_inbound.public_ip_name
         }
         slbPIpNewOrExisting = {
           value = "existing"
