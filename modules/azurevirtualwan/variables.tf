@@ -9,16 +9,24 @@
 variable "prefix" {***REMOVED***
 variable "name" {***REMOVED***
 variable "location" {***REMOVED***
-variable "resource_group_name" {***REMOVED***
-variable "resource_group_id" {***REMOVED***
+variable "resource_group" {
+  type = object({
+    name = string
+    id   = string
+  ***REMOVED***)
+***REMOVED***
+
+variable "managed_resource_group_name" {
+  description = "Managed Resource Group Name - defaults to [resource group name]-mrg if nothing provided"
+***REMOVED***
 variable "subscription_id" {***REMOVED***
 variable "username" {***REMOVED***
 variable "password" {***REMOVED***
-variable "deployment_type" {***REMOVED***
-variable "sku" {***REMOVED***
-variable "scaleunit" {***REMOVED***
-variable "mpversion" {***REMOVED***
-variable "asn" {***REMOVED***
+variable "fgt_vwan_deployment_type" {***REMOVED***
+variable "fgt_image_sku" {***REMOVED***
+variable "fgt_scaleunit" {***REMOVED***
+variable "fgt_version" {***REMOVED***
+variable "fgt_asn" {***REMOVED***
 variable "tags" {***REMOVED***
 variable "fortimanager_host" {***REMOVED***
 variable "fortimanager_serial" {***REMOVED***
@@ -26,25 +34,27 @@ variable "vhub_id" {***REMOVED***
 variable "vhub_virtual_router_ip1" {***REMOVED***
 variable "vhub_virtual_router_ip2" {***REMOVED***
 variable "vhub_virtual_router_asn" {***REMOVED***
-variable "internet_inbound_enabled" {***REMOVED***
-variable "internet_inbound_public_ip_rg" {***REMOVED***
-variable "internet_inbound_public_ip_name" {***REMOVED***
-
-variable "plan_name" {
-  default = "fortigate-managedvwan"
-***REMOVED***
-variable "product" {
-  default = "fortigate_vwan_nva"
-***REMOVED***
-variable "publisher" {
-  default = "fortinet"
-***REMOVED***
-variable "plan_version" {
-  default = "7.4.500250218"
+variable "internet_inbound" {
+  type = object({
+    enabled        = bool
+    public_ip_name = string
+    public_ip_rg   = string
+  ***REMOVED***)
 ***REMOVED***
 
-variable "managed_resource_group_name" {
-  description = "Managed Resource Group Name - defaults to [resource group name]-mrg if nothing provided"
+variable "plan" {
+  type = object({
+    name      = string
+    product   = string
+    publisher = string
+    version   = string
+  ***REMOVED***)
+  default = {
+    name      = "fortigate-managedvwan"
+    product   = "fortigate_vwan_nva"
+    publisher = "fortinet"
+    version   = "7.4.500250218"
+  ***REMOVED***
 ***REMOVED***
 
 ##############################################################################################################
@@ -58,7 +68,7 @@ terraform {
       version = ">=2.12.0"
     ***REMOVED***
     azapi = {
-      source = "azure/azapi"
+      source  = "azure/azapi"
       version = ">=2.3.0"
     ***REMOVED***
   ***REMOVED***
