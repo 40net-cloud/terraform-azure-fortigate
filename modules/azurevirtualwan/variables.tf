@@ -6,10 +6,17 @@
 ##############################################################################################################
 # Variables
 ##############################################################################################################
-variable "prefix" {***REMOVED***
-variable "name" {***REMOVED***
-variable "location" {***REMOVED***
+variable "prefix" {
+  description = "Naming prefix for all deployed resources"
+***REMOVED***
+variable "name" {
+  description = "Naming for the deployed FortiGate resources"
+***REMOVED***
+variable "location" {
+  description = "Location for all resources"
+***REMOVED***
 variable "resource_group" {
+  description = "Name and id of the resource group containing the Azure Virtual WAN resources"
   type = object({
     name = string
     id   = string
@@ -20,8 +27,13 @@ variable "managed_resource_group_name" {
   description = "Managed Resource Group Name - defaults to [resource group name]-mrg if nothing provided"
 ***REMOVED***
 variable "subscription_id" {***REMOVED***
-variable "username" {***REMOVED***
-variable "password" {***REMOVED***
+variable "username" {
+  description = "Username for the FortiGate VM"
+***REMOVED***
+variable "password" {
+  description = "Password for the FortiGate VM"
+  sensitive   = true
+***REMOVED***
 variable "fgt_vwan_deployment_type" {***REMOVED***
 variable "fgt_image_sku" {***REMOVED***
 variable "fgt_scaleunit" {***REMOVED***
