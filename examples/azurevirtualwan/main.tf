@@ -81,6 +81,7 @@ module "fgt_nva" {
   subscription_id             = "/subscriptions/${var.subscription_id}"
   username                    = var.username
   password                    = var.password
+  managedidentity_id          = var.managedidentity_id
   fgt_vwan_deployment_type    = var.fgt_vwan_deployment_type
   fgt_image_sku               = var.fgt_image_sku
   fgt_scaleunit               = var.fgt_scaleunit
