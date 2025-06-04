@@ -1,21 +1,41 @@
 # Required variables for deployment of the FortiGate in Azure Virtual WAN
+
+# Naming prefix for all deployed resources
 prefix = ""
-location = "westeurope"
-# Do no use reserved usernames like admin, root, administrator
+
+# Azure region for all resources
+location = ""
+
+# Username for FortiGate. Do no use reserved usernames like admin, root, administrator
 username = ""
-# Use a password that has at least 12 characters and use lowercase, uppercase, numbers and non-alphanumeric characters
+
+# Password for Fortigate. Use a password that has at least 12 characters and use lowercase, uppercase, numbers and non-alphanumeric characters
 password = "xxxxxxxxxxxx"
+
+# Azure subscription_id where you deploy all resoureces
 subscription_id = ""
+
+# User assigned managedidentity_id to deploy the managed application (optional)
+# You can either provide an existing managed identity that meets the requirments, or leave this field empty to allow Terraform to create a suitable managed identity automatically
+managedidentity_id = ""
+
+# Provide the IP address or DNS name of the FortiManager reachable over port TCP/541 (optional)
 fortimanager_host = ""
+
+# Provide the serial number of the FortiManager (optional)
 fortimanager_serial = ""
-# add your required tags using a map type
+
+# add your required tags using a map type (optional)
 tags = {
   "environment"  = "AzureVirtualWAN-FortiGate"
   "publisher"    = "Fortinet"
 }
+
 # FortiGate deployment type in Azure Virtual WAN: SDWAN + NGFW (Hybrid) 'sdfw' or NGFW 'ngfw'
-fgt_vwan_deployment_type = "sdfw"
+fgt_vwan_deployment_type = ""
+
 # FortiGate License Type: Bring Your Own License or FortiFlex 'byol' or Pay As You Go 'payg'
-fgt_image_sku = "byol"
+fgt_image_sku = ""
+
 # Managed resource group name - a resource group used to deploy the FortiGate NVA into. It will be created during deployment and should not exist
 managed_resource_group_name = "xxxxxxxxxxx-mrg"
