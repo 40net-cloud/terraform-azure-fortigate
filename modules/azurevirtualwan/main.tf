@@ -8,33 +8,40 @@
 ##############################################################################################################
 
 resource "azurerm_user_assigned_identity" "managedidentity" {
+  for_each            = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
   location            = var.location
   name                = "${var.prefix***REMOVED***-managed-identity"
   resource_group_name = var.resource_group.name
 ***REMOVED***
 
 resource "azurerm_role_assignment" "reader" {
-  depends_on           = [azurerm_user_assigned_identity.managedidentity]
+  for_each             = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  depends_on           = [azurerm_user_assigned_identity.managedidentity["create"]]
   scope                = "${var.subscription_id***REMOVED***/resourceGroups/${var.resource_group.name***REMOVED***"
   role_definition_name = "Reader"
-  principal_id         = azurerm_user_assigned_identity.managedidentity.principal_id
+  principal_id         = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)
 ***REMOVED***
 
 resource "azurerm_role_definition" "joinpublicip" {
-  name  = "${var.prefix***REMOVED*** - Public IP join role"
-  scope = "${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"
+  depends_on = [azurerm_user_assigned_identity.managedidentity["create"]]
+  name       = "${var.prefix***REMOVED*** - Public IP join role"
+  scope      = "${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"
   permissions {
     actions     = ["Microsoft.Network/publicIPAddresses/join/action"]
     not_actions = []
   ***REMOVED***
-  assignable_scopes = ["${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"]
+  assignable_scopes = ["${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"] 
 ***REMOVED***
 
 resource "azurerm_role_assignment" "joinpublicipassignment" {
-  depends_on           = [azurerm_user_assigned_identity.managedidentity]
+  for_each            = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  depends_on          = [
+    azurerm_user_assigned_identity.managedidentity["create"],
+     azurerm_role_definition.joinpublicip
+     ]
   scope                = "${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"
   role_definition_name = azurerm_role_definition.joinpublicip.name
-  principal_id         = azurerm_user_assigned_identity.managedidentity.principal_id
+  principal_id         = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)  
 ***REMOVED***
 
 resource "azapi_resource" "fgtinvhub" {
@@ -45,7 +52,7 @@ resource "azapi_resource" "fgtinvhub" {
   identity {
     type = "UserAssigned"
     identity_ids = [
-      azurerm_user_assigned_identity.managedidentity.id
+      var.managedidentity_id != "" ? var.managedidentity_id : azurerm_user_assigned_identity.managedidentity["create"].id
     ]
   ***REMOVED***
   body = {
