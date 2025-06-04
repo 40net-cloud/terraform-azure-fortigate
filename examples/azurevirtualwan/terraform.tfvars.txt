@@ -1,21 +1,41 @@
 ***REMOVED***
+
 ***REMOVED***
-location = "westeurope"
-# Do no use reserved usernames like admin, root, administrator
 ***REMOVED***
-# Use a password that has at least 12 characters and use lowercase, uppercase, numbers and non-alphanumeric characters
+
+***REMOVED***
+***REMOVED***
+
+***REMOVED***
+***REMOVED***
+
+***REMOVED***
 password = "xxxxxxxxxxxx"
+
+***REMOVED***
+***REMOVED***
+
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
-# add your required tags using a map type
+
+***REMOVED***
+***REMOVED***
+
+***REMOVED***
+***REMOVED***
+
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
 ***REMOVED***
-fgt_vwan_deployment_type = "sdfw"
+
 ***REMOVED***
-fgt_image_sku = "byol"
+***REMOVED***
+
+***REMOVED***
+***REMOVED***
+
 ***REMOVED***
 ***REMOVED***
