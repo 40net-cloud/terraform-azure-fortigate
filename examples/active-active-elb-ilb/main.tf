@@ -8,6 +8,7 @@
 ##############################################################################################################
 # Resource Group
 ##############################################################################################################
+
 resource "azurerm_resource_group" "resourcegroup" {
   name     = "${var.prefix}-rg"
   location = var.location
@@ -35,60 +36,6 @@ resource "azurerm_subnet" "subnets" {
 ##############################################################################################################
 # Load Balancers
 ##############################################################################################################
-
-# locals {
-#   # produce a sequence [0,1,…,fgt_count-1]
-#   fgt_indices = range(var.fgt_count)
-#
-#   # build a flat list of objects, two per VM:
-#   fgt_nat_rules = flatten([
-#     for i in local.fgt_indices : [
-#       {
-#         fgt_index      = i
-#         name          = "${var.prefix}-fgt-${i+1}-MGMT-HTTPS"
-#         protocol      = "Tcp"
-#         frontend_port = 40030 + i
-#         backend_port  = 443
-#       },
-#       {
-#         fgt_index      = i
-#         name          = "${var.prefix}-fgt-${i+1}-MGMT-SSH"
-#         protocol      = "Tcp"
-#         frontend_port = 50030 + i
-#         backend_port  = 22
-#       }
-#     ]
-#   ])
-#
-#   # turn that list into a map keyed by rule-name
-#   fgt_nat_rules_map = {
-#     for r in local.fgt_nat_rules : r.name => r
-#   }
-# }
-#
-# # Create the NAT‐rules on your external LB
-# resource "azurerm_lb_nat_rule" "elbinboundrules" {
-#   for_each = local.fgt_nat_rules_map
-#
-#   name                           = each.key
-#   resource_group_name            = azurerm_resource_group.resourcegroup.name
-#   loadbalancer_id                = module.elb.azurerm_lb_id
-#   frontend_ip_configuration_name = module.elb.azurerm_lb_frontend_ip_configuration[0].name
-#   backend_address_pool_id  = module.fgt.fortigate_ipconfig_external_ids[tostring(each.value.fgt_index)]
-#   protocol                    = each.value.protocol
-#   frontend_port               = each.value.frontend_port
-#   backend_port                = each.value.backend_port
-#
-#   enable_floating_ip          = false
-#   idle_timeout_in_minutes     = 4
-#   enable_tcp_reset            = false
-# }
-
-
-#output "nic_map_keys" {
-  #value = keys(module.fgt.fortigate_network_interface_external)
-#}
-
 
 resource "azurerm_lb_nat_rule" "elbinboundrules" {
   for_each = merge({
@@ -193,28 +140,6 @@ module "ilb" {
   tags       = var.fortinet_tags
   depends_on = [azurerm_resource_group.resourcegroup]
 }
-
-##############################################################################################################
-# Public IP for management interface of the FortiGate
-##############################################################################################################
-#resource "azurerm_public_ip" "fgtamgmtpip" {
-#  name                = "${var.prefix}-fgt-a-mgmt-pip"
-#  location            = var.location
-#  resource_group_name = azurerm_resource_group.resourcegroup.name
-#  allocation_method   = "Static"
-#  domain_name_label   = "${var.prefix}-fgt-a-mgmt-pip"
-#  sku                 = "Standard"
-#}
-
-#resource "azurerm_public_ip" "fgtbmgmtpip" {
-#  name                = "${var.prefix}-fgt-b-mgmt-pip"
-#  location            = var.location
-#  resource_group_name = azurerm_resource_group.resourcegroup.name
-#  allocation_method   = "Static"
-#  domain_name_label   = "${var.prefix}-fgt-b-mgmt-pip"
-#  sku                 = "Standard"
-#}
-
 
 ##############################################################################################################
 # FortiGate
