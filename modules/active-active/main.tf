@@ -196,7 +196,6 @@ resource "azurerm_managed_disk" "managed_disk" {
   for_each             = toset([for j in local.datadisk_lun_map : j.datadisk_name])
   name                 = each.key
   location             = var.location
-  #zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[0]
   zone                  = var.fgt_availability_set ? null : var.fgt_availability_zone[tonumber(regex("[0-9]+", each.key)) % length(var.fgt_availability_zone)]
   resource_group_name  = var.resource_group_name
   storage_account_type = "Standard_LRS"
