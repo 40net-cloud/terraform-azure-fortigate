@@ -49,24 +49,13 @@ config system interface
         set mode static
         set ip ${fgt_external_ipaddr***REMOVED***/${fgt_external_mask***REMOVED***
         set description external
-        set allowaccess probe-response
+        set allowaccess set allowaccess ping https ssh probe-response
     next
     edit port2
         set mode static
         set ip ${fgt_internal_ipaddr***REMOVED***/${fgt_internal_mask***REMOVED***
         set description internal
-        set allowaccess probe-response
-    next
-    edit port3
-        set mode static
-        set ip ${fgt_hasync_ipaddr***REMOVED***/${fgt_hasync_mask***REMOVED***
-        set description hasync
-    next
-    edit port4
-        set mode static
-        set ip ${fgt_mgmt_ipaddr***REMOVED***/${fgt_mgmt_mask***REMOVED***
-        set description mgmt
-        set allowaccess ping https ssh ftm
+        set allowaccess set allowaccess ping https ssh probe-response
     next
 end
 %{ if fgt_ssh_public_key_file != "" ***REMOVED***
@@ -78,22 +67,22 @@ end
 %{ endif ***REMOVED***
 %{ if fgt_config_ha ***REMOVED***
 config system ha
-    set group-name AzureHA
-    set mode a-p
-    set hbdev port3 100
     set session-pickup enable
     set session-pickup-connectionless enable
-    set ha-mgmt-status enable
-    config ha-mgmt-interfaces
-        edit 1
-            set interface port4
-            set gateway ${fgt_mgmt_gw***REMOVED***
-        next
-    end
+    set session-pickup-nat enable
+    set session-pickup-expectation enable
     set override disable
-    set priority ${fgt_ha_priority***REMOVED***
-    set unicast-hb enable
-    set unicast-hb-peerip ${fgt_ha_peerip***REMOVED***
+end
+
+config system standalone-cluster
+  config cluster-peer
+    %{ for idx, ip in fgt_ha_peerips ~***REMOVED***
+        edit ${idx + 1***REMOVED***
+            set peerip ${ip***REMOVED***
+            set syncvd "root"
+        next
+    %{ endfor ~***REMOVED***
+  end
 end
 %{ endif ***REMOVED***
 %{ if fgt_fortimanager_ip != "" ***REMOVED***
