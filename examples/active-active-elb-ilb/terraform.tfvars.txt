@@ -1,6 +1,6 @@
-##########################################################################
-#Required variables for deployment of the FortiGate in Azure Virtual WAN #
-##########################################################################
+###########################################################################################################################################
+#Required variables for deployment of FortiGate Active/Active High Availability with Azure Standard Load Balancer - External and Internal #
+###########################################################################################################################################
 
 # Added name to each deployed resource
 prefix = ""
