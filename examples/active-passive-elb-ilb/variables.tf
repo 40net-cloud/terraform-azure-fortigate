@@ -5,19 +5,30 @@
 #
 ##############################################################################################################
 
-# Prefix for all resources created for this deployment in Microsoft Azure
 variable "prefix" {
   description = "Added name to each deployed resource"
+  type        = string
 }
 
 variable "location" {
   description = "Azure region"
+  type        = string
 }
 
 variable "username" {
+  description = "Username for FortiGate admin"
+  type        = string
 }
 
 variable "password" {
+  description = "Password for FortiGate admin"
+  type        = string
+  sensitive   = true
+}
+
+variable "subscription_id" {
+  description = "Azure subscription ID"
+  type        = string
 }
 
 ##############################################################################################################
@@ -26,7 +37,6 @@ variable "password" {
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace default image sku hourly (PAYG 'fortinet_fg-vm_payg_2023') or byol (Bring your own license 'fortinet_fg-vm')"
-  #  default     = "fortinet_fg-vm_payg_2023"
   default = "fortinet_fg-vm"
 }
 
@@ -36,18 +46,22 @@ variable "fgt_version" {
 }
 
 variable "fgt_byol_license_file_a" {
+  description = "BYOL license file for FGT_a"
   default = ""
 }
 
 variable "fgt_byol_license_file_b" {
+  description = "BYOL license file for FGT_b"
   default = ""
 }
 
 variable "fgt_byol_fortiflex_license_token_a" {
-  default = ""
+  description = "fortiflex token for FGT_a"
+  default     = ""
 }
 
 variable "fgt_byol_fortiflex_license_token_b" {
+  description = "fortiflex token for FGT_b"
   default = ""
 }
 
@@ -65,13 +79,22 @@ variable "fgt_availability_set" {
   default     = "false"
 }
 
-variable "fgt_availability_zone" {
-  description = "Deploy FortiGate in a new Availability Zone"
-  default     = ["1", "2"]
+variable "fgt_datadisk_size" {
+  description = "Size in GB for FortiGate data disks"
+  type        = number
+  default     = 64
+}
+
+variable "fgt_datadisk_count" {
+  description = "Number of data disks to attach to each FortiGate"
+  type        = number
+  default     = 1
 }
 
 variable "fgt_config_ha" {
-  default = "true"
+  description = "Enable High Availability configuration for FortiGate"
+  type        = bool
+  default     = true
 }
 
 variable "fgt_fortimanager_ip" {
@@ -90,14 +113,26 @@ variable "fgt_additional_custom_data" {
 }
 
 variable "fgt_vmsize" {
-  default = "Standard_F4s"
+  description = "Azure VM size for FortiGate instances"
+  type        = string
+  default     = "Standard_F4s"
 }
 
 ##############################################################################################################
 # Deployment in Microsoft Azure
 ##############################################################################################################
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">=2.0.0"
+    }
+  }
+}
 provider "azurerm" {
   features {}
+  subscription_id = var.subscription_id
 }
 
 ##############################################################################################################
@@ -119,7 +154,7 @@ variable "subnets" {
     { name = "subnet-external", cidr = ["172.16.136.0/26", "2001:db8:4:1::/64"] },  # External
     { name = "subnet-internal", cidr = ["172.16.136.64/26", "2001:db8:4:2::/64"] }, # Internal
     { name = "subnet-hasync", cidr = ["172.16.136.128/26", "2001:db8:4:3::/64"] },  # HASYNC
-    { name = "subnet-hamgmt", cidr = ["172.16.136.192/26", "2001:db8:4:4::/64"] }
+    { name = "subnet-hamgmt", cidr = ["172.16.136.192/26", "2001:db8:4:4::/64"] }   # MGMT
   ]
 }
 
@@ -160,7 +195,7 @@ locals {
     fgt_mgmt_gw                = tostring(cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1))
     fgt_ha_peerip              = local.fgt_ip_configuration["hasync"]["fgt-b"]["ipconfig1"].private_ip_address
     fgt_ha_priority            = "255"
-    vnet_network               = tostring(azurerm_virtual_network.vnet.address_space[0])
+    vnet_network               = tostring(tolist(azurerm_virtual_network.vnet.address_space)[0])
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
@@ -186,7 +221,7 @@ locals {
     fgt_mgmt_gw                = cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1)
     fgt_ha_peerip              = local.fgt_ip_configuration["hasync"]["fgt-a"]["ipconfig1"].private_ip_address
     fgt_ha_priority            = "1"
-    vnet_network               = tostring(azurerm_virtual_network.vnet.address_space[0])
+    vnet_network               = tostring(tolist(azurerm_virtual_network.vnet.address_space)[0])
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
@@ -293,7 +328,7 @@ locals {
           public_ip_address_resource_id = azurerm_public_ip.fgtbmgmtpip.id
         }
       }
-    } # HAMGMT
+    } # MGMT
   }
 }
 
