@@ -1,0 +1,59 @@
+############################################################################################################################################
+#Required variables for deployment of FortiGate Active/Passive High Availability with Azure Standard Load Balancer - External and Internal #
+############################################################################################################################################
+
+# Added name to each deployed resource
+prefix = ""
+
+# Azure region
+location = ""
+
+# Username for FortiGate admin
+username = ""
+
+# Password for FortiGate admin
+password = ""
+
+# Azure subscription ID
+subscription_id = ""
+
+# Azure Marketplace image SKU: PAYG ('fortinet_fg-vm_payg_2023') or BYOL ('fortinet_fg-vm')
+fgt_image_sku = "fortinet_fg-vm"
+
+# FortiGate version, defaults to latest available in Azure Marketplace
+fgt_version = "7.4.4"
+
+# Deploy FortiGate in a new Availability Set or Availability Zone (true:Availability Set false:Availability Zone )
+fgt_availability_set = false
+
+# Azure VM size for FortiGate instances
+fgt_vmsize = "Standard_F4s"
+
+# Size in GB for FortiGate data disks
+fgt_datadisk_size = 64
+
+# Number of data disks to attach to each FortiGate
+fgt_datadisk_count = 1
+
+# Add BYOL license file for FGT_a (optional)
+fgt_byol_license_file_a = ""
+
+# Add BYOL license file for FGT_b (optional)
+fgt_byol_license_file_b = ""
+
+# Add fortiflex token for FGT_a (optional)
+fgt_byol_fortiflex_license_token_a = ""
+
+# Add fortiflex token for FGT_b (optional)
+fgt_byol_fortiflex_license_token_b = ""
+
+# Path to the SSH public key file for FortiGate instances (optional)
+fgt_ssh_public_key_file = ""
+
+# IP address of the FortiManager (optional)
+fgt_fortimanager_ip = ""
+
+# Serial number of the FortiManager (optional)
+fgt_fortimanager_serial = ""
+
+
