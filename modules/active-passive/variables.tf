@@ -9,26 +9,36 @@
 
 variable "prefix" {
   description = "Added name to each deployed resource"
+  type        = string
 }
 
 variable "location" {
   description = "Azure region"
+  type        = string
 }
 
 variable "username" {
+  description = "Username for FortiGate admin"
+  type        = string
 }
 
 variable "password" {
+  description = "Password for FortiGate admin"
+  type        = string
+  sensitive   = true
 }
 ##############################################################################################################
 # Names and data sources of linked Azure resource
 ##############################################################################################################
 
 variable "resource_group_name" {
+  description = "Resource group for all deployed resources"
+  type        = string
 }
 
 variable "virtual_network_id" {
-  description = "Id of the VNET to deploy the FortiGate into"
+  description = "ID of the VNET to deploy the FortiGate into"
+  type        = string
 }
 
 variable "virtual_network_address_space" {
@@ -50,7 +60,6 @@ variable "subnet_names" {
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace default image sku hourly (PAYG 'fortinet_fg-vm_payg_2023') or byol (Bring your own license 'fortinet_fg-vm')"
-  #  default     = "fortinet_fg-vm_payg_2023"
   default = "fortinet_fg-vm"
 }
 
@@ -60,18 +69,22 @@ variable "fgt_version" {
 }
 
 variable "fgt_byol_license_file_a" {
+  description = "BYOL license file for FGT_a"
   default = ""
 }
 
 variable "fgt_byol_license_file_b" {
+  description = "BYOL license file for FGT_b"
   default = ""
 }
 
 variable "fgt_byol_fortiflex_license_token_a" {
-  default = ""
+  description = "fortiflex token for FGT_a"
+  default     = ""
 }
 
 variable "fgt_byol_fortiflex_license_token_b" {
+  description = "fortiflex token for FGT_b"
   default = ""
 }
 
@@ -95,7 +108,7 @@ variable "fgt_availability_set" {
 
 variable "fgt_availability_zone" {
   description = "Deploy FortiGate in Availability Zones"
-  default     = []
+  default     = ["1", "2"]
 }
 
 variable "fgt_datadisk_size" {
