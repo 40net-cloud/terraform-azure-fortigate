@@ -125,12 +125,9 @@ module "fgt" {
   fgt_ip_configuration               = local.fgt_ip_configuration
   fgt_a_customdata_variables         = local.fgt_a_vars
   fgt_b_customdata_variables         = local.fgt_b_vars
-
-  # Azure Availability Set - a change from set to zone or vice versa will result in a redeploy and loss of all data
-  fgt_availability_set = true
-  # Azure Availability Zone
-  #  fgt_availability_set               = false
-  #  fgt_availability_zone              = ["2", "1"]
+  fgt_availability_set               = var.fgt_availability_set
+  fgt_datadisk_size                  = var.fgt_datadisk_size
+  fgt_datadisk_count                 = var.fgt_datadisk_count
 }
 
 ##############################################################################################################
