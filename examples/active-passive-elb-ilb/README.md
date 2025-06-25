@@ -19,10 +19,10 @@ The Terraform code provisions a resource group that includes the following resou
 - Internal Azure Standard Load Balancer
 - VNET with an external, internal, hasync and mgmt subnets
 - NSG attached to interfaces for each FortiGate 
-- The Public IPs:
-   A Public IP address used as the frontend IP for the external load balancer
-   A Public IP address attached to FGT-a mgmt interface used for management
-   A Public IP address attached to FGT-b mgmt interface used for management
+- Three Public IPs:
+   - A Public IP address used as the frontend IP for the external load balancer
+   - A Public IP address attached to FGT-a mgmt interface used for management
+   - A Public IP address attached to FGT-b mgmt interface used for management
 
 ### Instructions
 
