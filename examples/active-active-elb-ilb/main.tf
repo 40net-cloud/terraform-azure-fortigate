@@ -31,6 +31,9 @@ resource "azurerm_subnet" "subnets" {
   resource_group_name  = azurerm_resource_group.resourcegroup.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = each.value.cidr
+  depends_on = [
+    azurerm_virtual_network.vnet 
+  ]
 }
 
 ##############################################################################################################
@@ -40,16 +43,16 @@ resource "azurerm_subnet" "subnets" {
 resource "azurerm_lb_nat_rule" "elbinboundrules" {
   for_each = merge({
     for i in range(var.fgt_count) :
-    format("%s-fgt-%d-MGMT-SSH", var.prefix, i + 1) => {
-      name           = format("%s-fgt-%d-MGMT-SSH", var.prefix, i + 1)
+    format("%s-fgt-%d-MGMT-SSH", var.prefix, i) => {
+      name           = format("%s-fgt-%d-MGMT-SSH", var.prefix, i )
       protocol       = "Tcp"
       frontend_port  = 50030 + i
       backend_port   = 22
     }
   }, {
     for i in range(var.fgt_count) :
-    format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i + 1) => {
-      name           = format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i + 1)
+    format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i) => {
+      name           = format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i)
       protocol       = "Tcp"
       frontend_port  = 40030 + i
       backend_port   = 443
@@ -66,23 +69,27 @@ resource "azurerm_lb_nat_rule" "elbinboundrules" {
   enable_floating_ip              = false
   idle_timeout_in_minutes         = 4
   enable_tcp_reset                = false
+
+  depends_on = [
+    module.elb  
+  ]
 }
 
 
 resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
   for_each = merge({
     for idx in range(var.fgt_count) :
-    format("%s-fgt-%d-MGMT-SSH", var.prefix, idx + 1) => {
+    format("%s-fgt-%d-MGMT-SSH", var.prefix, idx) => {
       network_interface_id = module.fgt.fortigate_network_interface_external["node-${idx}"].id
       ip_config_name       = "ipconfig1"
-      nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-SSH", var.prefix, idx + 1)].id
+      nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-SSH", var.prefix, idx)].id
     }
   }, {
     for idx in range(var.fgt_count) :
-    format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx + 1) => {
+    format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx) => {
       network_interface_id = module.fgt.fortigate_network_interface_external["node-${idx}"].id
       ip_config_name       = "ipconfig1"
-      nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx + 1)].id
+      nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx)].id
     }
   })
 
@@ -117,7 +124,8 @@ module "elb" {
   }
 
   tags       = var.fortinet_tags
-  depends_on = [azurerm_resource_group.resourcegroup]
+  depends_on = [
+    azurerm_resource_group.resourcegroup]
 }
 
 module "ilb" {
@@ -138,7 +146,8 @@ module "ilb" {
     lbprobe = ["Tcp", "8008", ""]
   }
   tags       = var.fortinet_tags
-  depends_on = [azurerm_resource_group.resourcegroup]
+  depends_on = [
+    azurerm_resource_group.resourcegroup]
 }
 
 ##############################################################################################################
@@ -167,7 +176,6 @@ module "fgt" {
   fgt_serial_console                 = var.fgt_serial_console
   fortinet_tags                      = var.fortinet_tags
   fgt_customdata_variables           = local.fgt_vars
-  subscription_id                    = var.subscription_id
 }
 
 ##############################################################################################################
