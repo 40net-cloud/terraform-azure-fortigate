@@ -76,6 +76,10 @@ resource "azurerm_lb_backend_address_pool_address" "fgtifcext2elbbackendpool" {
   backend_address_pool_id = each.value.backend_address_pool_id
   virtual_network_id      = var.virtual_network_id
   ip_address              = each.value.ip_address
+  depends_on = [
+    azurerm_network_interface.fgtifcext,
+    azurerm_linux_virtual_machine.fgtvm
+  ]
 }
 
 resource "azurerm_network_interface" "fgtifcext" {
