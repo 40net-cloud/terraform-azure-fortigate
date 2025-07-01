@@ -17,11 +17,6 @@ variable "location" {
   type        = string
 }
 
-variable "subscription_id" {
-  description = "subscription_id"
-  type        = string
-}
-
 variable "username" {
   description = "Admin username for the FortiGate VM"
   type        = string
