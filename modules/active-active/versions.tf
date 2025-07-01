@@ -18,8 +18,5 @@ terraform {
     ***REMOVED***
   ***REMOVED***
 ***REMOVED***
-provider "azurerm" {
-  features {***REMOVED***
-  subscription_id = var.subscription_id
-***REMOVED***
+
 ##############################################################################################################
