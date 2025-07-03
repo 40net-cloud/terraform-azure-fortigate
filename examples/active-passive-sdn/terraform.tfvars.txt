@@ -1,5 +1,5 @@
 ############################################################################################################################################
-#Required variables for deployment of FortiGate Active/Passive High Availability with Azure Standard Load Balancer - External and Internal #
+#Required variables for deployment of FortiGate Active/Passive High Availablity with Fabric Connector Failover #
 ############################################################################################################################################
 
 # Added name to each deployed resource
