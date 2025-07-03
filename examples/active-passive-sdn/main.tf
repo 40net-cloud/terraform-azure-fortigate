@@ -1,6 +1,6 @@
 ##############################################################################################################
 #
-# FortiGate Active/Passive High Availability with Azure Standard Load Balancer - External and Internal
+# FortiGate Active/Passive High Availablity with Fabric Connector Failover
 # Terraform deployment template for Microsoft Azure
 #
 ##############################################################################################################
@@ -40,14 +40,60 @@ resource "azurerm_public_ip" "fgt_pip" {
 }
 
 ##############################################################################################################
+# Public IP for management interface of the FortiGate
+##############################################################################################################
+resource "azurerm_public_ip" "fgtamgmtpip" {
+  name                = "${var.prefix}-fgt-a-mgmt-pip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  allocation_method   = "Static"
+  domain_name_label   = "${var.prefix}-fgt-a-mgmt-pip"
+  sku                 = "Standard"
+}
+
+resource "azurerm_public_ip" "fgtbmgmtpip" {
+  name                = "${var.prefix}-fgt-b-mgmt-pip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  allocation_method   = "Static"
+  domain_name_label   = "${var.prefix}-fgt-b-mgmt-pip"
+  sku                 = "Standard"
+}
+
+##############################################################################################################
+# Route Table
+##############################################################################################################
+
+resource "azurerm_route_table" "protected_subnet_rt" {
+  name                = "${var.prefix}-routetable-protectedsubnet"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  tags = {
+    publisher = "Fortinet"
+    template  = "Active-Passive-SDN"
+    provider  = "6EB3B02F-50E5-4A3E-8CB8-2E12925APSDN"
+  }
+}
+
+resource "azurerm_route" "to_default" {
+  name                   = "toDefault"
+  resource_group_name    = azurerm_resource_group.resourcegroup.name
+  route_table_name       = azurerm_route_table.protected_subnet_rt.name
+  address_prefix         = "0.0.0.0/0"
+  next_hop_type          = "VirtualAppliance"
+  next_hop_in_ip_address = local.fgt_a_vars.fgt_internal_ipaddr
+}
+
+##############################################################################################################
 # FortiGate
 ##############################################################################################################
 module "fgt" {
-  #  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-elb-ilb"
-  source = "../../modules/active-passive-elb-ilb"
+  #  source = "github.com/40net-cloud/terraform-azure-fortigate/modules/active-passive-sdn"
+  source = "../../modules/active-passive-sdn"
 
   prefix                             = var.prefix
   location                           = var.location
+  subscription_id                    = var.subscription_id
   resource_group_name                = azurerm_resource_group.resourcegroup.name
   username                           = var.username
   password                           = var.password
@@ -63,13 +109,11 @@ module "fgt" {
   fgt_accelerated_networking         = var.fgt_accelerated_networking
   fgt_ip_configuration               = local.fgt_ip_configuration
   fgt_a_customdata_variables         = local.fgt_a_vars
-  fgt_b_customdata_variables         = local.fgt_b_vars
+  fgt_b_customdata_variables         = local.fgt_b_vars																										   
+  fgt_availability_set               = var.fgt_availability_set
+  fgt_datadisk_size                  = var.fgt_datadisk_size
+  fgt_datadisk_count                 = var.fgt_datadisk_count
 
-  # Azure Availability Set - a change from set to zone or vice versa will result in a redeploy and loss of all data
-  fgt_availability_set = true
-  # Azure Availability Zone
-  #  fgt_availability_set               = false
-  #  fgt_availability_zone              = ["2", "1"]
 }
 
 ##############################################################################################################
