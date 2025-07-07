@@ -1,6 +1,6 @@
 ##############################################################################################################
 #
-# FortiGate a standalone FortiGate VM
+# Standalone FortiGate VM
 # Terraform deployment template for Microsoft Azure
 #
 ##############################################################################################################
@@ -25,7 +25,6 @@ resource "azurerm_virtual_network" "vnet" {
 
 resource "azurerm_subnet" "subnets" {
   for_each = { for s in var.subnets : s.name => s }
-
   name                 = each.key
   resource_group_name  = azurerm_resource_group.resourcegroup.name
   virtual_network_name = azurerm_virtual_network.vnet.name
@@ -65,6 +64,8 @@ module "fgt" {
   fgt_accelerated_networking       = var.fgt_accelerated_networking
   fgt_ip_configuration             = local.fgt_ip_configuration
   fgt_customdata_variables         = local.fgt_vars
+  fgt_datadisk_size                = var.fgt_datadisk_size
+  fgt_datadisk_count               = var.fgt_datadisk_count
 }
 
 ##############################################################################################################
