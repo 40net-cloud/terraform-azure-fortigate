@@ -123,6 +123,12 @@ module "fgt_nva" {
 #   address_prefixes     = [var.spoke_subnet["spoke1"]]
 # ***REMOVED***
 
+# resource "azurerm_virtual_hub_connection" "spoke1-connection1" {
+#   name                      = "${var.prefix***REMOVED***-connection-spoke1-to-vwan-hub"
+#   virtual_hub_id            = azurerm_virtual_hub.vhub.id
+#   remote_virtual_network_id = azurerm_virtual_network.spoke1.id
+# ***REMOVED***
+
 # resource "azurerm_virtual_network" "spoke2" {
 #   name                = "${var.prefix***REMOVED***-spoke2-vnet"
 #   address_space       = [var.vnet["spoke2"]]
@@ -139,58 +145,65 @@ module "fgt_nva" {
 #   address_prefixes     = [var.spoke_subnet["spoke2"]]
 # ***REMOVED***
 
+# resource "azurerm_virtual_hub_connection" "spoke2-connection1" {
+#   name                      = "${var.prefix***REMOVED***-connection-spoke2-to-vwan-hub"
+#   virtual_hub_id            = azurerm_virtual_hub.vhub.id
+#   remote_virtual_network_id = azurerm_virtual_network.spoke2.id
+# ***REMOVED***
+
+
 ##############################################################################################################
 #
 # Example: Spoke VM
 #
 ##############################################################################################################
-#resource "azurerm_network_interface" "spoke1lnxifc" {
+# resource "azurerm_network_interface" "spoke1lnxifc" {
 #  name                           = "${var.prefix***REMOVED***-spoke1-lnx-ifc"
 #  location                       = azurerm_resource_group.resourcegroup.location
 #  resource_group_name            = azurerm_resource_group.resourcegroup.name
 #  ip_forwarding_enabled          = false
 #  accelerated_networking_enabled = false
-#
+
 #  ip_configuration {
 #    name                          = "interface1"
 #    subnet_id                     = azurerm_subnet.spoke1subnet1.id
 #    private_ip_address_allocation = "Dynamic"
 #  ***REMOVED***
-#
-#  tags = var.tags
-#***REMOVED***
 
-#resource "azurerm_linux_virtual_machine" "spoke1lnxvm" {
+#  tags = var.tags
+# ***REMOVED***
+
+# resource "azurerm_linux_virtual_machine" "spoke1lnxvm" {
 #  name                  = "${var.prefix***REMOVED***-spoke1-lnx"
 #  location              = azurerm_resource_group.resourcegroup.location
 #  resource_group_name   = azurerm_resource_group.resourcegroup.name
 #  network_interface_ids = [azurerm_network_interface.spoke1lnxifc.id]
 #  size                  = var.lnx_vmsize
-#
+
 #  source_image_reference {
 #    publisher = "Canonical"
 #    offer     = "0001-com-ubuntu-server-jammy"
 #    sku       = "22_04-lts"
 #    version   = "latest"
 #  ***REMOVED***
-#
+
 #  os_disk {
 #    name                 = "${var.prefix***REMOVED***-spoke1-lnx-osdisk"
 #    caching              = "ReadWrite"
 #    storage_account_type = "StandardSSD_LRS"
 #  ***REMOVED***
-#
+
 #  computer_name                   = "${var.prefix***REMOVED***-spoke1-lnx"
 #  admin_username                  = var.username
 #  admin_password                  = var.password
 #  disable_password_authentication = false
 #  custom_data                     = base64encode(templatefile("${path.module***REMOVED***/vm-customdata.tftpl", {***REMOVED***))
-#
+
 #  boot_diagnostics {
 #  ***REMOVED***
-#
+
 #  tags = var.tags
-#***REMOVED***
+# ***REMOVED***
 
 #resource "azurerm_network_interface" "spoke2lnxifc" {
 #  name                           = "${var.prefix***REMOVED***-spoke2-lnx-ifc"
