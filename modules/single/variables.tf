@@ -1,6 +1,6 @@
 ##############################################################################################################
 #
-# FortiGate Active/Passive High Availability with Azure Standard Load Balancer - External and Internal
+# Standalone FortiGate VM
 # Terraform deployment template for Microsoft Azure
 #
 ##############################################################################################################
@@ -9,22 +9,33 @@
 
 variable "prefix" {
   description = "Added name to each deployed resource"
+  type        = string
 }
 
 variable "location" {
   description = "Azure region"
+  type        = string
 }
 
 variable "username" {
+  description = "Username for FortiGate admin"
+  type        = string
 }
 
 variable "password" {
+  description = "Password for FortiGate admin"
+  type        = string
+  sensitive   = true
 }
+
+
 ##############################################################################################################
 # Names and data sources of linked Azure resource
 ##############################################################################################################
 
 variable "resource_group_name" {
+  description = "Resource group for all deployed resources"
+  type        = string
 }
 
 variable "virtual_network_id" {
@@ -45,9 +56,13 @@ variable "subnet_names" {
 ##############################################################################################################
 
 variable "fgt_image_sku" {
-  description = "Azure Marketplace default image sku hourly (PAYG 'fortinet_fg-vm_payg_2023') or byol (Bring your own license 'fortinet_fg-vm')"
-  #  default     = "fortinet_fg-vm_payg_2023"
-  default = "fortinet_fg-vm"
+  description = "Azure Marketplace default image sku: hourly (PAYG 'fortinet_fg-vm_payg_2023') or BYOL (Bring your own license 'fortinet_fg-vm')"
+  default     = "fortinet_fg-vm"
+
+  validation {
+    condition     = contains(["fortinet_fg-vm", "fortinet_fg-vm_payg_2023"], var.fgt_image_sku)
+    error_message = "Invalid image SKU. Allowed values are 'fortinet_fg-vm' (BYOL) and 'fortinet_fg-vm_payg_2023' (PAYG)."
+  }
 }
 
 variable "fgt_version" {
@@ -56,10 +71,12 @@ variable "fgt_version" {
 }
 
 variable "fgt_byol_license_file" {
+  description = "BYOL license file path for FGT"
   default = ""
 }
 
 variable "fgt_byol_fortiflex_license_token" {
+  description = "fortiflex token for FGT"
   default = ""
 }
 
@@ -77,11 +94,15 @@ variable "fgt_accelerated_networking" {
 }
 
 variable "fgt_datadisk_size" {
-  default = 50
+  description = "Size in GB for FortiGate data disks"
+  type        = number
+  default     = 64
 }
 
 variable "fgt_datadisk_count" {
-  default = 1
+  description = "Number of data disks to attach to each FortiGate"
+  type        = number
+  default     = 1
 }
 
 variable "fgt_additional_custom_data" {
@@ -114,17 +135,7 @@ variable "fgt_ip_configuration" {
   type = map(object({
     fgt = map(object({
       name = string
-      app_gateway_backend_pools = optional(map(object({
-        app_gateway_backend_pool_resource_id = string
-      })), {})
-      gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
-      is_primary_ipconfiguration                                  = optional(bool, true)
-      load_balancer_backend_pools = optional(map(object({
-        load_balancer_backend_pool_resource_id = string
-      })), {})
-      load_balancer_nat_rules = optional(map(object({
-        load_balancer_nat_rule_resource_id = string
-      })), {})
+      is_primary_ipconfiguration    = optional(bool, true)
       private_ip_address            = optional(string)
       private_ip_address_allocation = optional(string, "Dynamic")
       private_ip_address_version    = optional(string, "IPv4")

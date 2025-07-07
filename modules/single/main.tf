@@ -1,6 +1,6 @@
 ##############################################################################################################
 #
-# FortiGate a standalone FortiGate VM
+# Standalone FortiGate VM
 # Terraform deployment template for Microsoft Azure
 #
 ##############################################################################################################
@@ -20,7 +20,6 @@ resource "azurerm_network_interface" "fgtifcext" {
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id 
       primary                                            = ip_configuration.value.is_primary_ipconfiguration
       private_ip_address                                 = ip_configuration.value.private_ip_address
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
@@ -33,6 +32,10 @@ resource "azurerm_network_interface" "fgtifcext" {
 resource "azurerm_network_interface_security_group_association" "fgtifcextnsg" {
   network_interface_id      = azurerm_network_interface.fgtifcext.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
+    depends_on = [
+    azurerm_network_interface.fgtifcext,
+    azurerm_network_security_group.fgtnsg
+  ]
 }
 
 resource "azurerm_network_interface" "fgtifcint" {
@@ -46,7 +49,6 @@ resource "azurerm_network_interface" "fgtifcint" {
     content {
       name                                               = ip_configuration.value.name
       private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      gateway_load_balancer_frontend_ip_configuration_id = ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id
       primary                                            = ip_configuration.value.is_primary_ipconfiguration
       private_ip_address                                 = ip_configuration.value.private_ip_address
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
@@ -59,6 +61,10 @@ resource "azurerm_network_interface" "fgtifcint" {
 resource "azurerm_network_interface_security_group_association" "fgtifcintnsg" {
   network_interface_id      = azurerm_network_interface.fgtifcint.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
+    depends_on = [
+    azurerm_network_interface.fgtifcint,
+    azurerm_network_security_group.fgtnsg
+  ]
 }
 
 resource "azurerm_linux_virtual_machine" "fgtvm" {
@@ -108,6 +114,10 @@ resource "azurerm_linux_virtual_machine" "fgtvm" {
   lifecycle {
     ignore_changes = [custom_data]
   }
+  depends_on = [
+    azurerm_network_interface_security_group_association.fgtifcextnsg,
+    azurerm_network_interface_security_group_association.fgtifcintnsg,
+  ]
 }
 
 resource "azurerm_managed_disk" "fgtvm-datadisk" {
@@ -126,6 +136,9 @@ resource "azurerm_virtual_machine_data_disk_attachment" "fgtvm-datadisk-attach" 
   virtual_machine_id = azurerm_linux_virtual_machine.fgtvm.id
   lun                = count.index
   caching            = "ReadWrite"
+  depends_on = [
+    azurerm_linux_virtual_machine.fgtvm
+  ]
 }
 
 ##############################################################################################################
