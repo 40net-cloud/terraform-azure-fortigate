@@ -15,6 +15,7 @@ end
 config sys global
     set hostname "${fgt_vm_name}"
     set gui-theme mariner
+    set allow-traffic-redirect disable
 end
 config vpn ssl settings
     set port 7443
@@ -35,13 +36,13 @@ config system interface
         set mode static
         set ip ${fgt_external_ipaddr}/${fgt_external_mask}
         set description external
-        set allowaccess probe-response
+        set allowaccess probe-response ping https ssh
     next
     edit port2
         set mode static
         set ip ${fgt_internal_ipaddr}/${fgt_internal_mask}
         set description internal
-        set allowaccess probe-response
+        set allowaccess ping ssh https
     next
 end
 %{ if fgt_ssh_public_key != "" }
