@@ -9,11 +9,11 @@ locals {
   fgt_customdata = {
     for idx, vars in var.fgt_customdata_variables :
     idx => {
-      hostname   = "${var.prefix}-fgt-${idx}"
+      hostname   = vars.fgt_vm_name,
       customdata = base64encode(
         templatefile(
           "${path.module}/fgt-customdata.tftpl",
-          merge(vars, { hostname = "${var.prefix}-fgt-${idx}" })
+          vars
         )
       )
     }
@@ -200,7 +200,7 @@ resource "azurerm_managed_disk" "managed_disk" {
   for_each             = toset([for j in local.datadisk_lun_map : j.datadisk_name])
   name                 = each.key
   location             = var.location
-  zone                  = var.fgt_availability_set ? null : var.fgt_availability_zone[tonumber(regex("[0-9]+", each.key)) % length(var.fgt_availability_zone)]
+  zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[tonumber(regex("[0-9]+", local.datadisk_attachments[each.key].fgt_key)) % length(var.fgt_availability_zone)]
   resource_group_name  = var.resource_group_name
   storage_account_type = "Standard_LRS"
   create_option        = "Empty"

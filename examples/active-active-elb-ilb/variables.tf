@@ -195,8 +195,8 @@ variable "fortinet_tags" {
 ##############################################################################################################
 
 locals {
-  # Generate list of FortiGate hostnames, fallback to "node-0", "node-1", etc.
-  fgt_hostnames = length(var.fgt_hostnames) > 0 ? var.fgt_hostnames : [for i in range(var.fgt_count) : "node-${i}"]
+  # Generate list of FortiGate hostnames, fallback to "fgt-0", "fgt-1", etc.
+  fgt_hostnames = length(var.fgt_hostnames) > 0 ? var.fgt_hostnames : [for i in range(var.fgt_count) : "fgt-${i}"]
 
   # Generate VM names for each FortiGate
   fgt_vm_names = [for name in local.fgt_hostnames : "${var.prefix}-${name}"]

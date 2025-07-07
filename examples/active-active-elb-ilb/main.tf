@@ -80,14 +80,14 @@ resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
   for_each = merge({
     for idx in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-SSH", var.prefix, idx) => {
-      network_interface_id = module.fgt.fortigate_network_interface_external["node-${idx}"].id
+      network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx}"].id
       ip_config_name       = "ipconfig1"
       nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-SSH", var.prefix, idx)].id
     }
   }, {
     for idx in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx) => {
-      network_interface_id = module.fgt.fortigate_network_interface_external["node-${idx}"].id
+      network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx}"].id
       ip_config_name       = "ipconfig1"
       nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx)].id
     }
@@ -106,7 +106,7 @@ resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
 module "elb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix}-externalloadbalancer"
+  name                         = "${var.prefix}-elb"
   type                         = "public"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
@@ -131,7 +131,7 @@ module "elb" {
 module "ilb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix}-internalloadbalancer"
+  name                         = "${var.prefix}-ilb"
   type                         = "private"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
