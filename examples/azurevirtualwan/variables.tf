@@ -129,7 +129,7 @@ variable "fgt_asn" {
 
 variable "fgt_version" {
   description = "FortiGate version by default the 'latest' available version in the Azure Marketplace is selected"
-  default     = "7.4.7"
+  default     = "7.4.8"
 }
 
 ##############################################################################################################
