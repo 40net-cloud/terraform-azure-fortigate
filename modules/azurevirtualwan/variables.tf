@@ -116,7 +116,7 @@ variable "plan" {
     name      = "fortigate-managedvwan"
     product   = "fortigate_vwan_nva"
     publisher = "fortinet"
-    version   = "7.4.700250619"
+    version   = "7.4.800250704"
   }
 }
 
