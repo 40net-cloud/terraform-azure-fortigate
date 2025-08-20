@@ -13,6 +13,11 @@ resource "azurerm_resource_group" "resourcegroup" {
   tags = var.tags
 }
 
+locals {
+  // nva_app_name is passed to fgt_nva module and used to identify the resources in intent routing example
+  nva_app_name = "${var.prefix}-vwan-fgt"
+}
+
 ##############################################################################################################
 #
 # Virtual WAN
@@ -71,7 +76,7 @@ module "fgt_nva" {
   source = "../../modules/azurevirtualwan"
 
   prefix   = var.prefix
-  name     = "${var.prefix}-vwan-fgt"
+  name     = local.nva_app_name
   location = azurerm_resource_group.resourcegroup.location
   resource_group = {
     name = azurerm_resource_group.resourcegroup.name
@@ -267,7 +272,7 @@ resource "azurerm_virtual_hub_routing_intent" "vwan_hub" {
   routing_policy {
     name         = "AllTrafficPolicy"
     destinations = ["Internet", "PrivateTraffic"]
-    next_hop     = [for s in data.azapi_resource_list.listNVA.output.value : s if length(regexall(".*${var.prefix}-vwan-fgt.*", s.properties.cloudInitConfiguration)) > 0][0].id
+    next_hop     = [for s in data.azapi_resource_list.listNVA.output.value : s if length(regexall(".*${local.nva_app_name}.*", s.properties.cloudInitConfiguration)) > 0][0].id
   }
 }
 
@@ -286,5 +291,5 @@ data "azapi_resource_list" "listNVA" {
 }
 
 #output "fortigate-azurevirtualwan-nva" {
-#  value = [for s in data.azapi_resource_list.listNVA.output.value : s if length(regexall(".*${var.prefix}-vwan-fgt.*", s.properties.cloudInitConfiguration)) > 0][0].id
+#  value = [for s in data.azapi_resource_list.listNVA.output.value : s if length(regexall(".*${local.nva_app_name}.*", s.properties.cloudInitConfiguration)) > 0][0].id
 #}
