@@ -60,7 +60,7 @@ variable "fgt_image_sku" {
   default     = "fortinet_fg-vm"
 
   validation {
-    condition     = contains(["fortinet_fg-vm", "fortinet_fg-vm_payg_2023"], var.fgt_image_sku)
+    condition     = contains(["fortinet_fg-vm", "fortinet_fg-vm_arm64", "fortinet_fg-vm_g2", "fortinet_fg-vm_payg", "fortinet_fg-vm_payg_20190624", "fortinet_fg-vm_payg_2022", "fortinet_fg-vm_payg_2023", "fortinet_fg-vm_payg_2023_arm64", "fortinet_fg-vm_payg_2023_g2"], var.fgt_image_sku)
     error_message = "Invalid image SKU. Allowed values are 'fortinet_fg-vm' (BYOL) and 'fortinet_fg-vm_payg_2023' (PAYG)."
   }
 }
