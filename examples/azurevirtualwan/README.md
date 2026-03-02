@@ -31,7 +31,7 @@ In the Managed Resource Group (name ends with -mrg):
 - The scope of  "joinpublicip" role must be the resource group containing the public IP address.
 - Both roles "reader" and "joinpublicip" should be assigned to the existing managed identity.
 
-**Note 2:** You will get an error related to sensitive data because the outpit include sensitive data like password. You can avoid this error by adding sensitive = true to the output file.
+**Note 2:** You will get an error related to sensitive data because the output include sensitive data like password. You can avoid this error by adding sensitive = true to the output file.
 <code><pre>
 output "fortigate-azurevirtualwan-managed_application" {
   value = module.fgt_nva.fortigate-azurevirtualwan-managed_application
