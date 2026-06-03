@@ -55,19 +55,19 @@ variable "subnet_names" {
 # FortiGate
 ##############################################################################################################
 
-variable "fgt_image_sku" {
-  description = "Azure Marketplace default image sku: hourly (PAYG 'fortinet_fg-vm_payg_2023') or BYOL (Bring your own license 'fortinet_fg-vm')"
-  default     = "fortinet_fg-vm"
+variable "fgt_image_offer" {
+  description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
+  default = "fortinet_fortigate-vm"
+}
 
-  validation {
-    condition     = contains(["fortinet_fg-vm", "fortinet_fg-vm_arm64", "fortinet_fg-vm_g2", "fortinet_fg-vm_payg", "fortinet_fg-vm_payg_20190624", "fortinet_fg-vm_payg_2022", "fortinet_fg-vm_payg_2023", "fortinet_fg-vm_payg_2023_arm64", "fortinet_fg-vm_payg_2023_g2"], var.fgt_image_sku)
-    error_message = "Invalid image SKU. Allowed values are 'fortinet_fg-vm' (BYOL) and 'fortinet_fg-vm_payg_2023' (PAYG)."
-  }
+variable "fgt_image_sku" {
+  description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
+  default = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
   description = "FortiGate version by default the 'latest' available version in the Azure Marketplace is selected"
-  default     = "7.2.8"
+  default     = "7.6.6"
 }
 
 variable "fgt_byol_license_file" {
@@ -103,6 +103,12 @@ variable "fgt_datadisk_count" {
   description = "Number of data disks to attach to each FortiGate"
   type        = number
   default     = 1
+}
+
+variable "fgt_datadisk_storage_account_type" {
+  description = "Storage account type for FortiGate data disks"
+  type        = string
+  default     = "Premium_LRS"
 }
 
 variable "fgt_additional_custom_data" {

@@ -27,12 +27,14 @@ resource "azurerm_virtual_network" "vnet" {
 resource "azurerm_subnet" "subnets" {
   for_each = { for s in var.subnets : s.name => s }
 
-  name                 = each.key
-  resource_group_name  = azurerm_resource_group.resourcegroup.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = each.value.cidr
+  name                            = each.key
+  resource_group_name             = azurerm_resource_group.resourcegroup.name
+  virtual_network_name            = azurerm_virtual_network.vnet.name
+  address_prefixes                = each.value.cidr
+  default_outbound_access_enabled = false
+
   depends_on = [
-    azurerm_virtual_network.vnet 
+    azurerm_virtual_network.vnet
   ]
 }
 
@@ -44,34 +46,34 @@ resource "azurerm_lb_nat_rule" "elbinboundrules" {
   for_each = merge({
     for i in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-SSH", var.prefix, i) => {
-      name           = format("%s-fgt-%d-MGMT-SSH", var.prefix, i )
-      protocol       = "Tcp"
-      frontend_port  = 50030 + i
-      backend_port   = 22
+      name          = format("%s-fgt-%d-MGMT-SSH", var.prefix, i)
+      protocol      = "Tcp"
+      frontend_port = 50030 + i
+      backend_port  = 22
     }
-  }, {
+    }, {
     for i in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i) => {
-      name           = format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i)
-      protocol       = "Tcp"
-      frontend_port  = 40030 + i
-      backend_port   = 443
+      name          = format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i)
+      protocol      = "Tcp"
+      frontend_port = 40030 + i
+      backend_port  = 443
     }
   })
 
-  name                            = each.value.name
-  resource_group_name             = azurerm_resource_group.resourcegroup.name
-  loadbalancer_id                 = module.elb.azurerm_lb_id
+  name                           = each.value.name
+  resource_group_name            = azurerm_resource_group.resourcegroup.name
+  loadbalancer_id                = module.elb.azurerm_lb_id
   frontend_ip_configuration_name = module.elb.azurerm_lb_frontend_ip_configuration[0].name
-  protocol                        = each.value.protocol
-  frontend_port                   = each.value.frontend_port
-  backend_port                    = each.value.backend_port
-  enable_floating_ip              = false
-  idle_timeout_in_minutes         = 4
-  enable_tcp_reset                = false
+  protocol                       = each.value.protocol
+  frontend_port                  = each.value.frontend_port
+  backend_port                   = each.value.backend_port
+  enable_floating_ip             = false
+  idle_timeout_in_minutes        = 4
+  enable_tcp_reset               = false
 
   depends_on = [
-    module.elb  
+    module.elb
   ]
 }
 
@@ -84,7 +86,7 @@ resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
       ip_config_name       = "ipconfig1"
       nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-SSH", var.prefix, idx)].id
     }
-  }, {
+    }, {
     for idx in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx) => {
       network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx}"].id
@@ -93,13 +95,13 @@ resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
     }
   })
 
-  network_interface_id   = each.value.network_interface_id
-  ip_configuration_name  = each.value.ip_config_name
-  nat_rule_id            = each.value.nat_rule_id
-  
+  network_interface_id  = each.value.network_interface_id
+  ip_configuration_name = each.value.ip_config_name
+  nat_rule_id           = each.value.nat_rule_id
+
   depends_on = [
     module.fgt,
-    module.elb  
+    module.elb
   ]
 }
 
@@ -123,9 +125,9 @@ module "elb" {
     lbprobe = ["Tcp", "8008", ""]
   }
 
-  tags       = var.fortinet_tags
+  tags = var.fortinet_tags
   depends_on = [
-    azurerm_resource_group.resourcegroup]
+  azurerm_resource_group.resourcegroup]
 }
 
 module "ilb" {
@@ -145,9 +147,9 @@ module "ilb" {
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
   }
-  tags       = var.fortinet_tags
+  tags = var.fortinet_tags
   depends_on = [
-    azurerm_resource_group.resourcegroup]
+  azurerm_resource_group.resourcegroup]
 }
 
 ##############################################################################################################
@@ -155,27 +157,29 @@ module "ilb" {
 ##############################################################################################################
 
 module "fgt" {
-  source                             = "../../modules/active-active"
-  prefix                             = var.prefix
-  location                           = var.location
-  resource_group_name                = azurerm_resource_group.resourcegroup.name
-  username                           = var.username
-  password                           = var.password
-  virtual_network_id                 = azurerm_virtual_network.vnet.id
-  virtual_network_address_space      = azurerm_virtual_network.vnet.address_space
-  subnet_names                       = slice([for s in var.subnets : s.name], 0, 2)
-  fgt_count                          = var.fgt_count
-  fgt_image_sku                      = var.fgt_image_sku
-  fgt_version                        = var.fgt_version
-  fgt_accelerated_networking         = var.fgt_accelerated_networking
-  fgt_ip_configuration               = local.fgt_ip_configuration
-  fgt_availability_set               = var.fgt_availability_set
-  fgt_availability_zone              = var.fgt_availability_zone
-  fgt_datadisk_size                  = var.fgt_datadisk_size
-  fgt_datadisk_count                 = var.fgt_datadisk_count
-  fgt_serial_console                 = var.fgt_serial_console
-  fortinet_tags                      = var.fortinet_tags
-  fgt_customdata_variables           = local.fgt_vars
+  source                        = "../../modules/active-active"
+  prefix                        = var.prefix
+  location                      = var.location
+  resource_group_name           = azurerm_resource_group.resourcegroup.name
+  username                      = var.username
+  password                      = var.password
+  virtual_network_id            = azurerm_virtual_network.vnet.id
+  virtual_network_address_space = azurerm_virtual_network.vnet.address_space
+  subnet_names                  = slice([for s in var.subnets : s.name], 0, 2)
+  fgt_count                     = var.fgt_count
+  fgt_vmsize                    = var.fgt_vmsize
+  fgt_image_offer               = var.fgt_image_offer
+  fgt_image_sku                 = var.fgt_image_sku
+  fgt_version                   = var.fgt_version
+  fgt_accelerated_networking    = var.fgt_accelerated_networking
+  fgt_ip_configuration          = local.fgt_ip_configuration
+  fgt_availability_set          = var.fgt_availability_set
+  fgt_availability_zone         = var.fgt_availability_zone
+  fgt_datadisk_size             = var.fgt_datadisk_size
+  fgt_datadisk_count            = var.fgt_datadisk_count
+  fgt_serial_console            = var.fgt_serial_console
+  fortinet_tags                 = var.fortinet_tags
+  fgt_customdata_variables      = local.fgt_vars
 }
 
 ##############################################################################################################

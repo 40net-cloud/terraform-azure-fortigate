@@ -17,12 +17,14 @@ password = ""
 # Azure subscription ID
 subscription_id = ""
 
-# Azure Marketplace image SKU: PAYG ('fortinet_fg-vm_payg_2023') or BYOL ('fortinet_fg-vm')
-fgt_image_sku = "fortinet_fg-vm"
+# Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')
+fgt_image_offer = "fortinet_fortigate-vm"
+
+# Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')
+fgt_image_sku = "fortinet_fg-vm_byol_76"
 
 # FortiGate version, defaults to latest available in Azure Marketplace
-fgt_version = "7.4.4"
-
+fgt_version = "7.6.6"
 
 # Azure VM size for FortiGate instances
 fgt_vmsize = "Standard_F4s"

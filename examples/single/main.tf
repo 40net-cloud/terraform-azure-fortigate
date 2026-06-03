@@ -24,11 +24,16 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnets" {
-  for_each = { for s in var.subnets : s.name => s }
+  for_each             = { for s in var.subnets : s.name => s }
   name                 = each.key
   resource_group_name  = azurerm_resource_group.resourcegroup.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = each.value.cidr
+  default_outbound_access_enabled = false
+
+  depends_on = [
+    azurerm_virtual_network.vnet
+  ]
 }
 
 ##############################################################################################################
@@ -57,6 +62,8 @@ module "fgt" {
   password                         = var.password
   virtual_network_id               = azurerm_virtual_network.vnet.id
   subnet_names                     = slice([for s in var.subnets : s.name], 0, 2)
+  fgt_vmsize                       = var.fgt_vmsize
+  fgt_image_offer                  = var.fgt_image_offer
   fgt_image_sku                    = var.fgt_image_sku
   fgt_version                      = var.fgt_version
   fgt_byol_license_file            = var.fgt_byol_license_file

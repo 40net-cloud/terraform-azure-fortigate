@@ -25,10 +25,15 @@ resource "azurerm_virtual_network" "vnet" {
 resource "azurerm_subnet" "subnets" {
   for_each = { for s in var.subnets : s.name => s }
 
-  name                 = each.key
-  resource_group_name  = azurerm_resource_group.resourcegroup.name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = each.value.cidr
+  name                            = each.key
+  resource_group_name             = azurerm_resource_group.resourcegroup.name
+  virtual_network_name            = azurerm_virtual_network.vnet.name
+  address_prefixes                = each.value.cidr
+  default_outbound_access_enabled = false
+
+  depends_on = [
+    azurerm_virtual_network.vnet
+  ]
 }
 
 resource "azurerm_public_ip" "fgt_pip" {
@@ -100,6 +105,8 @@ module "fgt" {
   virtual_network_id                 = azurerm_virtual_network.vnet.id
   virtual_network_address_space      = azurerm_virtual_network.vnet.address_space
   subnet_names                       = slice([for s in var.subnets : s.name], 0, 4)
+  fgt_vmsize                         = var.fgt_vmsize
+  fgt_image_offer                    = var.fgt_image_offer
   fgt_image_sku                      = var.fgt_image_sku
   fgt_version                        = var.fgt_version
   fgt_byol_license_file_a            = var.fgt_byol_license_file_a
@@ -109,7 +116,7 @@ module "fgt" {
   fgt_accelerated_networking         = var.fgt_accelerated_networking
   fgt_ip_configuration               = local.fgt_ip_configuration
   fgt_a_customdata_variables         = local.fgt_a_vars
-  fgt_b_customdata_variables         = local.fgt_b_vars																										   
+  fgt_b_customdata_variables         = local.fgt_b_vars
   fgt_availability_set               = var.fgt_availability_set
   fgt_datadisk_size                  = var.fgt_datadisk_size
   fgt_datadisk_count                 = var.fgt_datadisk_count

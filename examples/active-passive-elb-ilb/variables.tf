@@ -35,14 +35,19 @@ variable "subscription_id" {
 # FortiGate
 ##############################################################################################################
 
+variable "fgt_image_offer" {
+  description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
+  default = "fortinet_fortigate-vm"
+}
+
 variable "fgt_image_sku" {
-  description = "Azure Marketplace default image sku hourly (PAYG 'fortinet_fg-vm_payg_2023') or byol (Bring your own license 'fortinet_fg-vm')"
-  default = "fortinet_fg-vm"
+  description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
+  default = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
   description = "FortiGate version by default the 'latest' available version in the Azure Marketplace is selected"
-  default     = "7.2.8"
+  default     = "7.6.6"
 }
 
 variable "fgt_byol_license_file_a" {

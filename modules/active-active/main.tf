@@ -157,21 +157,21 @@ resource "azurerm_linux_virtual_machine" "fgtvm" {
 
   source_image_reference {
     publisher = "fortinet"
-    offer     = "fortinet_fortigate-vm_v5"
+    offer     = var.fgt_image_offer
     sku       = var.fgt_image_sku
     version   = var.fgt_version
   }
 
   plan {
     publisher = "fortinet"
-    product   = "fortinet_fortigate-vm_v5"
+    product   = var.fgt_image_offer
     name      = var.fgt_image_sku
   }
 
   os_disk {
     name                 = "${each.value.hostname}-osdisk"
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = "Premium_LRS"
   }
 
   admin_username                   = var.username
@@ -202,7 +202,7 @@ resource "azurerm_managed_disk" "managed_disk" {
   location             = var.location
   zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[tonumber(regex("[0-9]+", local.datadisk_attachments[each.key].fgt_key)) % length(var.fgt_availability_zone)]
   resource_group_name  = var.resource_group_name
-  storage_account_type = "Standard_LRS"
+  storage_account_type = var.fgt_datadisk_storage_account_type
   create_option        = "Empty"
   disk_size_gb         = var.fgt_datadisk_size
 }

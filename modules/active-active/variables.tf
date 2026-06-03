@@ -60,16 +60,19 @@ variable "subnet_names" {
 # FortiGate
 ##############################################################################################################
 
+variable "fgt_image_offer" {
+  description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
+  default = "fortinet_fortigate-vm"
+}
+
 variable "fgt_image_sku" {
-  description = "Image SKU - PAYG: 'fortinet_fg-vm_payg_2023' or BYOL: 'fortinet_fg-vm'"
-  type        = string
-  default     = "fortinet_fg-vm"
+  description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
+  default = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
-  description = "FortiGate version - 'latest' or specific like '7.4.4'"
-  type        = string
-  default     = "7.4.4"
+  description = "FortiGate version by default the 'latest' available version in the Azure Marketplace is selected"
+  default     = "7.6.6"
 }
 
 variable "fgt_byol_license_files" {
@@ -140,6 +143,12 @@ variable "fgt_datadisk_count" {
   description = "Number of data disks to attach to each FortiGate"
   type        = number
   default     = 1
+}
+
+variable "fgt_datadisk_storage_account_type" {
+  description = "Storage account type for FortiGate data disks"
+  type        = string
+  default     = "Premium_LRS"
 }
 
 variable "fgt_config_ha" {
