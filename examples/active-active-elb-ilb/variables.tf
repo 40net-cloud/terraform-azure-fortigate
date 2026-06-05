@@ -37,12 +37,12 @@ variable "subscription_id" {
 
 variable "fgt_image_offer" {
   description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
-  default = "fortinet_fortigate-vm"
+  default     = "fortinet_fortigate-vm"
 }
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
-  default = "fortinet_fg-vm_byol_76"
+  default     = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
@@ -221,19 +221,19 @@ locals {
       fgt_ssh_public_key_file = var.fgt_ssh_public_key_file
       fgt_config_ha           = var.fgt_config_ha
 
-      fgt_external_ipaddr     = local.fgt_ip_configuration["external"][hostname]["ipconfig1"].private_ip_address
-      fgt_external_mask       = cidrnetmask(azurerm_subnet.subnets["subnet-external"].address_prefixes[0])
-      fgt_external_gw         = cidrhost(azurerm_subnet.subnets["subnet-external"].address_prefixes[0], 1)
+      fgt_external_ipaddr = local.fgt_ip_configuration["external"][hostname]["ipconfig1"].private_ip_address
+      fgt_external_mask   = cidrnetmask(azurerm_subnet.subnets["subnet-external"].address_prefixes[0])
+      fgt_external_gw     = cidrhost(azurerm_subnet.subnets["subnet-external"].address_prefixes[0], 1)
 
-      fgt_internal_ipaddr     = local.fgt_ip_configuration["internal"][hostname]["ipconfig1"].private_ip_address
-      fgt_internal_mask       = cidrnetmask(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0])
-      fgt_internal_gw         = cidrhost(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0], 1)
-      fgt_ha_peerips           = local.fgt_peer_ips[hostname]
+      fgt_internal_ipaddr = local.fgt_ip_configuration["internal"][hostname]["ipconfig1"].private_ip_address
+      fgt_internal_mask   = cidrnetmask(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0])
+      fgt_internal_gw     = cidrhost(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0], 1)
+      fgt_ha_peerips      = local.fgt_peer_ips[hostname]
 
-      vnet_network = tostring(tolist(azurerm_virtual_network.vnet.address_space)[0])
+      vnet_network               = tostring(tolist(azurerm_virtual_network.vnet.address_space)[0])
       fgt_additional_custom_data = var.fgt_additional_custom_data
-      fgt_fortimanager_ip     = var.fgt_fortimanager_ip
-      fgt_fortimanager_serial = var.fgt_fortimanager_serial
+      fgt_fortimanager_ip        = var.fgt_fortimanager_ip
+      fgt_fortimanager_serial    = var.fgt_fortimanager_serial
     }
   }
 
@@ -265,7 +265,7 @@ locals {
           private_ip_address_version    = "IPv4"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-internal"].id
           is_primary_ipconfiguration    = true
-           load_balancer_backend_pools = {
+          load_balancer_backend_pools = {
             lb_pool_1 = {
               load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
             }

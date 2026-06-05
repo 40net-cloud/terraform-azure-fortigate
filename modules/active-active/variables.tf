@@ -62,12 +62,12 @@ variable "subnet_names" {
 
 variable "fgt_image_offer" {
   description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
-  default = "fortinet_fortigate-vm"
+  default     = "fortinet_fortigate-vm"
 }
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
-  default = "fortinet_fg-vm_byol_76"
+  default     = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
@@ -166,23 +166,23 @@ variable "fgt_additional_custom_data" {
 variable "fgt_customdata_variables" {
   description = "FortiGate configuration appended to cloud-init"
   type = map(object({
-    fgt_vm_name               = string
-    fgt_license_file          = string
-    fgt_license_fortiflex     = string
-    fgt_username              = string
-    fgt_ssh_public_key_file   = string
-    fgt_config_ha             = bool
-    fgt_external_ipaddr       = string
-    fgt_external_mask         = string
-    fgt_external_gw           = string
-    fgt_internal_ipaddr       = string
-    fgt_internal_mask         = string
-    fgt_internal_gw           = string
-    fgt_ha_peerips            = list(string)
-    vnet_network              = string
+    fgt_vm_name                = string
+    fgt_license_file           = string
+    fgt_license_fortiflex      = string
+    fgt_username               = string
+    fgt_ssh_public_key_file    = string
+    fgt_config_ha              = bool
+    fgt_external_ipaddr        = string
+    fgt_external_mask          = string
+    fgt_external_gw            = string
+    fgt_internal_ipaddr        = string
+    fgt_internal_mask          = string
+    fgt_internal_gw            = string
+    fgt_ha_peerips             = list(string)
+    vnet_network               = string
     fgt_additional_custom_data = string
-    fgt_fortimanager_ip       = string
-    fgt_fortimanager_serial   = string
+    fgt_fortimanager_ip        = string
+    fgt_fortimanager_serial    = string
   }))
 }
 

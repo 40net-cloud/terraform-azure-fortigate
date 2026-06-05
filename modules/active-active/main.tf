@@ -9,7 +9,7 @@ locals {
   fgt_customdata = {
     for idx, vars in var.fgt_customdata_variables :
     idx => {
-      hostname   = vars.fgt_vm_name,
+      hostname = vars.fgt_vm_name,
       customdata = base64encode(
         templatefile(
           "${path.module}/fgt-customdata.tftpl",
@@ -27,8 +27,8 @@ locals {
   datadisk_lun_map = flatten([
     for fgt_key, count in local.vm_datadisk_count_map : [
       for i in range(count) : {
-        fgt_key       = fgt_key
-        hostname      = local.fgt_customdata[fgt_key].hostname
+        fgt_key  = fgt_key
+        hostname = local.fgt_customdata[fgt_key].hostname
         datadisk_name = format(
           "%s-datadisk_%02d",
           local.fgt_customdata[fgt_key].hostname,
@@ -83,29 +83,29 @@ resource "azurerm_lb_backend_address_pool_address" "fgtifcext2elbbackendpool" {
 }
 
 resource "azurerm_network_interface" "fgtifcext" {
-  for_each            = local.fgt_customdata
-  name                = format("%s-nic1-ext", each.value.hostname)
-  location            = var.location
-  resource_group_name = var.resource_group_name
+  for_each              = local.fgt_customdata
+  name                  = format("%s-nic1-ext", each.value.hostname)
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["external"][each.key]
-      content {
-        name                          = ip_configuration.value.name
-        private_ip_address            = ip_configuration.value.private_ip_address == null ? null : ip_configuration.value.private_ip_address
-        private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
-        private_ip_address_version    = ip_configuration.value.private_ip_address_version
-        subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
-        primary                       = ip_configuration.value.is_primary_ipconfiguration
-        gateway_load_balancer_frontend_ip_configuration_id = try(ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id, null)
-      }
+    content {
+      name                                               = ip_configuration.value.name
+      private_ip_address                                 = ip_configuration.value.private_ip_address == null ? null : ip_configuration.value.private_ip_address
+      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
+      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
+      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      primary                                            = ip_configuration.value.is_primary_ipconfiguration
+      gateway_load_balancer_frontend_ip_configuration_id = try(ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id, null)
     }
+  }
 }
 
 resource "azurerm_network_interface_security_group_association" "fgtifcextnsg" {
-  for_each = local.fgt_customdata
+  for_each                  = local.fgt_customdata
   network_interface_id      = azurerm_network_interface.fgtifcext[each.key].id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
   depends_on = [
@@ -115,10 +115,10 @@ resource "azurerm_network_interface_security_group_association" "fgtifcextnsg" {
 }
 
 resource "azurerm_network_interface" "fgtifcint" {
-  for_each = local.fgt_customdata
-  name     = format("%s-nic2-int", each.value.hostname)
-  location = var.location
-  resource_group_name = var.resource_group_name
+  for_each              = local.fgt_customdata
+  name                  = format("%s-nic2-int", each.value.hostname)
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
@@ -136,7 +136,7 @@ resource "azurerm_network_interface" "fgtifcint" {
 }
 
 resource "azurerm_network_interface_security_group_association" "fgtifcintnsg" {
-  for_each = local.fgt_customdata
+  for_each                  = local.fgt_customdata
   network_interface_id      = azurerm_network_interface.fgtifcint[each.key].id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
@@ -174,10 +174,10 @@ resource "azurerm_linux_virtual_machine" "fgtvm" {
     storage_account_type = "Premium_LRS"
   }
 
-  admin_username                   = var.username
-  admin_password                   = var.password
+  admin_username                  = var.username
+  admin_password                  = var.password
   disable_password_authentication = false
-  custom_data                      = each.value.customdata
+  custom_data                     = each.value.customdata
 
   dynamic "boot_diagnostics" {
     for_each = var.fgt_serial_console ? [1] : []
@@ -208,11 +208,11 @@ resource "azurerm_managed_disk" "managed_disk" {
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "managed_disk_attach" {
-  for_each = local.datadisk_attachments
-  managed_disk_id = azurerm_managed_disk.managed_disk[each.key].id
+  for_each           = local.datadisk_attachments
+  managed_disk_id    = azurerm_managed_disk.managed_disk[each.key].id
   virtual_machine_id = azurerm_linux_virtual_machine.fgtvm[each.value.fgt_key].id
-  lun     = each.value.lun
-  caching = "ReadWrite"
+  lun                = each.value.lun
+  caching            = "ReadWrite"
 }
 
 

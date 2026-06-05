@@ -37,12 +37,12 @@ variable "subscription_id" {
 
 variable "fgt_image_offer" {
   description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
-  default = "fortinet_fortigate-vm"
+  default     = "fortinet_fortigate-vm"
 }
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
-  default = "fortinet_fg-vm_byol_76"
+  default     = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
@@ -52,12 +52,12 @@ variable "fgt_version" {
 
 variable "fgt_byol_license_file" {
   description = "BYOL license file path for FGT"
-  default = ""
+  default     = ""
 }
 
 variable "fgt_byol_fortiflex_license_token" {
   description = "fortiflex token for FGT"
-  default = ""
+  default     = ""
 }
 
 variable "fgt_ssh_public_key_file" {
@@ -99,7 +99,7 @@ variable "fgt_additional_custom_data" {
 variable "fgt_vmsize" {
   description = "Azure VM size for FortiGate instances"
   type        = string
-  default = "Standard_F2s"
+  default     = "Standard_F2s"
 }
 
 ##############################################################################################################

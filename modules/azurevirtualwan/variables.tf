@@ -57,7 +57,7 @@ variable "fgt_image_sku" {
 }
 variable "fgt_scaleunit" {
   description = "The scale unit determines the size and number of resources deployed. The higher the scale unit, the greater the amount of traffic that can be handled."
-    validation {
+  validation {
     condition     = contains(["2", "4", "10", "20"], var.fgt_scaleunit)
     error_message = "scale unit must be either '2', '4', '10' or '20'."
   }
@@ -72,10 +72,10 @@ variable "tags" {
   type        = map(string)
   description = "A map of tags added to the deployed resources"
 
-#  default = {
-#    "environment"  = "VirtualWAN-FortiGate"
-#    "publisher"    = "Fortinet"
-#  }
+  #  default = {
+  #    "environment"  = "VirtualWAN-FortiGate"
+  #    "publisher"    = "Fortinet"
+  #  }
 }
 variable "fortimanager_host" {
   description = "Provide the IP address or DNS name of the FortiManager reachable over port TCP/541"

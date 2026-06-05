@@ -31,8 +31,8 @@ resource "azurerm_role_definition" "tf_fgt_sdn_rw" {
       "Microsoft.Network/virtualNetworks/subnets/join/action"
     ]
 
-    not_actions     = []
-    data_actions    = []
+    not_actions      = []
+    data_actions     = []
     not_data_actions = []
   }
 
@@ -42,9 +42,9 @@ resource "azurerm_role_definition" "tf_fgt_sdn_rw" {
 }
 
 resource "azurerm_role_assignment" "fgt_a_assign_custom_role" {
-  principal_id         = azurerm_linux_virtual_machine.fgtavm.identity[0].principal_id
-  role_definition_id   = azurerm_role_definition.tf_fgt_sdn_rw.role_definition_resource_id
-  scope                = "/subscriptions/${var.subscription_id}"
+  principal_id       = azurerm_linux_virtual_machine.fgtavm.identity[0].principal_id
+  role_definition_id = azurerm_role_definition.tf_fgt_sdn_rw.role_definition_resource_id
+  scope              = "/subscriptions/${var.subscription_id}"
   depends_on = [
     azurerm_role_definition.tf_fgt_sdn_rw,
     azurerm_linux_virtual_machine.fgtavm
@@ -52,9 +52,9 @@ resource "azurerm_role_assignment" "fgt_a_assign_custom_role" {
 }
 
 resource "azurerm_role_assignment" "fgt_b_assign_custom_role" {
-  principal_id         = azurerm_linux_virtual_machine.fgtbvm.identity[0].principal_id
-  role_definition_id   = azurerm_role_definition.tf_fgt_sdn_rw.role_definition_resource_id
-  scope                = "/subscriptions/${var.subscription_id}"
+  principal_id       = azurerm_linux_virtual_machine.fgtbvm.identity[0].principal_id
+  role_definition_id = azurerm_role_definition.tf_fgt_sdn_rw.role_definition_resource_id
+  scope              = "/subscriptions/${var.subscription_id}"
   depends_on = [
     azurerm_role_definition.tf_fgt_sdn_rw,
     azurerm_linux_virtual_machine.fgtbvm
@@ -89,21 +89,21 @@ resource "azurerm_availability_set" "fgtavset" {
 }
 
 resource "azurerm_network_interface" "fgtaifcext" {
-  name                 = "${local.fgt_a_name}-nic1-ext"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_a_name}-nic1-ext"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["external"]["fgt-a"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -118,21 +118,21 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcextnsg" 
 }
 
 resource "azurerm_network_interface" "fgtaifcint" {
-  name                 = "${local.fgt_a_name}-nic2-int"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_a_name}-nic2-int"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["internal"]["fgt-a"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -147,21 +147,21 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcintnsg" 
 }
 
 resource "azurerm_network_interface" "fgtaifchasync" {
-  name                 = "${local.fgt_a_name}-nic3-hasync"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_a_name}-nic3-hasync"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hasync"]["fgt-a"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -176,22 +176,22 @@ resource "azurerm_network_interface_security_group_association" "fgtaifchasyncns
 }
 
 resource "azurerm_network_interface" "fgtaifchamgmt" {
-  name                          = "${local.fgt_a_name}-nic4-mgmt"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_a_name}-nic4-mgmt"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hamgmt"]["fgt-a"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -283,22 +283,22 @@ resource "azurerm_virtual_machine_data_disk_attachment" "fgtavm-datadisk-attach"
 }
 
 resource "azurerm_network_interface" "fgtbifcext" {
-  name                          = "${local.fgt_b_name}-nic1-ext"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name}-nic1-ext"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["external"]["fgt-b"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -306,29 +306,29 @@ resource "azurerm_network_interface" "fgtbifcext" {
 resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifcext.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-    depends_on = [
+  depends_on = [
     azurerm_network_interface.fgtbifcext,
     azurerm_network_security_group.fgtnsg
   ]
 }
 
 resource "azurerm_network_interface" "fgtbifcint" {
-  name                          = "${local.fgt_b_name}-nic2-int"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name}-nic2-int"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["internal"]["fgt-b"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -343,22 +343,22 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcintnsg" 
 }
 
 resource "azurerm_network_interface" "fgtbifchasync" {
-  name                          = "${local.fgt_b_name}-nic3-hasync"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name}-nic3-hasync"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hasync"]["fgt-b"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
@@ -373,22 +373,22 @@ resource "azurerm_network_interface_security_group_association" "fgtbifchasyncns
 }
 
 resource "azurerm_network_interface" "fgtbifchamgmt" {
-  name                          = "${local.fgt_b_name}-nic4-mgmt"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name}-nic4-mgmt"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
   dynamic "ip_configuration" {
     for_each = var.fgt_ip_configuration["hamgmt"]["fgt-b"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     }
   }
 }
