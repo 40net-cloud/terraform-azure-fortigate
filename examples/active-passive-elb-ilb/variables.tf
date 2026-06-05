@@ -37,12 +37,12 @@ variable "subscription_id" {
 
 variable "fgt_image_offer" {
   description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
-  default = "fortinet_fortigate-vm"
+  default     = "fortinet_fortigate-vm"
 }
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
-  default = "fortinet_fg-vm_byol_76"
+  default     = "fortinet_fg-vm_byol_76"
 }
 
 variable "fgt_version" {
@@ -52,12 +52,12 @@ variable "fgt_version" {
 
 variable "fgt_byol_license_file_a" {
   description = "BYOL license file for FGT_a"
-  default = ""
+  default     = ""
 }
 
 variable "fgt_byol_license_file_b" {
   description = "BYOL license file for FGT_b"
-  default = ""
+  default     = ""
 }
 
 variable "fgt_byol_fortiflex_license_token_a" {
@@ -67,7 +67,7 @@ variable "fgt_byol_fortiflex_license_token_a" {
 
 variable "fgt_byol_fortiflex_license_token_b" {
   description = "fortiflex token for FGT_b"
-  default = ""
+  default     = ""
 }
 
 variable "fgt_ssh_public_key_file" {
@@ -184,6 +184,7 @@ locals {
     fgt_license_file           = var.fgt_byol_license_file_a
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_a
     fgt_username               = var.username
+    fgt_password               = var.password
     fgt_ssh_public_key_file    = var.fgt_ssh_public_key_file
     fgt_config_ha              = var.fgt_config_ha
     fgt_external_ipaddr        = local.fgt_ip_configuration["external"]["fgt-a"]["ipconfig1"].private_ip_address
@@ -210,6 +211,7 @@ locals {
     fgt_license_file           = var.fgt_byol_license_file_b
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_b
     fgt_username               = var.username
+    fgt_password               = var.password
     fgt_ssh_public_key_file    = var.fgt_ssh_public_key_file
     fgt_config_ha              = var.fgt_config_ha
     fgt_external_ipaddr        = local.fgt_ip_configuration["external"]["fgt-b"]["ipconfig1"].private_ip_address
