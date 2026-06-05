@@ -63,37 +63,37 @@ provider "azurerm" {
 
 variable "fgt_vwan_deployment_type" {
   description = "FortiGate deployment type in Azure Virtual WAN. Accepted values: 'sdfw' for SD-WAN + NGFW (Hybrid), or 'ngfw' for NGFW only."
-  default = "sdfw"
+  default     = "sdfw"
 ***REMOVED***
 
 variable "fgt_image_sku" {
   description = "FortiGate License Type: 'byol' Bring Your Own License or FortiFlex or 'payg' Pay As You Go"
-  default = "byol"
+  default     = "byol"
 ***REMOVED***
 
 variable "fgt_scaleunit" {
   description = "The scale unit determines the size and number of resources deployed. The higher the scale unit, the greater the amount of traffic that can be handled."
-  default = "2"
+  default     = "2"
 ***REMOVED***
 
 variable "tags" {
   type        = map(string)
   description = "A map of tags added to the deployed resources"
 
-#  default = {
-#    "environment"  = "VirtualWAN-FortiGate"
-#  ***REMOVED***
-#  ***REMOVED***
+  #  default = {
+  #    "environment"  = "VirtualWAN-FortiGate"
+  #  ***REMOVED***
+  #  ***REMOVED***
 ***REMOVED***
 
 variable "vnet_vhub" {
-  description = "address_prefix for vnet virtual hub" 
-  default = "172.16.120.0/24"
+  description = "address_prefix for vnet virtual hub"
+  default     = "172.16.120.0/24"
 ***REMOVED***
 
 variable "vnet" {
   type        = map(string)
-  description = "address_prefix for vnet: spoke1 and spoke2" 
+  description = "address_prefix for vnet: spoke1 and spoke2"
 
   default = {
     "spoke1" = "172.16.121.0/24"
@@ -113,18 +113,18 @@ variable "spoke_subnet" {
 
 variable "fortimanager_host" {
   description = "Provide the IP address or DNS name of the FortiManager reachable over port TCP/541"
-  type = string
+  type        = string
 ***REMOVED***
 
 variable "fortimanager_serial" {
   description = "Provide the serial number of the FortiManager"
-  type = string
+  type        = string
 ***REMOVED***
 
 variable "fgt_asn" {
   description = "Local BGP ASN to be used by FortiGates. The default is 64512"
-  type = string
-  default = "64512"
+  type        = string
+  default     = "64512"
 ***REMOVED***
 
 variable "fgt_version" {
@@ -138,5 +138,5 @@ variable "fgt_version" {
 
 variable "lnx_vmsize" {
   description = "Linux virtual machine instance type in spoke1 and spoke2 "
-  default = "Standard_B1s"
+  default     = "Standard_B1s"
 ***REMOVED***

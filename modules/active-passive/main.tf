@@ -46,9 +46,9 @@ resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtaifcext" {
-  name                 = "${local.fgt_a_name***REMOVED***-nic1-ext"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_a_name***REMOVED***-nic1-ext"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
@@ -72,9 +72,9 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcextnsg" 
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtaifcint" {
-  name                 = "${local.fgt_a_name***REMOVED***-nic2-int"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_a_name***REMOVED***-nic2-int"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
@@ -98,9 +98,9 @@ resource "azurerm_network_interface_security_group_association" "fgtaifcintnsg" 
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtaifchasync" {
-  name                 = "${local.fgt_a_name***REMOVED***-nic3-hasync"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_a_name***REMOVED***-nic3-hasync"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
@@ -124,9 +124,9 @@ resource "azurerm_network_interface_security_group_association" "fgtaifchasyncns
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtaifchamgmt" {
-  name                          = "${local.fgt_a_name***REMOVED***-nic4-mgmt"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_a_name***REMOVED***-nic4-mgmt"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
@@ -228,9 +228,9 @@ resource "azurerm_virtual_machine_data_disk_attachment" "fgtavm-datadisk-attach"
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtbifcext" {
-  name                          = "${local.fgt_b_name***REMOVED***-nic1-ext"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name***REMOVED***-nic1-ext"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
@@ -255,9 +255,9 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" 
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtbifcint" {
-  name                          = "${local.fgt_b_name***REMOVED***-nic2-int"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name***REMOVED***-nic2-int"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
@@ -282,9 +282,9 @@ resource "azurerm_network_interface_security_group_association" "fgtbifcintnsg" 
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtbifchasync" {
-  name                          = "${local.fgt_b_name***REMOVED***-nic3-hasync"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name***REMOVED***-nic3-hasync"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 
@@ -309,9 +309,9 @@ resource "azurerm_network_interface_security_group_association" "fgtbifchasyncns
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtbifchamgmt" {
-  name                          = "${local.fgt_b_name***REMOVED***-nic4-mgmt"
-  location                      = var.location
-  resource_group_name           = var.resource_group_name
+  name                           = "${local.fgt_b_name***REMOVED***-nic4-mgmt"
+  location                       = var.location
+  resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = var.fgt_accelerated_networking
 

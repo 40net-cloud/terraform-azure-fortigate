@@ -5,26 +5,26 @@
 #
 ##############################################################################################################
 locals {
-  fgt_name              = "${var.prefix***REMOVED***-fgt"
+  fgt_name       = "${var.prefix***REMOVED***-fgt"
   fgt_customdata = base64encode(templatefile("${path.module***REMOVED***/fgt-customdata.tftpl", var.fgt_customdata_variables))
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtifcext" {
-  name                 = "${local.fgt_name***REMOVED***-nic1-ext"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_name***REMOVED***-nic1-ext"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["external"]["fgt"] 
+    for_each = var.fgt_ip_configuration["external"]["fgt"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     ***REMOVED***
   ***REMOVED***
 ***REMOVED***
@@ -32,28 +32,28 @@ resource "azurerm_network_interface" "fgtifcext" {
 resource "azurerm_network_interface_security_group_association" "fgtifcextnsg" {
   network_interface_id      = azurerm_network_interface.fgtifcext.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-    depends_on = [
+  depends_on = [
     azurerm_network_interface.fgtifcext,
     azurerm_network_security_group.fgtnsg
   ]
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtifcint" {
-  name                 = "${local.fgt_name***REMOVED***-nic2-int"
-  location             = var.location
-  resource_group_name  = var.resource_group_name
+  name                  = "${local.fgt_name***REMOVED***-nic2-int"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   dynamic "ip_configuration" {
-    for_each = var.fgt_ip_configuration["internal"]["fgt"] 
+    for_each = var.fgt_ip_configuration["internal"]["fgt"]
     content {
-      name                                               = ip_configuration.value.name
-      private_ip_address_allocation                      = ip_configuration.value.private_ip_address_allocation
-      primary                                            = ip_configuration.value.is_primary_ipconfiguration
-      private_ip_address                                 = ip_configuration.value.private_ip_address
-      private_ip_address_version                         = ip_configuration.value.private_ip_address_version
-      public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
-      subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
+      name                          = ip_configuration.value.name
+      private_ip_address_allocation = ip_configuration.value.private_ip_address_allocation
+      primary                       = ip_configuration.value.is_primary_ipconfiguration
+      private_ip_address            = ip_configuration.value.private_ip_address
+      private_ip_address_version    = ip_configuration.value.private_ip_address_version
+      public_ip_address_id          = ip_configuration.value.public_ip_address_resource_id
+      subnet_id                     = ip_configuration.value.private_ip_subnet_resource_id
     ***REMOVED***
   ***REMOVED***
 ***REMOVED***
@@ -61,7 +61,7 @@ resource "azurerm_network_interface" "fgtifcint" {
 resource "azurerm_network_interface_security_group_association" "fgtifcintnsg" {
   network_interface_id      = azurerm_network_interface.fgtifcint.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-    depends_on = [
+  depends_on = [
     azurerm_network_interface.fgtifcint,
     azurerm_network_security_group.fgtnsg
   ]

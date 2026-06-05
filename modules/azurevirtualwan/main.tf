@@ -30,18 +30,18 @@ resource "azurerm_role_definition" "joinpublicip" {
     actions     = ["Microsoft.Network/publicIPAddresses/join/action"]
     not_actions = []
   ***REMOVED***
-  assignable_scopes = ["${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"] 
+  assignable_scopes = ["${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"]
 ***REMOVED***
 
 resource "azurerm_role_assignment" "joinpublicipassignment" {
-  for_each            = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
-  depends_on          = [
+  for_each = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  depends_on = [
     azurerm_user_assigned_identity.managedidentity["create"],
-     azurerm_role_definition.joinpublicip
-     ]
+    azurerm_role_definition.joinpublicip
+  ]
   scope                = "${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"
   role_definition_name = azurerm_role_definition.joinpublicip.name
-  principal_id         = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)  
+  principal_id         = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)
 ***REMOVED***
 
 resource "azapi_resource" "fgtinvhub" {
