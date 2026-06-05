@@ -191,6 +191,7 @@ locals {
     fgt_license_file           = var.fgt_byol_license_file_a
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_a
     fgt_username               = var.username
+    fgt_password               = var.password
     fgt_ssh_public_key_file    = var.fgt_ssh_public_key_file
     fgt_config_ha              = var.fgt_config_ha
     fgt_external_ipaddr        = local.fgt_ip_configuration["external"]["fgt-a"]["ipconfig1"].private_ip_address
@@ -222,6 +223,7 @@ locals {
     fgt_license_file           = var.fgt_byol_license_file_b
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_b
     fgt_username               = var.username
+    fgt_password               = var.password
     fgt_ssh_public_key_file    = var.fgt_ssh_public_key_file
     fgt_config_ha              = var.fgt_config_ha
     fgt_external_ipaddr        = local.fgt_ip_configuration["external"]["fgt-b"]["ipconfig1"].private_ip_address
