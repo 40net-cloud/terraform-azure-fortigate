@@ -16,6 +16,11 @@ on:
       - '.github/workflows/terraform-example-test.yml'
       - '.github/workflows/tf-example-active-passive-sdn.yml'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy the FortiGate HA pair (apply + destroy). Off = plan only.'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,4 +32,8 @@ jobs:
     with:
       example: active-passive-sdn
       prefix: fortiqa-apsdn # lowercase: prefix is used in domain_name_label
+      deploy: ${{ inputs.deploy == true }} # only ever true on manual dispatch; push = plan only
+      marketplace_offer: fortinet_fortigate-vm
+      marketplace_sku: fortinet_fg-vm_byol_76
+      ssh_test_output: FGT-A-MGMT-IP FGT-B-MGMT-IP # test both HA members
     secrets: inherit

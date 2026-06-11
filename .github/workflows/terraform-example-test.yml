@@ -43,7 +43,7 @@ on:
         type: string
         default: ''
       ssh_test_output:
-        description: 'Space-separated terraform output name(s) holding FortiGate mgmt public IP(s). When set (and deploy=true), CI logs into each over SSH and runs status commands after apply.'
+        description: 'Space-separated terraform output name(s) holding FortiGate mgmt public IP(s), each optionally suffixed :port (default 22). E.g. "FGT-A-MGMT-IP FGT-B-MGMT-IP" or "ELB-PIP:50030 ELB-PIP:50031". When set (and deploy=true), CI logs into each over SSH and runs status commands after apply.'
         required: false
         type: string
         default: ''
@@ -132,10 +132,13 @@ jobs:
         run: |
           sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y sshpass >/dev/null
           FAIL=0
-          for OUT in ${{ inputs.ssh_test_output }}; do
+          for SPEC in ${{ inputs.ssh_test_output }}; do
+            OUT="${SPEC%%:*}"
+            PORT="${SPEC#*:}"
+            [ "$PORT" = "$SPEC" ] && PORT=22
             IP=$(terraform output -raw "$OUT")
-            echo "=== Testing $OUT -> $IP ==="
-            SSH="sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 $TF_VAR_username@$IP"
+            echo "=== Testing $OUT -> $IP port $PORT ==="
+            SSH="sshpass -e ssh -p $PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 $TF_VAR_username@$IP"
             OK=0
             # FortiGate needs a few minutes to boot after the VM is created: retry up to 10 minutes
             for i in $(seq 1 20); do

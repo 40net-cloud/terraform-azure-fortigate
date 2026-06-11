@@ -16,6 +16,11 @@ on:
       - '.github/workflows/terraform-example-test.yml'
       - '.github/workflows/tf-example-active-active-elb-ilb.yml'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy the FortiGate A/A pair (apply + destroy). Off = plan only.'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,4 +35,9 @@ jobs:
       # fgt_ssh_public_key_file has no default in this example; empty = password auth only
       extra_tfvars: |
         fgt_ssh_public_key_file = ""
+      deploy: ${{ inputs.deploy == true }} # only ever true on manual dispatch; push = plan only
+      marketplace_offer: fortinet_fortigate-vm
+      marketplace_sku: fortinet_fg-vm_byol_76
+      # mgmt access via ELB inbound NAT rules: SSH = 50030 + instance number
+      ssh_test_output: ELB-PIP:50030 ELB-PIP:50031
     secrets: inherit
