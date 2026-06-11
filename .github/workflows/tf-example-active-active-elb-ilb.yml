@@ -24,7 +24,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false # never cancel: a killed deploy run would skip its destroy/cleanup
 
 jobs:
   test:

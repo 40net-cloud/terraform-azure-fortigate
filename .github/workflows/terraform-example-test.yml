@@ -57,6 +57,16 @@ on:
         required: false
         type: string
         default: ''
+      ci_override_path:
+        description: 'Optional path (relative to repo root) of a Terraform *_override.tf file written before init. Used for CI-only fixes without modifying examples/ or modules/. Must end in _override.tf (gitignored).'
+        required: false
+        type: string
+        default: ''
+      ci_override_hcl:
+        description: 'HCL content for ci_override_path.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   terraform:
@@ -91,6 +101,18 @@ jobs:
         env:
           EXTRA_TFVARS: ${{ inputs.extra_tfvars }}
         working-directory: ${{ env.TFPath }}
+
+      # CI-only Terraform override (merged by Terraform at load time, never committed:
+      # *_override.tf is gitignored). Exists for the whole job, so it applies to
+      # plan, apply AND destroy.
+      - name: "Write CI override file"
+        if: inputs.ci_override_path != '' && inputs.ci_override_hcl != ''
+        run: |
+          printf '%s\n' "${CI_OVERRIDE}" > '${{ inputs.ci_override_path }}'
+          echo "Wrote ${{ inputs.ci_override_path }}:"
+          cat '${{ inputs.ci_override_path }}'
+        env:
+          CI_OVERRIDE: ${{ inputs.ci_override_hcl }}
 
       - name: "Terraform Init"
         id: init

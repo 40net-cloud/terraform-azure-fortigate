@@ -24,7 +24,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false # never cancel: a killed deploy run would skip its destroy/cleanup
 
 jobs:
   test:
@@ -50,6 +50,18 @@ jobs:
       marketplace_offer: fortigate_vwan_nva
       marketplace_sku: fortigate-managedvwan
       timeout_minutes: 180 # VWAN hub + NVA deploy and destroy are slow
+      # The module's azapi_resource has no timeouts block, so the azapi default of 30m
+      # cancels the NVA managed-app deployment mid-flight (it needs 30-60m).
+      # CI-only override until fixed upstream in the module.
+      ci_override_path: modules/azurevirtualwan/ci_timeouts_override.tf
+      ci_override_hcl: |
+        resource "azapi_resource" "fgtinvhub" {
+          timeouts {
+            create = "120m"
+            update = "120m"
+            delete = "120m"
+          }
+        }
       # Hub NVA NSGs are Microsoft-locked and mgmt goes via FortiManager, so no SSH test.
       # Instead verify the deployment via the Azure control plane while it is up.
       post_test: |
