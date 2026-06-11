@@ -52,6 +52,11 @@ on:
         required: false
         type: number
         default: 60
+      post_test:
+        description: 'Optional shell script run after a successful apply, while the infrastructure is up (and after the SSH test, if any). Runs in the example directory with az logged in and terraform available.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   terraform:
@@ -165,6 +170,14 @@ jobs:
           exit $FAIL
         env:
           SSHPASS: ${{ secrets.PASSWORD }}
+
+      - name: "Test - post-deploy checks"
+        if: inputs.deploy && inputs.post_test != '' && steps.apply.outcome == 'success'
+        working-directory: ${{ env.TFPath }}
+        run: |
+          az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" --output none
+          az account set --subscription "$ARM_SUBSCRIPTION_ID"
+          ${{ inputs.post_test }}
 
       # Destroy always runs after an apply attempt (success OR failure),
       # so partially created resources are cleaned up and nothing keeps billing.

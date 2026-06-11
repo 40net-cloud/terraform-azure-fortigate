@@ -50,4 +50,23 @@ jobs:
       marketplace_offer: fortigate_vwan_nva
       marketplace_sku: fortigate-managedvwan
       timeout_minutes: 180 # VWAN hub + NVA deploy and destroy are slow
+      # Hub NVA NSGs are Microsoft-locked and mgmt goes via FortiManager, so no SSH test.
+      # Instead verify the deployment via the Azure control plane while it is up.
+      post_test: |
+        RG="${TF_VAR_prefix}-rg"
+        MANAGED_RG="fortiqa-vwan-${{ github.run_number }}-managed-rg"
+        echo "=== Virtual hub state ==="
+        az network vhub show -g "$RG" -n "${TF_VAR_prefix}-virtualwan-hub" \
+          --query "{provisioningState:provisioningState, routingState:routingState, addressPrefix:addressPrefix}" -o table
+        echo "=== FortiGate managed NVA ==="
+        az network virtual-appliance list -g "$MANAGED_RG" \
+          --query "[].{name:name, provisioningState:provisioningState, asn:virtualApplianceAsn, version:nvaVersion}" -o table
+        echo "=== NVA provisioning check ==="
+        STATE=$(az network virtual-appliance list -g "$MANAGED_RG" --query "[0].provisioningState" -o tsv)
+        echo "NVA provisioningState: $STATE"
+        test "$STATE" = "Succeeded"
+        echo "=== Managed application ==="
+        az resource list -g "$RG" --resource-type Microsoft.Solutions/applications \
+          --query "[].{name:name, state:properties.provisioningState}" -o table || true
+        echo "Post-deploy checks OK"
     secrets: inherit
