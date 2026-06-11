@@ -26,5 +26,5 @@ jobs:
     uses: ./.github/workflows/terraform-example-test.yml
     with:
       example: single
-      prefix: FORTIQA-SGL
+      prefix: fortiqa-sgl # lowercase: prefix may be used in DNS labels
     secrets: inherit

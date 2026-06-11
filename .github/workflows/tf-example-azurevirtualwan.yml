@@ -26,7 +26,7 @@ jobs:
     uses: ./.github/workflows/terraform-example-test.yml
     with:
       example: azurevirtualwan
-      prefix: FORTIQA-VWAN
+      prefix: fortiqa-vwan # lowercase: prefix may be used in DNS labels
       # Plan-only placeholders for values that normally point to real
       # pre-provisioned resources. Override via repo secrets if real
       # values are available (see .github/workflows/README.md).
@@ -35,4 +35,8 @@ jobs:
         managed_resource_group_name = "fortiqa-ci-vwan-managed-rg"
         fortimanager_host           = "192.0.2.1"
         fortimanager_serial         = "FMG-VMTM00000000"
+        tags = {
+          environment = "fortiqa-ci"
+          publisher   = "Fortinet"
+        }
     secrets: inherit

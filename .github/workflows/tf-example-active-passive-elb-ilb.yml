@@ -26,5 +26,5 @@ jobs:
     uses: ./.github/workflows/terraform-example-test.yml
     with:
       example: active-passive-elb-ilb
-      prefix: FORTIQA-AP
+      prefix: fortiqa-ap # lowercase: prefix is used in domain_name_label
     secrets: inherit
