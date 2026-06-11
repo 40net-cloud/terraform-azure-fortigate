@@ -8,7 +8,8 @@
 ##############################################################################################################
 
 output "fortigate-azurevirtualwan-managed_application" {
-  value = module.fgt_nva.fortigate-azurevirtualwan-managed_application
+  value     = module.fgt_nva.fortigate-azurevirtualwan-managed_application
+  sensitive = true
 }
 
 ##############################################################################################################
