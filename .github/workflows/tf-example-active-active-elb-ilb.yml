@@ -1,0 +1,33 @@
+name: '[FGT] TF - Example - Active-Active-ELB-ILB'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/active-active-elb-ilb/**'
+      - 'modules/active-active/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-active-active-elb-ilb.yml'
+  pull_request:
+    paths:
+      - 'examples/active-active-elb-ilb/**'
+      - 'modules/active-active/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-active-active-elb-ilb.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/terraform-example-test.yml
+    with:
+      example: active-active-elb-ilb
+      prefix: FORTIQA-AA
+      # fgt_ssh_public_key_file has no default in this example; empty = password auth only
+      extra_tfvars: |
+        fgt_ssh_public_key_file = ""
+    secrets: inherit

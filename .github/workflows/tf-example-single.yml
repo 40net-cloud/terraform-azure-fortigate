@@ -1,0 +1,30 @@
+name: '[FGT] TF - Example - Single'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/single/**'
+      - 'modules/single/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-single.yml'
+  pull_request:
+    paths:
+      - 'examples/single/**'
+      - 'modules/single/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-single.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/terraform-example-test.yml
+    with:
+      example: single
+      prefix: FORTIQA-SGL
+    secrets: inherit

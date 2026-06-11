@@ -1,0 +1,30 @@
+name: '[FGT] TF - Example - Active-Passive-SDN'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/active-passive-sdn/**'
+      - 'modules/active-passive-sdn/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-active-passive-sdn.yml'
+  pull_request:
+    paths:
+      - 'examples/active-passive-sdn/**'
+      - 'modules/active-passive-sdn/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-active-passive-sdn.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/terraform-example-test.yml
+    with:
+      example: active-passive-sdn
+      prefix: FORTIQA-APSDN
+    secrets: inherit

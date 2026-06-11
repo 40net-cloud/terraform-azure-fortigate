@@ -1,0 +1,84 @@
+name: 'Terraform Example Test (reusable)'
+
+# Reusable workflow that tests a single example in examples/<example>.
+# Runs: init -> fmt check -> validate -> plan (no apply).
+#
+# Required repository secrets (used by all callers via `secrets: inherit`):
+#   ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID, PASSWORD
+
+on:
+  workflow_call:
+    inputs:
+      example:
+        description: 'Directory name under examples/'
+        required: true
+        type: string
+      prefix:
+        description: 'Short resource prefix used during plan'
+        required: true
+        type: string
+      location:
+        description: 'Azure region'
+        required: false
+        type: string
+        default: 'westeurope'
+      extra_tfvars:
+        description: 'Optional extra variables (HCL), written to ci.auto.tfvars'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  terraform:
+    name: "Terraform ${{ inputs.example }}"
+    runs-on: ubuntu-latest
+    env:
+      TFPath: examples/${{ inputs.example }}
+      TF_IN_AUTOMATION: 'true'
+      TF_VAR_prefix: "${{ inputs.prefix }}-${{ github.run_number }}"
+      TF_VAR_location: "${{ inputs.location }}"
+      TF_VAR_username: "azureuser"
+      TF_VAR_password: "${{ secrets.PASSWORD }}"
+      TF_VAR_subscription_id: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v4
+
+      - name: "Setup Terraform"
+        uses: hashicorp/setup-terraform@v3
+
+      - name: "Write extra tfvars"
+        if: inputs.extra_tfvars != ''
+        run: printf '%s\n' "${EXTRA_TFVARS}" > ci.auto.tfvars
+        env:
+          EXTRA_TFVARS: ${{ inputs.extra_tfvars }}
+        working-directory: ${{ env.TFPath }}
+
+      - name: "Terraform Init"
+        id: init
+        run: terraform init -input=false
+        working-directory: ${{ env.TFPath }}
+
+      - name: "Terraform Format"
+        id: format
+        run: terraform fmt -check -diff -recursive
+        working-directory: ${{ env.TFPath }}
+
+      - name: "Terraform Validate"
+        id: validate
+        run: terraform validate
+        working-directory: ${{ env.TFPath }}
+
+      - name: "Terraform Plan"
+        id: plan
+        run: terraform plan -input=false -out plan.tfplan
+        working-directory: ${{ env.TFPath }}
+
+      - name: "Plan Summary"
+        run: terraform show -no-color plan.tfplan | tail -n 20
+        working-directory: ${{ env.TFPath }}

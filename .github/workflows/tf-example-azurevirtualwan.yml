@@ -1,0 +1,38 @@
+name: '[FGT] TF - Example - AzureVirtualWAN'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/azurevirtualwan/**'
+      - 'modules/azurevirtualwan/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-azurevirtualwan.yml'
+  pull_request:
+    paths:
+      - 'examples/azurevirtualwan/**'
+      - 'modules/azurevirtualwan/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-azurevirtualwan.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/terraform-example-test.yml
+    with:
+      example: azurevirtualwan
+      prefix: FORTIQA-VWAN
+      # Plan-only placeholders for values that normally point to real
+      # pre-provisioned resources. Override via repo secrets if real
+      # values are available (see .github/workflows/README.md).
+      extra_tfvars: |
+        managedidentity_id          = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fortiqa-ci-dummy/providers/Microsoft.ManagedIdentity/userAssignedIdentities/fortiqa-ci-dummy"
+        managed_resource_group_name = "fortiqa-ci-vwan-managed-rg"
+        fortimanager_host           = "192.0.2.1"
+        fortimanager_serial         = "FMG-VMTM00000000"
+    secrets: inherit

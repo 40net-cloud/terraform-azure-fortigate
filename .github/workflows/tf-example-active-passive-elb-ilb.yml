@@ -1,0 +1,30 @@
+name: '[FGT] TF - Example - Active-Passive-ELB-ILB'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/active-passive-elb-ilb/**'
+      - 'modules/active-passive/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-active-passive-elb-ilb.yml'
+  pull_request:
+    paths:
+      - 'examples/active-passive-elb-ilb/**'
+      - 'modules/active-passive/**'
+      - '.github/workflows/terraform-example-test.yml'
+      - '.github/workflows/tf-example-active-passive-elb-ilb.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    uses: ./.github/workflows/terraform-example-test.yml
+    with:
+      example: active-passive-elb-ilb
+      prefix: FORTIQA-AP
+    secrets: inherit
