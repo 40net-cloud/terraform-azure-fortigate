@@ -27,11 +27,27 @@ on:
         required: false
         type: string
         default: ''
+      deploy:
+        description: 'When true, apply the plan and destroy afterwards (real deployment). Default: plan only.'
+        required: false
+        type: boolean
+        default: false
+      marketplace_offer:
+        description: 'Azure Marketplace offer to accept terms for before deploying (only used when deploy=true)'
+        required: false
+        type: string
+        default: ''
+      marketplace_sku:
+        description: 'Azure Marketplace plan/SKU to accept terms for before deploying (only used when deploy=true)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   terraform:
-    name: "Terraform ${{ inputs.example }}"
+    name: "Terraform ${{ inputs.example }}${{ inputs.deploy && ' (deploy)' || '' }}"
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       TFPath: examples/${{ inputs.example }}
       TF_IN_AUTOMATION: 'true'
@@ -81,4 +97,31 @@ jobs:
 
       - name: "Plan Summary"
         run: terraform show -no-color plan.tfplan | tail -n 20
+        working-directory: ${{ env.TFPath }}
+
+      # ── Deployment steps below only run when deploy=true ────────────────────
+
+      - name: "Accept Marketplace Terms"
+        if: inputs.deploy && inputs.marketplace_offer != '' && inputs.marketplace_sku != ''
+        run: |
+          az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" --output none
+          az account set --subscription "$ARM_SUBSCRIPTION_ID"
+          az vm image terms accept \
+            --publisher fortinet \
+            --offer "${{ inputs.marketplace_offer }}" \
+            --plan "${{ inputs.marketplace_sku }}" \
+            --output none
+          echo "Marketplace terms accepted for ${{ inputs.marketplace_offer }} / ${{ inputs.marketplace_sku }}"
+
+      - name: "Terraform Apply"
+        id: apply
+        if: inputs.deploy
+        run: terraform apply -input=false -auto-approve plan.tfplan
+        working-directory: ${{ env.TFPath }}
+
+      # Destroy always runs after an apply attempt (success OR failure),
+      # so partially created resources are cleaned up and nothing keeps billing.
+      - name: "Terraform Destroy"
+        if: always() && inputs.deploy && contains(fromJSON('["success", "failure"]'), steps.apply.outcome)
+        run: terraform destroy -input=false -auto-approve
         working-directory: ${{ env.TFPath }}
