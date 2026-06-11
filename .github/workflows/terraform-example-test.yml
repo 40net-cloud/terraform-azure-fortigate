@@ -43,7 +43,7 @@ on:
         type: string
         default: ''
       ssh_test_output:
-        description: 'Name of the terraform output holding the FortiGate mgmt public IP. When set (and deploy=true), CI logs in over SSH and runs status commands after apply.'
+        description: 'Space-separated terraform output name(s) holding FortiGate mgmt public IP(s). When set (and deploy=true), CI logs into each over SSH and runs status commands after apply.'
         required: false
         type: string
         default: ''
@@ -131,22 +131,30 @@ jobs:
         working-directory: ${{ env.TFPath }}
         run: |
           sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y sshpass >/dev/null
-          IP=$(terraform output -raw '${{ inputs.ssh_test_output }}')
-          echo "FortiGate management IP: $IP"
-          SSH="sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 $TF_VAR_username@$IP"
-          # FortiGate needs a few minutes to boot after the VM is created: retry up to 10 minutes
-          for i in $(seq 1 20); do
-            if $SSH "get system status"; then
-              echo "--- interfaces ---"
-              $SSH "show system interface" || true
-              echo "SSH test OK after $i attempt(s)"
-              exit 0
+          FAIL=0
+          for OUT in ${{ inputs.ssh_test_output }}; do
+            IP=$(terraform output -raw "$OUT")
+            echo "=== Testing $OUT -> $IP ==="
+            SSH="sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 $TF_VAR_username@$IP"
+            OK=0
+            # FortiGate needs a few minutes to boot after the VM is created: retry up to 10 minutes
+            for i in $(seq 1 20); do
+              if $SSH "get system status"; then
+                echo "--- interfaces ---"
+                $SSH "show system interface" || true
+                echo "SSH test OK for $OUT after $i attempt(s)"
+                OK=1
+                break
+              fi
+              echo "$OUT not reachable yet (attempt $i/20), retrying in 30s..."
+              sleep 30
+            done
+            if [ "$OK" -ne 1 ]; then
+              echo "::error::$OUT ($IP) did not become reachable over SSH within 10 minutes"
+              FAIL=1
             fi
-            echo "FortiGate not reachable yet (attempt $i/20), retrying in 30s..."
-            sleep 30
           done
-          echo "::error::FortiGate did not become reachable over SSH within 10 minutes"
-          exit 1
+          exit $FAIL
         env:
           SSHPASS: ${{ secrets.PASSWORD }}
 
