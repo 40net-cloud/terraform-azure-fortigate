@@ -26,7 +26,7 @@ jobs:
     uses: ./.github/workflows/terraform-example-test.yml
     with:
       example: active-active-elb-ilb
-      prefix: FORTIQA-AA
+      prefix: fortiqa-aa # lowercase: prefix may be used in DNS labels
       # fgt_ssh_public_key_file has no default in this example; empty = password auth only
       extra_tfvars: |
         fgt_ssh_public_key_file = ""

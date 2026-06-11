@@ -26,5 +26,5 @@ jobs:
     uses: ./.github/workflows/terraform-example-test.yml
     with:
       example: active-passive-sdn
-      prefix: FORTIQA-APSDN
+      prefix: fortiqa-apsdn # lowercase: prefix is used in domain_name_label
     secrets: inherit
