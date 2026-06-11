@@ -47,12 +47,17 @@ on:
         required: false
         type: string
         default: ''
+      timeout_minutes:
+        description: 'Job timeout in minutes. Increase for slow deployments like Virtual WAN.'
+        required: false
+        type: number
+        default: 60
 
 jobs:
   terraform:
     name: "Terraform ${{ inputs.example }}${{ inputs.deploy && ' (deploy)' || '' }}"
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     env:
       TFPath: examples/${{ inputs.example }}
       TF_IN_AUTOMATION: 'true'

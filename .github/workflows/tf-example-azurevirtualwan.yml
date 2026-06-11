@@ -16,6 +16,11 @@ on:
       - '.github/workflows/terraform-example-test.yml'
       - '.github/workflows/tf-example-azurevirtualwan.yml'
   workflow_dispatch:
+    inputs:
+      deploy:
+        description: 'Deploy the VWAN hub + FortiGate managed NVA (apply + destroy). Slow: 1-2 hours. Off = plan only.'
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,16 +32,22 @@ jobs:
     with:
       example: azurevirtualwan
       prefix: fortiqa-vwan # lowercase: prefix may be used in DNS labels
-      # Plan-only placeholders for values that normally point to real
-      # pre-provisioned resources. Override via repo secrets if real
-      # values are available (see .github/workflows/README.md).
+      # managedidentity_id = "": the module creates + authorizes a managed identity itself
+      # managed RG must NOT pre-exist -> unique name per run
+      # FortiManager values are placeholders: the NVA deploys fine, the FortiGates
+      # just will not register anywhere - acceptable for a deploy smoke test
       extra_tfvars: |
-        managedidentity_id          = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/fortiqa-ci-dummy/providers/Microsoft.ManagedIdentity/userAssignedIdentities/fortiqa-ci-dummy"
-        managed_resource_group_name = "fortiqa-ci-vwan-managed-rg"
+        managedidentity_id          = ""
+        managed_resource_group_name = "fortiqa-vwan-${{ github.run_number }}-managed-rg"
         fortimanager_host           = "192.0.2.1"
         fortimanager_serial         = "FMG-VMTM00000000"
         tags = {
           environment = "fortiqa-ci"
           publisher   = "Fortinet"
         }
+      deploy: ${{ inputs.deploy == true }} # only ever true on manual dispatch; push = plan only
+      # the managed NVA is a Marketplace managed application, not a VM image
+      marketplace_offer: fortigate_vwan_nva
+      marketplace_sku: fortigate-managedvwan
+      timeout_minutes: 180 # VWAN hub + NVA deploy and destroy are slow
     secrets: inherit
