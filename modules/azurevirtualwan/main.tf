@@ -49,6 +49,16 @@ resource "azapi_resource" "fgtinvhub" {
   name      = var.name
   parent_id = var.resource_group.id
   location  = var.location
+
+  # Deploying or deleting the FortiGate NVA managed application takes 30-60 minutes.
+  # The azapi provider default timeout of 30m cancels the operation mid-flight,
+  # leaving a half-deployed (or half-deleted) managed application behind.
+  timeouts {
+    create = "120m"
+    update = "120m"
+    delete = "120m"
+  }
+
   identity {
     type = "UserAssigned"
     identity_ids = [
