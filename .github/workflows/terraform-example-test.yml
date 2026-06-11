@@ -42,6 +42,11 @@ on:
         required: false
         type: string
         default: ''
+      ssh_test_output:
+        description: 'Name of the terraform output holding the FortiGate mgmt public IP. When set (and deploy=true), CI logs in over SSH and runs status commands after apply.'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   terraform:
@@ -67,6 +72,8 @@ jobs:
 
       - name: "Setup Terraform"
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false # wrapper breaks $(terraform output) command substitution
 
       - name: "Write extra tfvars"
         if: inputs.extra_tfvars != ''
@@ -118,6 +125,30 @@ jobs:
         if: inputs.deploy
         run: terraform apply -input=false -auto-approve plan.tfplan
         working-directory: ${{ env.TFPath }}
+
+      - name: "Test - SSH login to FortiGate"
+        if: inputs.deploy && inputs.ssh_test_output != '' && steps.apply.outcome == 'success'
+        working-directory: ${{ env.TFPath }}
+        run: |
+          sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y sshpass >/dev/null
+          IP=$(terraform output -raw '${{ inputs.ssh_test_output }}')
+          echo "FortiGate management IP: $IP"
+          SSH="sshpass -e ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 $TF_VAR_username@$IP"
+          # FortiGate needs a few minutes to boot after the VM is created: retry up to 10 minutes
+          for i in $(seq 1 20); do
+            if $SSH "get system status"; then
+              echo "--- interfaces ---"
+              $SSH "show system interface" || true
+              echo "SSH test OK after $i attempt(s)"
+              exit 0
+            fi
+            echo "FortiGate not reachable yet (attempt $i/20), retrying in 30s..."
+            sleep 30
+          done
+          echo "::error::FortiGate did not become reachable over SSH within 10 minutes"
+          exit 1
+        env:
+          SSHPASS: ${{ secrets.PASSWORD }}
 
       # Destroy always runs after an apply attempt (success OR failure),
       # so partially created resources are cleaned up and nothing keeps billing.

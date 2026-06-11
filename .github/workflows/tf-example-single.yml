@@ -35,4 +35,5 @@ jobs:
       deploy: ${{ inputs.deploy == true }} # only ever true on manual dispatch; push = plan only
       marketplace_offer: fortinet_fortigate-vm
       marketplace_sku: fortinet_fg-vm_byol_76
+      ssh_test_output: FGT-MGMT-IP # after apply: SSH in and run status commands
     secrets: inherit
