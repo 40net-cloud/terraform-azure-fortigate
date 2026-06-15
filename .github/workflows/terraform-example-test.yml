@@ -93,10 +93,10 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "Setup Terraform"
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_wrapper: false # wrapper breaks $(terraform output) command substitution
 
@@ -232,7 +232,7 @@ jobs:
       - name: "Upload FortiGate test report"
         # Runs even if the SSH test failed, so the captured output is always available.
         if: always() && inputs.deploy && inputs.ssh_test_output != '' && steps.apply.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: fgt-test-report-${{ inputs.example }}
           path: ${{ runner.temp }}/fgt-test-report-${{ inputs.example }}.txt
