@@ -36,4 +36,5 @@ jobs:
       marketplace_offer: fortinet_fortigate-vm
       marketplace_sku: fortinet_fg-vm_byol_76
       ssh_test_output: FGT-A-MGMT-IP FGT-B-MGMT-IP # test both HA members
+      ha_test: true # log "get system ha status" on each node
     secrets: inherit
