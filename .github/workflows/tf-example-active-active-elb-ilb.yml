@@ -40,4 +40,5 @@ jobs:
       marketplace_sku: fortinet_fg-vm_byol_76
       # mgmt access via ELB inbound NAT rules: SSH = 50030 + instance number
       ssh_test_output: ELB-PIP:50030 ELB-PIP:50031
+      ha_test: true # log "get system ha status" on each node
     secrets: inherit

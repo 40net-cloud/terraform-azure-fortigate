@@ -57,6 +57,11 @@ on:
         required: false
         type: string
         default: ''
+      ha_test:
+        description: 'When true (and the SSH test runs), assert each node is in HA mode via "get system ha status" (retried up to 3 min for the cluster to form). Fails the job if any node reports Standalone instead of "Mode: HA". Only set for HA examples (A/P, A/A).'
+        required: false
+        type: boolean
+        default: false
       ci_override_path:
         description: 'Optional path (relative to repo root) of a Terraform *_override.tf file written before init. Used for CI-only fixes without modifying examples/ or modules/. Must end in _override.tf (gitignored).'
         required: false
@@ -162,6 +167,11 @@ jobs:
         if: inputs.deploy && inputs.ssh_test_output != '' && steps.apply.outcome == 'success'
         working-directory: ${{ env.TFPath }}
         run: |
+          # Mirror everything below to a report file as well as the console, so it
+          # can be uploaded as an artifact (captures output even when the step fails).
+          REPORT="$RUNNER_TEMP/fgt-test-report-${{ inputs.example }}.txt"
+          exec > >(tee -a "$REPORT") 2>&1
+          echo "FortiGate verification report - example=${{ inputs.example }} run=${{ github.run_number }} ($(date -u +%FT%TZ))"
           sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y sshpass >/dev/null
           FAIL=0
           for SPEC in ${{ inputs.ssh_test_output }}; do
@@ -177,6 +187,32 @@ jobs:
               if $SSH "get system status"; then
                 echo "--- interfaces ---"
                 $SSH "show system interface" || true
+                echo "--- static routes ---"
+                $SSH "show router static" || true
+                echo "--- cloud-init ---"
+                $SSH "diag debug cloudinit show" || true
+                if [ "${{ inputs.ha_test }}" = "true" ]; then
+                  echo "--- HA status ---"
+                  # HA may still be negotiating right after boot: retry up to 3 minutes
+                  HA_OK=0
+                  for h in $(seq 1 6); do
+                    HA_OUT=$($SSH "get system ha status" 2>/dev/null || true)
+                    echo "$HA_OUT"
+                    # A configured cluster reports "Mode: HA A-P" / "Mode: HA A-A";
+                    # a standalone unit reports "Mode: Standalone".
+                    if echo "$HA_OUT" | grep -qiE "Mode:[[:space:]]*HA"; then
+                      echo "HA is configured on $OUT"
+                      HA_OK=1
+                      break
+                    fi
+                    echo "HA not formed yet on $OUT (attempt $h/6), retrying in 30s..."
+                    sleep 30
+                  done
+                  if [ "$HA_OK" -ne 1 ]; then
+                    echo "::error::$OUT ($IP) is not in HA mode (get system ha status did not report 'Mode: HA')"
+                    FAIL=1
+                  fi
+                fi
                 echo "SSH test OK for $OUT after $i attempt(s)"
                 OK=1
                 break
@@ -192,6 +228,15 @@ jobs:
           exit $FAIL
         env:
           SSHPASS: ${{ secrets.PASSWORD }}
+
+      - name: "Upload FortiGate test report"
+        # Runs even if the SSH test failed, so the captured output is always available.
+        if: always() && inputs.deploy && inputs.ssh_test_output != '' && steps.apply.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: fgt-test-report-${{ inputs.example }}
+          path: ${{ runner.temp }}/fgt-test-report-${{ inputs.example }}.txt
+          if-no-files-found: warn
 
       - name: "Test - post-deploy checks"
         if: inputs.deploy && inputs.post_test != '' && steps.apply.outcome == 'success'
