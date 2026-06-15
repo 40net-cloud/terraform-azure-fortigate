@@ -1,0 +1,56 @@
+name: '[General] Trivy IaC'
+
+# Infrastructure-as-Code misconfiguration scanning of the Terraform in this repo
+# (modules/ and examples/). Report-only by default: it prints findings to the
+# log and uploads a SARIF artifact, but does NOT fail the build — this repo has
+# intentional exposures (public mgmt IPs, permissive NSGs for testing). To make
+# it a hard gate, set exit-code: '1' on the "table" step below.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    name: 'Trivy IaC scan'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Human-readable findings in the Actions log.
+      - name: Trivy config scan (table)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: 'HIGH,CRITICAL'
+          format: table
+          exit-code: '0' # report-only; set to '1' to fail on findings
+
+      # Machine-readable SARIF, kept as an artifact for review / later upload
+      # to GitHub code scanning.
+      - name: Trivy config scan (SARIF)
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: 'HIGH,CRITICAL'
+          format: sarif
+          output: trivy-iac.sarif
+          exit-code: '0'
+
+      - name: Upload SARIF artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-iac-sarif
+          path: trivy-iac.sarif
+          if-no-files-found: warn

@@ -1,0 +1,30 @@
+name: '[General] TruffleHog'
+
+# Secret scanning: fails the build if a *verified* credential is found in the
+# repo (or, on PRs, in the changed range). Mirrors the scan used in
+# 40net-cloud/fortinet-azure-solutions.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  trufflehog:
+    name: 'Secret Scanning'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so commit ranges can be diffed
+
+      - name: TruffleHog secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
