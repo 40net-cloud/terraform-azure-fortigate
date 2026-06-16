@@ -1,4 +1,4 @@
-name: 'Terraform Example Test (reusable)'
+name: 'Terraform Test (reusable)'
 
 # Reusable workflow that tests a single example in examples/<example>.
 # Runs: init -> fmt check -> validate -> plan (no apply).
@@ -201,20 +201,31 @@ jobs:
             OK=0
             # FortiGate needs a few minutes to boot after the VM is created: retry up to 10 minutes
             for i in $(seq 1 20); do
-              if $SSH "get system status"; then
-                echo "--- interfaces ---"
-                $SSH "show system interface" || true
-                echo "--- static routes ---"
-                $SSH "show router static" || true
-                echo "--- cloud-init ---"
-                $SSH "diag debug cloudinit show" || true
+              if $SSH "get system status" >/dev/null 2>&1; then
+                # Disable the CLI pager so output isn't chopped up by "--More--"
+                # (this is a persistent console setting on the device).
+                printf 'config system console\nset output standard\nend\n' | $SSH >/dev/null 2>&1 || true
+
+                # Run each check, print it under its own header (leading newline
+                # so it isn't glued to the FortiGate prompt), and fail the job if
+                # FortiOS reports a "Command fail".
+                for CMD in "get system status" "show system interface" "show router static" "diag debug cloudinit show"; do
+                  printf '\n===== %s =====\n' "$CMD"
+                  CMD_OUT=$($SSH "$CMD" 2>&1) || true
+                  printf '%s\n' "$CMD_OUT"
+                  if printf '%s' "$CMD_OUT" | grep -qi 'command fail'; then
+                    echo "::error::$OUT ($IP): '$CMD' returned a Command fail"
+                    FAIL=1
+                  fi
+                done
+
                 if [ "${{ inputs.ha_test }}" = "true" ]; then
-                  echo "--- HA status ---"
+                  printf '\n===== get system ha status =====\n'
                   # HA may still be negotiating right after boot: retry up to 3 minutes
                   HA_OK=0
                   for h in $(seq 1 6); do
                     HA_OUT=$($SSH "get system ha status" 2>/dev/null || true)
-                    echo "$HA_OUT"
+                    printf '%s\n' "$HA_OUT"
                     # A configured cluster reports "Mode: HA A-P" / "Mode: HA A-A";
                     # a standalone unit reports "Mode: Standalone".
                     if echo "$HA_OUT" | grep -qiE "Mode:[[:space:]]*HA"; then

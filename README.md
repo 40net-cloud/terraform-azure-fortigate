@@ -4,6 +4,20 @@
 
 Multiple examples for the different deployment methods in Microsoft Azure can be found in the examples directory. These examples are based on the same architectures used for the ARM templates more information can be found [here](https://github.com/40net-cloud/fortinet-azure-solutions/tree/main/FortiGate)
 
+## CI status
+
+Each example is validated by GitHub Actions (`init` → `fmt` → `validate` → `plan` on every push/PR; full `apply` → FortiGate checks → `destroy` on manual dispatch). Authentication uses Azure OIDC — see [`.github/workflows/OIDC-SETUP.md`](.github/workflows/OIDC-SETUP.md).
+
+| Workflow | Status |
+|---|---|
+| Single | [![Single](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-single.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-single.yml) |
+| Active-Passive ELB/ILB | [![Active-Passive ELB-ILB](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-active-passive-elb-ilb.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-active-passive-elb-ilb.yml) |
+| Active-Passive SDN | [![Active-Passive SDN](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-active-passive-sdn.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-active-passive-sdn.yml) |
+| Active-Active ELB/ILB | [![Active-Active ELB-ILB](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-active-active-elb-ilb.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-active-active-elb-ilb.yml) |
+| Azure Virtual WAN | [![AzureVirtualWAN](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-azurevirtualwan.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/tf-example-azurevirtualwan.yml) |
+| TruffleHog (secret scan) | [![TruffleHog](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/trufflehog.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/trufflehog.yml) |
+| Trivy (IaC scan) | [![Trivy IaC](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/trivy-iac.yml/badge.svg?branch=main)](https://github.com/40net-cloud/terraform-azure-fortigate/actions/workflows/trivy-iac.yml) |
+
 ## Deployment
 
 Before deploying the example, users should review the `examples/terraform.tfvars.txt` file to ensure all required values are provided and to adjust any settings to fit their specific project needs.

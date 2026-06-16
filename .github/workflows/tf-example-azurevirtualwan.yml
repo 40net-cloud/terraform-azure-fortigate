@@ -1,4 +1,4 @@
-name: '[FGT] TF - Example - AzureVirtualWAN'
+name: '[FGT] TF - AzureVirtualWAN'
 
 on:
   push:
