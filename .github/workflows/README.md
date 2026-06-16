@@ -1,6 +1,6 @@
 # CI workflows
 
-Each example in `examples/` has a thin caller workflow (`tf-example-<name>.yml`) that invokes the shared reusable workflow `terraform-example-test.yml`.
+Each example in `examples/` has a thin caller workflow (`tf-<name>.yml`) that invokes the shared reusable workflow `terraform-test.yml`.
 
 Two modes:
 
@@ -77,13 +77,13 @@ It retries for up to 10 minutes per FortiGate to allow for boot time, and fails 
 
 ## Adding a new example
 
-Copy any `tf-example-*.yml` and change:
+Copy any `tf-*.yml` and change:
 
 1. `example` — directory name under `examples/`
 2. `prefix` — keep it short and **lowercase** (several examples feed it into `domain_name_label`, which Azure restricts to lowercase)
 3. The `paths` filters — example dir + module dir + the two workflow files
 4. `ssh_test_output` — the terraform output(s) exposing mgmt IP(s)
-5. `extra_tfvars` — any required variables beyond the common five (`prefix`, `location`, `username`, `password`, `subscription_id`); see `tf-example-azurevirtualwan.yml` for plan-only placeholder values
+5. `extra_tfvars` — any required variables beyond the common five (`prefix`, `location`, `username`, `password`, `subscription_id`); see `tf-azurevirtualwan.yml` for plan-only placeholder values
 
 ## Per-example notes
 

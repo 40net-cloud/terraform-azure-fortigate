@@ -7,14 +7,14 @@ on:
     paths:
       - 'examples/single/**'
       - 'modules/single/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-single.yml'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-single.yml'
   pull_request:
     paths:
       - 'examples/single/**'
       - 'modules/single/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-single.yml'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-single.yml'
   workflow_dispatch:
     inputs:
       deploy:
@@ -31,7 +31,7 @@ jobs:
     permissions:
       id-token: write # required for Azure OIDC federated login
       contents: read
-    uses: ./.github/workflows/terraform-example-test.yml
+    uses: ./.github/workflows/terraform-test.yml
     with:
       example: single
       prefix: fortiqa-sgl # lowercase: prefix may be used in DNS labels

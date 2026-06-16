@@ -7,14 +7,14 @@ on:
     paths:
       - 'examples/active-active-elb-ilb/**'
       - 'modules/active-active/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-active-active-elb-ilb.yml'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-active-active-elb-ilb.yml'
   pull_request:
     paths:
       - 'examples/active-active-elb-ilb/**'
       - 'modules/active-active/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-active-active-elb-ilb.yml'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-active-active-elb-ilb.yml'
   workflow_dispatch:
     inputs:
       deploy:
@@ -31,7 +31,7 @@ jobs:
     permissions:
       id-token: write # required for Azure OIDC federated login
       contents: read
-    uses: ./.github/workflows/terraform-example-test.yml
+    uses: ./.github/workflows/terraform-test.yml
     with:
       example: active-active-elb-ilb
       prefix: fortiqa-aa # lowercase: prefix may be used in DNS labels
