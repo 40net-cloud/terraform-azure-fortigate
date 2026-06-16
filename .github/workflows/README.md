@@ -13,6 +13,10 @@ The destroy step always runs after an apply attempt — success or failure — s
 
 ## Setup to replicate this CI
 
+> **Auth is now OIDC (no client secret).** For a from-scratch setup elsewhere,
+> follow [OIDC-SETUP.md](OIDC-SETUP.md). The service-principal-secret steps below
+> are retained only for reference / the legacy path.
+
 ### 1. Create a service principal
 
 In Azure Cloud Shell (or any `az` CLI logged into the right subscription):
