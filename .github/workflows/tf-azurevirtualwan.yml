@@ -7,14 +7,14 @@ on:
     paths:
       - 'examples/azurevirtualwan/**'
       - 'modules/azurevirtualwan/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-azurevirtualwan.yml'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-azurevirtualwan.yml'
   pull_request:
     paths:
       - 'examples/azurevirtualwan/**'
       - 'modules/azurevirtualwan/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-azurevirtualwan.yml'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-azurevirtualwan.yml'
   workflow_dispatch:
     inputs:
       deploy:
@@ -31,7 +31,7 @@ jobs:
     permissions:
       id-token: write # required for Azure OIDC federated login
       contents: read
-    uses: ./.github/workflows/terraform-example-test.yml
+    uses: ./.github/workflows/terraform-test.yml
     with:
       example: azurevirtualwan
       prefix: fortiqa-vwan # lowercase: prefix may be used in DNS labels

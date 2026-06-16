@@ -1,20 +1,20 @@
-name: '[FGT] TF - Active-Passive-ELB-ILB'
+name: '[FGT] TF - Active-Passive-SDN'
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'examples/active-passive-elb-ilb/**'
-      - 'modules/active-passive/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-active-passive-elb-ilb.yml'
+      - 'examples/active-passive-sdn/**'
+      - 'modules/active-passive-sdn/**'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-active-passive-sdn.yml'
   pull_request:
     paths:
-      - 'examples/active-passive-elb-ilb/**'
-      - 'modules/active-passive/**'
-      - '.github/workflows/terraform-example-test.yml'
-      - '.github/workflows/tf-example-active-passive-elb-ilb.yml'
+      - 'examples/active-passive-sdn/**'
+      - 'modules/active-passive-sdn/**'
+      - '.github/workflows/terraform-test.yml'
+      - '.github/workflows/tf-active-passive-sdn.yml'
   workflow_dispatch:
     inputs:
       deploy:
@@ -31,10 +31,10 @@ jobs:
     permissions:
       id-token: write # required for Azure OIDC federated login
       contents: read
-    uses: ./.github/workflows/terraform-example-test.yml
+    uses: ./.github/workflows/terraform-test.yml
     with:
-      example: active-passive-elb-ilb
-      prefix: fortiqa-ap # lowercase: prefix is used in domain_name_label
+      example: active-passive-sdn
+      prefix: fortiqa-apsdn # lowercase: prefix is used in domain_name_label
       deploy: ${{ inputs.deploy == true }} # only ever true on manual dispatch; push = plan only
       marketplace_offer: fortinet_fortigate-vm
       marketplace_sku: fortinet_fg-vm_byol_76
