@@ -28,6 +28,9 @@ concurrency:
 
 jobs:
   test:
+    permissions:
+      id-token: write # required for Azure OIDC federated login
+      contents: read
     uses: ./.github/workflows/terraform-example-test.yml
     with:
       example: azurevirtualwan

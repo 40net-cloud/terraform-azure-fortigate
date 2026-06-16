@@ -3,8 +3,12 @@ name: 'Terraform Example Test (reusable)'
 # Reusable workflow that tests a single example in examples/<example>.
 # Runs: init -> fmt check -> validate -> plan (no apply).
 #
+# Auth: Azure OIDC (federated) — no client secret. Requires a federated
+# credential on the app registration whose subject matches the run
+# (e.g. repo:OWNER/REPO:ref:refs/heads/main) plus the job permission
+# id-token: write.
 # Required repository secrets (used by all callers via `secrets: inherit`):
-#   ARM_CLIENT_ID, ARM_CLIENT_SECRET, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID, PASSWORD
+#   ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID, PASSWORD
 
 on:
   workflow_call:
@@ -78,6 +82,9 @@ jobs:
     name: "Terraform ${{ inputs.example }}${{ inputs.deploy && ' (deploy)' || '' }}"
     runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      id-token: write # mint the GitHub OIDC token for Azure federated login
+      contents: read
     env:
       TFPath: examples/${{ inputs.example }}
       TF_IN_AUTOMATION: 'true'
@@ -86,8 +93,10 @@ jobs:
       TF_VAR_username: "azureuser"
       TF_VAR_password: "${{ secrets.PASSWORD }}"
       TF_VAR_subscription_id: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
+      # OIDC (federated) auth — no client secret. The azurerm provider picks up
+      # the GitHub OIDC token automatically when ARM_USE_OIDC=true.
+      ARM_USE_OIDC: 'true'
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
@@ -145,11 +154,19 @@ jobs:
 
       # ── Deployment steps below only run when deploy=true ────────────────────
 
+      # OIDC login for the az CLI (Marketplace terms + post-deploy checks).
+      # No client secret: uses the federated GitHub OIDC token.
+      - name: "Azure Login (OIDC)"
+        if: inputs.deploy
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
       - name: "Accept Marketplace Terms"
         if: inputs.deploy && inputs.marketplace_offer != '' && inputs.marketplace_sku != ''
         run: |
-          az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" --output none
-          az account set --subscription "$ARM_SUBSCRIPTION_ID"
           az vm image terms accept \
             --publisher fortinet \
             --offer "${{ inputs.marketplace_offer }}" \
@@ -242,8 +259,7 @@ jobs:
         if: inputs.deploy && inputs.post_test != '' && steps.apply.outcome == 'success'
         working-directory: ${{ env.TFPath }}
         run: |
-          az login --service-principal -u "$ARM_CLIENT_ID" -p "$ARM_CLIENT_SECRET" --tenant "$ARM_TENANT_ID" --output none
-          az account set --subscription "$ARM_SUBSCRIPTION_ID"
+          # Already logged in via the "Azure Login (OIDC)" step above.
           ${{ inputs.post_test }}
 
       # Destroy always runs after an apply attempt (success OR failure),
