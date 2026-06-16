@@ -39,16 +39,30 @@ resource "azurerm_role_assignment" "joinpublicipassignment" {
     azurerm_user_assigned_identity.managedidentity["create"],
     azurerm_role_definition.joinpublicip
   ]
-  scope                = "${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"
-  role_definition_name = azurerm_role_definition.joinpublicip.name
-  principal_id         = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)
+  scope = "${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"
+  # Reference the role by its resource ID, not its name: a freshly created custom
+  # role definition is not immediately queryable by name, which otherwise fails
+  # with "listing role definitions: could not find role '<name>'".
+  role_definition_id = azurerm_role_definition.joinpublicip.role_definition_resource_id
+  principal_id       = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)
+}
+
+# Azure RBAC is eventually consistent: the custom "Public IP join role" assignment
+# above takes a minute or two to propagate. Without this wait, the managed-app
+# deployment's referenced-resource access check fails with
+# NvaReferencedResourceAccessCheckFailed on Microsoft.Network/publicIPAddresses/join/action.
+resource "time_sleep" "wait_for_rbac" {
+  for_each        = var.managedidentity_id == "" ? { create = true } : {}
+  depends_on      = [azurerm_role_assignment.joinpublicipassignment]
+  create_duration = "180s"
 }
 
 resource "azapi_resource" "fgtinvhub" {
-  type      = "Microsoft.Solutions/applications@2021-07-01"
-  name      = var.name
-  parent_id = var.resource_group.id
-  location  = var.location
+  depends_on = [time_sleep.wait_for_rbac]
+  type       = "Microsoft.Solutions/applications@2021-07-01"
+  name       = var.name
+  parent_id  = var.resource_group.id
+  location   = var.location
 
   # Deploying or deleting the FortiGate NVA managed application takes 30-60 minutes.
   # The azapi provider default timeout of 30m cancels the operation mid-flight,
