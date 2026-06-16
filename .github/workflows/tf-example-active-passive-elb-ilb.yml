@@ -1,4 +1,4 @@
-name: '[FGT] TF - Example - Active-Passive-ELB-ILB'
+name: '[FGT] TF - Active-Passive-ELB-ILB'
 
 on:
   push:

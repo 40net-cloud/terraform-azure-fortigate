@@ -1,4 +1,4 @@
-name: '[FGT] TF - Example - Single'
+name: '[FGT] TF - Single'
 
 on:
   push:
