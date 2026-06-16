@@ -235,7 +235,7 @@ locals {
     fgt_hasync_ipaddr          = local.fgt_ip_configuration["hasync"]["fgt-b"]["ipconfig1"].private_ip_address
     fgt_hasync_mask            = cidrnetmask(azurerm_subnet.subnets["subnet-hasync"].address_prefixes[0])
     fgt_hasync_gw              = cidrhost(azurerm_subnet.subnets["subnet-hasync"].address_prefixes[0], 1)
-    fgt_mgmt_ipaddr            = local.fgt_ip_configuration["hasync"]["fgt-b"]["ipconfig1"].private_ip_address
+    fgt_mgmt_ipaddr            = local.fgt_ip_configuration["hamgmt"]["fgt-b"]["ipconfig1"].private_ip_address
     fgt_mgmt_mask              = cidrnetmask(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0])
     fgt_mgmt_gw                = cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1)
     fgt_ha_peerip              = local.fgt_ip_configuration["hasync"]["fgt-a"]["ipconfig1"].private_ip_address
