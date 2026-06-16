@@ -50,13 +50,13 @@ config system interface
         set mode static
         set ip ${fgt_external_ipaddr}/${fgt_external_mask}
         set description external
-        set allowaccess set allowaccess ping https ssh probe-response
+        set allowaccess ping https ssh probe-response
     next
     edit port2
         set mode static
         set ip ${fgt_internal_ipaddr}/${fgt_internal_mask}
         set description internal
-        set allowaccess set allowaccess ping https ssh probe-response
+        set allowaccess ping https ssh probe-response
     next
 end
 %{ if fgt_ssh_public_key_file != "" }
