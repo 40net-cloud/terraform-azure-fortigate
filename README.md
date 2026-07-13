@@ -29,6 +29,7 @@ Before deploying the example, users should review the `examples/terraform.tfvars
 
    ```sh
    terraform init
+   terraform plan
    terraform apply
    ```
 
