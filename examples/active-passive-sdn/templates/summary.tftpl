@@ -1,0 +1,25 @@
+-------------------------------------------------
+FortiGate Deployment Summary
+-------------------------------------------------
+
+Location: ${location}
+Username: ${fgt_username}
+
+VIP: ${vip_public_ip_address}
+
+FortiGate 1
+Public IP: ${fgta_public_ip_address}
+Private IP: ${fgta_private_ip_address}
+GUI: https://${fgta_public_ip_address}
+SSH: ssh ${fgt_username}@${fgta_public_ip_address}
+
+FortiManager 2
+Public IP: ${fgtb_public_ip_address}
+Private IP: ${fgtb_private_ip_address}
+GUI: https://${fgtb_public_ip_address}
+SSH: ssh ${fgt_username}@${fgtb_public_ip_address}
+
+IMPORTANT:
+- Change the admin password after initial login
+- Configure your firewall rules appropriately
+- Keep your license and software up to date

@@ -187,6 +187,8 @@ locals {
     public_ip_address_name     = azurerm_public_ip.fgt_pip.name
     resource_group_name        = azurerm_resource_group.resourcegroup.name
     nic1_name                  = module.fgt.fortigate-a-network-interface-external.name
+    nic2_name                  = module.fgt.fortigate-a-network-interface-internal.name
+    nic2_name_peer             = module.fgt.fortigate-b-network-interface-internal.name
     rt_name                    = azurerm_route_table.protected_subnet_rt.name
     fgt_license_file           = var.fgt_byol_license_file_a
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_a
@@ -198,6 +200,7 @@ locals {
     fgt_external_mask          = cidrnetmask(azurerm_subnet.subnets["subnet-external"].address_prefixes[0])
     fgt_external_gw            = cidrhost(azurerm_subnet.subnets["subnet-external"].address_prefixes[0], 1)
     fgt_internal_ipaddr        = local.fgt_ip_configuration["internal"]["fgt-a"]["ipconfig1"].private_ip_address
+    fgt_internal_ipaddr2       = local.fgt_ip_configuration["internal"]["fgt-a"]["ipconfig2"].private_ip_address
     fgt_internal_mask          = tostring(cidrnetmask(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0]))
     fgt_internal_gw            = tostring(cidrhost(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0], 1))
     fgt_hasync_ipaddr          = local.fgt_ip_configuration["hasync"]["fgt-a"]["ipconfig1"].private_ip_address
@@ -212,6 +215,7 @@ locals {
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
+    fgt_ha_internal_vip	       = true
   }
   fgt_b_vars = {
     fgt_vm_name                = "${local.fgt_b_name}"
@@ -219,6 +223,8 @@ locals {
     public_ip_address_name     = azurerm_public_ip.fgt_pip.name
     resource_group_name        = azurerm_resource_group.resourcegroup.name
     nic1_name                  = module.fgt.fortigate-b-network-interface-external.name
+    nic2_name                  = module.fgt.fortigate-b-network-interface-internal.name
+    nic2_name_peer             = module.fgt.fortigate-a-network-interface-internal.name
     rt_name                    = azurerm_route_table.protected_subnet_rt.name
     fgt_license_file           = var.fgt_byol_license_file_b
     fgt_license_fortiflex      = var.fgt_byol_fortiflex_license_token_b
@@ -230,6 +236,7 @@ locals {
     fgt_external_mask          = cidrnetmask(azurerm_subnet.subnets["subnet-external"].address_prefixes[0])
     fgt_external_gw            = cidrhost(azurerm_subnet.subnets["subnet-external"].address_prefixes[0], 1)
     fgt_internal_ipaddr        = local.fgt_ip_configuration["internal"]["fgt-b"]["ipconfig1"].private_ip_address
+    fgt_internal_ipaddr2       = local.fgt_ip_configuration["internal"]["fgt-a"]["ipconfig2"].private_ip_address
     fgt_internal_mask          = cidrnetmask(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0])
     fgt_internal_gw            = cidrhost(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0], 1)
     fgt_hasync_ipaddr          = local.fgt_ip_configuration["hasync"]["fgt-b"]["ipconfig1"].private_ip_address
@@ -244,6 +251,7 @@ locals {
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
+    fgt_ha_internal_vip	       = true
   }
   fgt_ip_configuration = {
     external = {
@@ -275,6 +283,13 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-internal"].id
           is_primary_ipconfiguration    = true
+        }
+        ipconfig2 = {
+          name                          = "ipconfig2"
+          private_ip_address            = cidrhost(azurerm_subnet.subnets["subnet-internal"].address_prefixes[0], 7)
+          private_ip_address_allocation = "Static"
+          private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-internal"].id
+          is_primary_ipconfiguration    = false
         }
       }
       fgt-b = {

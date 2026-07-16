@@ -42,5 +42,4 @@ output "fortigate-b-network-interface-hamgmt" {
 output "fortigate-network-security-group" {
   value = azurerm_network_security_group.fgtnsg
 }
-
 ##############################################################################################################
