@@ -8,8 +8,8 @@ locals {
   fgt_name         = "${var.prefix***REMOVED***-fgt"
   fgt_a_name       = "${var.prefix***REMOVED***-fgt-a"
   fgt_b_name       = "${var.prefix***REMOVED***-fgt-b"
-  fgt_a_customdata = base64encode(templatefile("${path.module***REMOVED***/fgt-customdata.tftpl", var.fgt_a_customdata_variables))
-  fgt_b_customdata = base64encode(templatefile("${path.module***REMOVED***/fgt-customdata.tftpl", var.fgt_b_customdata_variables))
+  fgt_a_customdata = base64encode(templatefile("${path.module***REMOVED***/templates/fgt-customdata.tftpl", var.fgt_a_customdata_variables))
+  fgt_b_customdata = base64encode(templatefile("${path.module***REMOVED***/templates/fgt-customdata.tftpl", var.fgt_b_customdata_variables))
 ***REMOVED***
 
 

@@ -21,7 +21,18 @@ config system sdn-connector
                     next
                 end
             next
+%{ if fgt_ha_internal_vip ***REMOVED***
+            edit ${nic2_name***REMOVED***
+		set peer-nic ${nic2_name_peer***REMOVED***
+                config ip
+                    edit "ipconfig2"
+                        set private-ip ${fgt_internal_ipaddr2***REMOVED***
+                    next
+                end
+            next
+%{ endif ***REMOVED***
         end
+%{ if ! fgt_ha_internal_vip ***REMOVED***
         config route-table
             edit ${rt_name***REMOVED***
                 config route
@@ -31,6 +42,7 @@ config system sdn-connector
                 end
             next
         end
+%{ endif ***REMOVED***
     next
 end
 config sys global
@@ -117,6 +129,19 @@ config system ha
     set priority ${fgt_ha_priority***REMOVED***
     set unicast-hb enable
     set unicast-hb-peerip ${fgt_ha_peerip***REMOVED***
+end
+%{ endif ***REMOVED***
+%{ if fgt_internal_ipaddr2 != "" ***REMOVED***
+config system interface
+    edit port2
+	    set secondary-IP enable 
+        config secondaryip
+            edit 1 
+                set ip ${fgt_internal_ipaddr2***REMOVED***/${fgt_internal_mask***REMOVED***
+                set allowaccess ping 
+            next 
+        end 
+    next
 end
 %{ endif ***REMOVED***
 %{ if fgt_fortimanager_ip != "" ***REMOVED***
