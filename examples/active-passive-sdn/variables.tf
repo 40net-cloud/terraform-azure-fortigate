@@ -215,7 +215,7 @@ locals {
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
-    fgt_ha_internal_vip	       = true
+    fgt_ha_internal_vip        = true
   }
   fgt_b_vars = {
     fgt_vm_name                = "${local.fgt_b_name}"
@@ -251,7 +251,7 @@ locals {
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
-    fgt_ha_internal_vip	       = true
+    fgt_ha_internal_vip        = true
   }
   fgt_ip_configuration = {
     external = {
