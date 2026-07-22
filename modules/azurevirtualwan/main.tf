@@ -57,6 +57,41 @@ resource "time_sleep" "wait_for_rbac" {
   create_duration = "180s"
 }
 
+# Create role assignments for NVA to control VWAN inbound SLB
+resource "azurerm_role_definition" "nvainboundslb" {
+  depends_on = [azurerm_user_assigned_identity.managedidentity["create"]]
+  name       = "${var.prefix} - Inbound SLB roles"
+  scope      = var.subscription_id
+  
+  permissions {
+    actions     = [
+         "Microsoft.Solutions/applications/read",
+         "Microsoft.Network/networkVirtualAppliances/read",
+         "Microsoft.Network/networkVirtualAppliances/write",
+         "Microsoft.Network/networkVirtualAppliances/inboundSecurityRules/read",
+         "Microsoft.Network/networkVirtualAppliances/inboundSecurityRules/write",
+         "Microsoft.Resources/subscriptions/resourcegroups/read",
+         "Microsoft.Network/publicIPAddresses/read"
+    ]
+    not_actions = []
+  }
+  assignable_scopes = [var.subscription_id] 
+}
+
+resource "azurerm_role_assignment" "nvainboundslb" {
+  scope                = var.subscription_id
+  role_definition_name = azurerm_role_definition.nvainboundslb.name
+  principal_id         = data.azapi_resource_list.fgtnva.output.value[0].identity.principalId
+}
+
+data "azapi_resource_list" "fgtnva" {
+  type                   = "Microsoft.Network/networkVirtualAppliances@2023-11-01"
+  parent_id              = "${var.subscription_id}/resourcegroups/${var.managed_resource_group_name}"
+  response_export_values = ["*"]
+
+  depends_on = [azapi_resource.fgtinvhub]
+}
+
 resource "azapi_resource" "fgtinvhub" {
   depends_on = [time_sleep.wait_for_rbac]
   type       = "Microsoft.Solutions/applications@2021-07-01"
