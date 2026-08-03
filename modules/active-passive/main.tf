@@ -27,6 +27,11 @@ locals {
       ]
     ]
   ]) : "${lb_pool.name***REMOVED***-${lb_pool.zone_key***REMOVED***-${lb_pool.ipconfig_key***REMOVED***-${lb_pool.lb_key***REMOVED***" => lb_pool ***REMOVED***
+
+  # Split by FortiGate unit so the two units' backend pool address
+  # registrations can be serialized below instead of applied concurrently.
+  lb_pools_ip_addresses_a = { for k, v in local.lb_pools_ip_addresses : k => v if v.name == "fgt-a" ***REMOVED***
+  lb_pools_ip_addresses_b = { for k, v in local.lb_pools_ip_addresses : k => v if v.name == "fgt-b" ***REMOVED***
 ***REMOVED***
 
 resource "azurerm_availability_set" "fgtavset" {
@@ -38,11 +43,26 @@ resource "azurerm_availability_set" "fgtavset" {
 ***REMOVED***
 
 resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
-  for_each                = local.lb_pools_ip_addresses
+  for_each                = local.lb_pools_ip_addresses_a
   name                    = each.key
   backend_address_pool_id = each.value.backend_address_pool_id
   virtual_network_id      = var.virtual_network_id
   ip_address              = each.value.ip_address
+***REMOVED***
+
+resource "azurerm_lb_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
+  for_each                = local.lb_pools_ip_addresses_b
+  name                    = each.key
+  backend_address_pool_id = each.value.backend_address_pool_id
+  virtual_network_id      = var.virtual_network_id
+  ip_address              = each.value.ip_address
+
+  # fgt-a and fgt-b can both register into the same backend pool (e.g. the
+  # shared external LB pool). Azure's ARM API only allows one write at a
+  # time per pool, so without this depends_on Terraform applies both
+  # for_each's instances concurrently and the second PUT gets
+  # 409 AnotherOperationInProgress.
+  depends_on = [azurerm_lb_backend_address_pool_address.fgtaifcext2elbbackendpool]
 ***REMOVED***
 
 resource "azurerm_network_interface" "fgtaifcext" {
