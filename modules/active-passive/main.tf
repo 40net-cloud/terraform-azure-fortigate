@@ -5,11 +5,11 @@
 #
 ##############################################################################################################
 locals {
-  fgt_name         = "${var.prefix***REMOVED***-fgt"
-  fgt_a_name       = "${var.prefix***REMOVED***-fgt-a"
-  fgt_b_name       = "${var.prefix***REMOVED***-fgt-b"
-  fgt_a_customdata = base64encode(templatefile("${path.module***REMOVED***/fgt-customdata.tftpl", var.fgt_a_customdata_variables))
-  fgt_b_customdata = base64encode(templatefile("${path.module***REMOVED***/fgt-customdata.tftpl", var.fgt_b_customdata_variables))
+  fgt_name         = "${var.prefix}-fgt"
+  fgt_a_name       = "${var.prefix}-fgt-a"
+  fgt_b_name       = "${var.prefix}-fgt-b"
+  fgt_a_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_a_customdata_variables))
+  fgt_b_customdata = base64encode(templatefile("${path.module}/fgt-customdata.tftpl", var.fgt_b_customdata_variables))
 
   lb_pools_ip_addresses = { for lb_pool in flatten([
     for zonek, zonev in var.fgt_ip_configuration : [
@@ -22,25 +22,25 @@ locals {
             zone_key                = zonek
             ipconfig_key            = ipck
             lb_key                  = lbk
-          ***REMOVED***
+          }
         ]
       ]
     ]
-  ]) : "${lb_pool.name***REMOVED***-${lb_pool.zone_key***REMOVED***-${lb_pool.ipconfig_key***REMOVED***-${lb_pool.lb_key***REMOVED***" => lb_pool ***REMOVED***
+  ]) : "${lb_pool.name}-${lb_pool.zone_key}-${lb_pool.ipconfig_key}-${lb_pool.lb_key}" => lb_pool }
 
   # Split by FortiGate unit so the two units' backend pool address
   # registrations can be serialized below instead of applied concurrently.
-  lb_pools_ip_addresses_a = { for k, v in local.lb_pools_ip_addresses : k => v if v.name == "fgt-a" ***REMOVED***
-  lb_pools_ip_addresses_b = { for k, v in local.lb_pools_ip_addresses : k => v if v.name == "fgt-b" ***REMOVED***
-***REMOVED***
+  lb_pools_ip_addresses_a = { for k, v in local.lb_pools_ip_addresses : k => v if v.name == "fgt-a" }
+  lb_pools_ip_addresses_b = { for k, v in local.lb_pools_ip_addresses : k => v if v.name == "fgt-b" }
+}
 
 resource "azurerm_availability_set" "fgtavset" {
   count               = var.fgt_availability_set ? 1 : 0
-  name                = "${local.fgt_name***REMOVED***-availabilityset"
+  name                = "${local.fgt_name}-availabilityset"
   location            = var.location
   managed             = true
   resource_group_name = var.resource_group_name
-***REMOVED***
+}
 
 resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
   for_each                = local.lb_pools_ip_addresses_a
@@ -48,7 +48,7 @@ resource "azurerm_lb_backend_address_pool_address" "fgtaifcext2elbbackendpool" {
   backend_address_pool_id = each.value.backend_address_pool_id
   virtual_network_id      = var.virtual_network_id
   ip_address              = each.value.ip_address
-***REMOVED***
+}
 
 resource "azurerm_lb_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
   for_each                = local.lb_pools_ip_addresses_b
@@ -63,10 +63,10 @@ resource "azurerm_lb_backend_address_pool_address" "fgtbifcext2elbbackendpool" {
   # for_each's instances concurrently and the second PUT gets
   # 409 AnotherOperationInProgress.
   depends_on = [azurerm_lb_backend_address_pool_address.fgtaifcext2elbbackendpool]
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtaifcext" {
-  name                  = "${local.fgt_a_name***REMOVED***-nic1-ext"
+  name                  = "${local.fgt_a_name}-nic1-ext"
   location              = var.location
   resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
@@ -82,17 +82,17 @@ resource "azurerm_network_interface" "fgtaifcext" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtaifcextnsg" {
   network_interface_id      = azurerm_network_interface.fgtaifcext.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtaifcint" {
-  name                  = "${local.fgt_a_name***REMOVED***-nic2-int"
+  name                  = "${local.fgt_a_name}-nic2-int"
   location              = var.location
   resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
@@ -108,17 +108,17 @@ resource "azurerm_network_interface" "fgtaifcint" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtaifcintnsg" {
   network_interface_id      = azurerm_network_interface.fgtaifcint.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtaifchasync" {
-  name                  = "${local.fgt_a_name***REMOVED***-nic3-hasync"
+  name                  = "${local.fgt_a_name}-nic3-hasync"
   location              = var.location
   resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
@@ -134,17 +134,17 @@ resource "azurerm_network_interface" "fgtaifchasync" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtaifchasyncnsg" {
   network_interface_id      = azurerm_network_interface.fgtaifchasync.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtaifchamgmt" {
-  name                           = "${local.fgt_a_name***REMOVED***-nic4-mgmt"
+  name                           = "${local.fgt_a_name}-nic4-mgmt"
   location                       = var.location
   resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
@@ -161,14 +161,14 @@ resource "azurerm_network_interface" "fgtaifchamgmt" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtaifchamgmtnsg" {
   network_interface_id      = azurerm_network_interface.fgtaifchamgmt.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_linux_virtual_machine" "fgtavm" {
   name                  = local.fgt_a_name
@@ -181,26 +181,26 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
 
   identity {
     type = "SystemAssigned"
-  ***REMOVED***
+  }
 
   source_image_reference {
     publisher = "fortinet"
     offer     = var.fgt_image_offer
     sku       = var.fgt_image_sku
     version   = var.fgt_version
-  ***REMOVED***
+  }
 
   plan {
     publisher = "fortinet"
     product   = var.fgt_image_offer
     name      = var.fgt_image_sku
-  ***REMOVED***
+  }
 
   os_disk {
-    name                 = "${local.fgt_a_name***REMOVED***-osdisk"
+    name                 = "${local.fgt_a_name}-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
-  ***REMOVED***
+  }
 
   admin_username                  = var.username
   admin_password                  = var.password
@@ -211,14 +211,14 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
     for_each = var.fgt_serial_console ? [1] : []
 
     content {
-    ***REMOVED***
-  ***REMOVED***
+    }
+  }
 
   tags = var.fortinet_tags
 
   lifecycle {
     ignore_changes = [custom_data]
-  ***REMOVED***
+  }
 
   depends_on = [ #set explicit depends on for each association to address delete order issues.
     azurerm_network_interface_security_group_association.fgtaifcextnsg,
@@ -226,18 +226,18 @@ resource "azurerm_linux_virtual_machine" "fgtavm" {
     azurerm_network_interface_security_group_association.fgtaifchasyncnsg,
     azurerm_network_interface_security_group_association.fgtaifchamgmtnsg
   ]
-***REMOVED***
+}
 
 resource "azurerm_managed_disk" "fgtavm-datadisk" {
   count                = var.fgt_datadisk_count
-  name                 = "${local.fgt_a_name***REMOVED***-datadisk-${count.index***REMOVED***"
+  name                 = "${local.fgt_a_name}-datadisk-${count.index}"
   location             = var.location
   zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[0]
   resource_group_name  = var.resource_group_name
   storage_account_type = var.fgt_datadisk_storage_account_type
   create_option        = "Empty"
   disk_size_gb         = var.fgt_datadisk_size
-***REMOVED***
+}
 
 resource "azurerm_virtual_machine_data_disk_attachment" "fgtavm-datadisk-attach" {
   count              = var.fgt_datadisk_count
@@ -245,10 +245,10 @@ resource "azurerm_virtual_machine_data_disk_attachment" "fgtavm-datadisk-attach"
   virtual_machine_id = azurerm_linux_virtual_machine.fgtavm.id
   lun                = count.index
   caching            = "ReadWrite"
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtbifcext" {
-  name                           = "${local.fgt_b_name***REMOVED***-nic1-ext"
+  name                           = "${local.fgt_b_name}-nic1-ext"
   location                       = var.location
   resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
@@ -265,17 +265,17 @@ resource "azurerm_network_interface" "fgtbifcext" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtbifcextnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifcext.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtbifcint" {
-  name                           = "${local.fgt_b_name***REMOVED***-nic2-int"
+  name                           = "${local.fgt_b_name}-nic2-int"
   location                       = var.location
   resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
@@ -292,17 +292,17 @@ resource "azurerm_network_interface" "fgtbifcint" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtbifcintnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifcint.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtbifchasync" {
-  name                           = "${local.fgt_b_name***REMOVED***-nic3-hasync"
+  name                           = "${local.fgt_b_name}-nic3-hasync"
   location                       = var.location
   resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
@@ -319,17 +319,17 @@ resource "azurerm_network_interface" "fgtbifchasync" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtbifchasyncnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifchasync.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtbifchamgmt" {
-  name                           = "${local.fgt_b_name***REMOVED***-nic4-mgmt"
+  name                           = "${local.fgt_b_name}-nic4-mgmt"
   location                       = var.location
   resource_group_name            = var.resource_group_name
   ip_forwarding_enabled          = true
@@ -346,14 +346,14 @@ resource "azurerm_network_interface" "fgtbifchamgmt" {
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       public_ip_address_id                               = ip_configuration.value.public_ip_address_resource_id
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtbifchamgmtnsg" {
   network_interface_id      = azurerm_network_interface.fgtbifchamgmt.id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_linux_virtual_machine" "fgtbvm" {
   name                  = local.fgt_b_name
@@ -366,26 +366,26 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
 
   identity {
     type = "SystemAssigned"
-  ***REMOVED***
+  }
 
   source_image_reference {
     publisher = "fortinet"
     offer     = var.fgt_image_offer
     sku       = var.fgt_image_sku
     version   = var.fgt_version
-  ***REMOVED***
+  }
 
   plan {
     publisher = "fortinet"
     product   = var.fgt_image_offer
     name      = var.fgt_image_sku
-  ***REMOVED***
+  }
 
   os_disk {
-    name                 = "${local.fgt_b_name***REMOVED***-osdisk"
+    name                 = "${local.fgt_b_name}-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
-  ***REMOVED***
+  }
 
   admin_username                  = var.username
   admin_password                  = var.password
@@ -396,14 +396,14 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
     for_each = var.fgt_serial_console ? [1] : []
 
     content {
-    ***REMOVED***
-  ***REMOVED***
+    }
+  }
 
   tags = var.fortinet_tags
 
   lifecycle {
     ignore_changes = [custom_data]
-  ***REMOVED***
+  }
 
   depends_on = [ #set explicit depends on for each association to address delete order issues.
     azurerm_network_interface_security_group_association.fgtbifcextnsg,
@@ -411,18 +411,18 @@ resource "azurerm_linux_virtual_machine" "fgtbvm" {
     azurerm_network_interface_security_group_association.fgtbifchasyncnsg,
     azurerm_network_interface_security_group_association.fgtbifchamgmtnsg
   ]
-***REMOVED***
+}
 
 resource "azurerm_managed_disk" "fgtbvm-datadisk" {
   count                = var.fgt_datadisk_count
-  name                 = "${local.fgt_b_name***REMOVED***-datadisk-${count.index***REMOVED***"
+  name                 = "${local.fgt_b_name}-datadisk-${count.index}"
   location             = var.location
   zone                 = var.fgt_availability_set ? null : var.fgt_availability_zone[1]
   resource_group_name  = var.resource_group_name
   storage_account_type = var.fgt_datadisk_storage_account_type
   create_option        = "Empty"
   disk_size_gb         = var.fgt_datadisk_size
-***REMOVED***
+}
 
 resource "azurerm_virtual_machine_data_disk_attachment" "fgtbvm-datadisk-attach" {
   count              = var.fgt_datadisk_count
@@ -430,6 +430,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "fgtbvm-datadisk-attach"
   virtual_machine_id = azurerm_linux_virtual_machine.fgtbvm.id
   lun                = count.index
   caching            = "ReadWrite"
-***REMOVED***
+}
 
 ##############################################################################################################

@@ -11,12 +11,12 @@
 
 output "fortigate-virtual-machine" {
   value = azurerm_linux_virtual_machine.fgtvm
-***REMOVED***
+}
 output "fortigate-network-interface-external" {
   value = azurerm_network_interface.fgtifcext
-***REMOVED***
+}
 output "fortigate-network-interface-internal" {
   value = azurerm_network_interface.fgtifcint
-***REMOVED***
+}
 
 ##############################################################################################################

@@ -14,23 +14,23 @@ output "fortigate_virtual_machines" {
   value = {
     for key in keys(local.fgt_customdata) :
     key => azurerm_linux_virtual_machine.fgtvm[key]
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 # Output each external network interface
 output "fortigate_network_interface_external" {
   value = {
     for key in keys(local.fgt_customdata) :
     key => azurerm_network_interface.fgtifcext[key]
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 # Output each internal network interface
 output "fortigate_network_interface_internal" {
   value = {
     for key in keys(local.fgt_customdata) :
     key => azurerm_network_interface.fgtifcint[key]
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 ##############################################################################################################

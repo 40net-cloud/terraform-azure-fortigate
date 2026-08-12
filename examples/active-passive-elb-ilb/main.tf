@@ -8,22 +8,22 @@
 # Resource Group
 ##############################################################################################################
 resource "azurerm_resource_group" "resourcegroup" {
-  name     = "${var.prefix***REMOVED***-rg"
+  name     = "${var.prefix}-rg"
   location = var.location
-***REMOVED***
+}
 
 ##############################################################################################################
 # Virtual Network - VNET
 ##############################################################################################################
 resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.prefix***REMOVED***-vnet"
+  name                = "${var.prefix}-vnet"
   address_space       = var.vnet
   location            = azurerm_resource_group.resourcegroup.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-***REMOVED***
+}
 
 resource "azurerm_subnet" "subnets" {
-  for_each = { for s in var.subnets : s.name => s ***REMOVED***
+  for_each = { for s in var.subnets : s.name => s }
 
   name                            = each.key
   resource_group_name             = azurerm_resource_group.resourcegroup.name
@@ -34,7 +34,7 @@ resource "azurerm_subnet" "subnets" {
   depends_on = [
     azurerm_virtual_network.vnet
   ]
-***REMOVED***
+}
 
 ##############################################################################################################
 # Load Balancers
@@ -42,30 +42,30 @@ resource "azurerm_subnet" "subnets" {
 module "elb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix***REMOVED***-externalloadbalancer"
+  name                         = "${var.prefix}-externalloadbalancer"
   type                         = "public"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
   lb_probe_unhealthy_threshold = 2
   lb_sku                       = "Standard"
-  pip_name                     = "${var.prefix***REMOVED***-elb-pip"
+  pip_name                     = "${var.prefix}-elb-pip"
   pip_sku                      = "Standard"
 
   lb_port = {
     http     = ["80", "Tcp", "80"]
     udp10551 = ["10551", "Udp", "10551"]
-  ***REMOVED***
+  }
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
-  ***REMOVED***
+  }
   tags       = var.fortinet_tags
   depends_on = [azurerm_resource_group.resourcegroup]
-***REMOVED***
+}
 
 module "ilb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix***REMOVED***-internalloadbalancer"
+  name                         = "${var.prefix}-internalloadbalancer"
   type                         = "private"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
@@ -75,34 +75,34 @@ module "ilb" {
 
   lb_port = {
     haports = ["0", "All", "0"]
-  ***REMOVED***
+  }
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
-  ***REMOVED***
+  }
   tags       = var.fortinet_tags
   depends_on = [azurerm_resource_group.resourcegroup]
-***REMOVED***
+}
 
 ##############################################################################################################
 # Public IP for management interface of the FortiGate
 ##############################################################################################################
 resource "azurerm_public_ip" "fgtamgmtpip" {
-  name                = "${var.prefix***REMOVED***-fgt-a-mgmt-pip"
+  name                = "${var.prefix}-fgt-a-mgmt-pip"
   location            = var.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
   allocation_method   = "Static"
-  domain_name_label   = "${var.prefix***REMOVED***-fgt-a-mgmt-pip"
+  domain_name_label   = "${var.prefix}-fgt-a-mgmt-pip"
   sku                 = "Standard"
-***REMOVED***
+}
 
 resource "azurerm_public_ip" "fgtbmgmtpip" {
-  name                = "${var.prefix***REMOVED***-fgt-b-mgmt-pip"
+  name                = "${var.prefix}-fgt-b-mgmt-pip"
   location            = var.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
   allocation_method   = "Static"
-  domain_name_label   = "${var.prefix***REMOVED***-fgt-b-mgmt-pip"
+  domain_name_label   = "${var.prefix}-fgt-b-mgmt-pip"
   sku                 = "Standard"
-***REMOVED***
+}
 
 
 ##############################################################################################################
@@ -135,6 +135,6 @@ module "fgt" {
   fgt_availability_set               = var.fgt_availability_set
   fgt_datadisk_size                  = var.fgt_datadisk_size
   fgt_datadisk_count                 = var.fgt_datadisk_count
-***REMOVED***
+}
 
 ##############################################################################################################

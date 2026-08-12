@@ -6,10 +6,10 @@
 ##############################################################################################################
 
 resource "azurerm_network_security_group" "fgtnsg" {
-  name                = "${var.prefix***REMOVED***-fgt-nsg"
+  name                = "${var.prefix}-fgt-nsg"
   location            = var.location
   resource_group_name = var.resource_group_name
-***REMOVED***
+}
 
 resource "azurerm_network_security_rule" "fgtnsgallowallout" {
   name                        = "AllowAllOutbound"
@@ -23,7 +23,7 @@ resource "azurerm_network_security_rule" "fgtnsgallowallout" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-***REMOVED***
+}
 
 resource "azurerm_network_security_rule" "fgtnsgallowallin" {
   name                        = "AllowAllInbound"
@@ -37,6 +37,6 @@ resource "azurerm_network_security_rule" "fgtnsgallowallin" {
   destination_port_range      = "*"
   source_address_prefix       = "*"
   destination_address_prefix  = "*"
-***REMOVED***
+}
 
 ##############################################################################################################

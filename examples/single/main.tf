@@ -9,22 +9,22 @@
 ##############################################################################################################
 
 resource "azurerm_resource_group" "resourcegroup" {
-  name     = "${var.prefix***REMOVED***-rg"
+  name     = "${var.prefix}-rg"
   location = var.location
-***REMOVED***
+}
 
 ##############################################################################################################
 # Virtual Network - VNET
 ##############################################################################################################
 resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.prefix***REMOVED***-vnet"
+  name                = "${var.prefix}-vnet"
   address_space       = var.vnet
   location            = azurerm_resource_group.resourcegroup.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-***REMOVED***
+}
 
 resource "azurerm_subnet" "subnets" {
-  for_each                        = { for s in var.subnets : s.name => s ***REMOVED***
+  for_each                        = { for s in var.subnets : s.name => s }
   name                            = each.key
   resource_group_name             = azurerm_resource_group.resourcegroup.name
   virtual_network_name            = azurerm_virtual_network.vnet.name
@@ -34,19 +34,19 @@ resource "azurerm_subnet" "subnets" {
   depends_on = [
     azurerm_virtual_network.vnet
   ]
-***REMOVED***
+}
 
 ##############################################################################################################
 # Public IP
 ##############################################################################################################
 resource "azurerm_public_ip" "fgtpip" {
-  name                = "${var.prefix***REMOVED***-fgt-pip"
+  name                = "${var.prefix}-fgt-pip"
   location            = var.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
   allocation_method   = "Static"
   sku                 = "Standard"
   domain_name_label   = format("%s-%s", lower(var.prefix), "fgt-pip")
-***REMOVED***
+}
 
 ##############################################################################################################
 # FortiGate
@@ -73,6 +73,6 @@ module "fgt" {
   fgt_customdata_variables         = local.fgt_vars
   fgt_datadisk_size                = var.fgt_datadisk_size
   fgt_datadisk_count               = var.fgt_datadisk_count
-***REMOVED***
+}
 
 ##############################################################################################################

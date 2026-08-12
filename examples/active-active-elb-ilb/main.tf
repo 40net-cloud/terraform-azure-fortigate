@@ -10,22 +10,22 @@
 ##############################################################################################################
 
 resource "azurerm_resource_group" "resourcegroup" {
-  name     = "${var.prefix***REMOVED***-rg"
+  name     = "${var.prefix}-rg"
   location = var.location
-***REMOVED***
+}
 
 ##############################################################################################################
 # Virtual Network - VNET
 ##############################################################################################################
 resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.prefix***REMOVED***-vnet"
+  name                = "${var.prefix}-vnet"
   address_space       = var.vnet
   location            = azurerm_resource_group.resourcegroup.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-***REMOVED***
+}
 
 resource "azurerm_subnet" "subnets" {
-  for_each = { for s in var.subnets : s.name => s ***REMOVED***
+  for_each = { for s in var.subnets : s.name => s }
 
   name                            = each.key
   resource_group_name             = azurerm_resource_group.resourcegroup.name
@@ -36,7 +36,7 @@ resource "azurerm_subnet" "subnets" {
   depends_on = [
     azurerm_virtual_network.vnet
   ]
-***REMOVED***
+}
 
 ##############################################################################################################
 # Load Balancers
@@ -50,16 +50,16 @@ resource "azurerm_lb_nat_rule" "elbinboundrules" {
       protocol      = "Tcp"
       frontend_port = 50030 + i
       backend_port  = 22
-    ***REMOVED***
-    ***REMOVED***, {
+    }
+    }, {
     for i in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i) => {
       name          = format("%s-fgt-%d-MGMT-HTTPS", var.prefix, i)
       protocol      = "Tcp"
       frontend_port = 40030 + i
       backend_port  = 443
-    ***REMOVED***
-  ***REMOVED***)
+    }
+  })
 
   name                           = each.value.name
   resource_group_name            = azurerm_resource_group.resourcegroup.name
@@ -75,25 +75,25 @@ resource "azurerm_lb_nat_rule" "elbinboundrules" {
   depends_on = [
     module.elb
   ]
-***REMOVED***
+}
 
 
 resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
   for_each = merge({
     for idx in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-SSH", var.prefix, idx) => {
-      network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx***REMOVED***"].id
+      network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx}"].id
       ip_config_name       = "ipconfig1"
       nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-SSH", var.prefix, idx)].id
-    ***REMOVED***
-    ***REMOVED***, {
+    }
+    }, {
     for idx in range(var.fgt_count) :
     format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx) => {
-      network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx***REMOVED***"].id
+      network_interface_id = module.fgt.fortigate_network_interface_external["fgt-${idx}"].id
       ip_config_name       = "ipconfig1"
       nat_rule_id          = azurerm_lb_nat_rule.elbinboundrules[format("%s-fgt-%d-MGMT-HTTPS", var.prefix, idx)].id
-    ***REMOVED***
-  ***REMOVED***)
+    }
+  })
 
   network_interface_id  = each.value.network_interface_id
   ip_configuration_name = each.value.ip_config_name
@@ -103,37 +103,37 @@ resource "azurerm_network_interface_nat_rule_association" "nat_assoc" {
     module.fgt,
     module.elb
   ]
-***REMOVED***
+}
 
 module "elb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix***REMOVED***-elb"
+  name                         = "${var.prefix}-elb"
   type                         = "public"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
   lb_probe_unhealthy_threshold = 2
   lb_sku                       = "Standard"
-  pip_name                     = "${var.prefix***REMOVED***-elb-pip"
+  pip_name                     = "${var.prefix}-elb-pip"
   pip_sku                      = "Standard"
 
   lb_port = {
     http     = ["80", "Tcp", "80"]
     udp10551 = ["10551", "Udp", "10551"]
-  ***REMOVED***
+  }
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
-  ***REMOVED***
+  }
 
   tags = var.fortinet_tags
   depends_on = [
   azurerm_resource_group.resourcegroup]
-***REMOVED***
+}
 
 module "ilb" {
   source                       = "Azure/loadbalancer/azurerm"
   resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix***REMOVED***-ilb"
+  name                         = "${var.prefix}-ilb"
   type                         = "private"
   lb_floating_ip_enabled       = true
   lb_probe_interval            = 5
@@ -143,14 +143,14 @@ module "ilb" {
 
   lb_port = {
     haports = ["0", "All", "0"]
-  ***REMOVED***
+  }
   lb_probe = {
     lbprobe = ["Tcp", "8008", ""]
-  ***REMOVED***
+  }
   tags = var.fortinet_tags
   depends_on = [
   azurerm_resource_group.resourcegroup]
-***REMOVED***
+}
 
 ##############################################################################################################
 # FortiGate
@@ -180,6 +180,6 @@ module "fgt" {
   fgt_serial_console            = var.fgt_serial_console
   fortinet_tags                 = var.fortinet_tags
   fgt_customdata_variables      = local.fgt_vars
-***REMOVED***
+}
 
 ##############################################################################################################

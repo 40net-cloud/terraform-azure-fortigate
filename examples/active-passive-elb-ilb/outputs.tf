@@ -11,10 +11,10 @@
 
 output "FGT-A-MGMT-IP" {
   value = azurerm_public_ip.fgtamgmtpip.ip_address
-***REMOVED***
+}
 
 output "FGT-B-MGMT-IP" {
   value = azurerm_public_ip.fgtbmgmtpip.ip_address
-***REMOVED***
+}
 
 ##############################################################################################################

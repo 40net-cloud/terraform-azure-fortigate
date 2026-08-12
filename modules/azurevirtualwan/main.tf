@@ -8,54 +8,54 @@
 ##############################################################################################################
 
 resource "azurerm_user_assigned_identity" "managedidentity" {
-  for_each            = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  for_each            = var.managedidentity_id == "" ? { create = true } : {}
   location            = var.location
-  name                = "${var.prefix***REMOVED***-managed-identity"
+  name                = "${var.prefix}-managed-identity"
   resource_group_name = var.resource_group.name
-***REMOVED***
+}
 
 resource "azurerm_role_assignment" "reader" {
-  for_each             = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  for_each             = var.managedidentity_id == "" ? { create = true } : {}
   depends_on           = [azurerm_user_assigned_identity.managedidentity["create"]]
-  scope                = "${var.subscription_id***REMOVED***/resourceGroups/${var.resource_group.name***REMOVED***"
+  scope                = "${var.subscription_id}/resourceGroups/${var.resource_group.name}"
   role_definition_name = "Reader"
   principal_id         = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)
-***REMOVED***
+}
 
 resource "azurerm_role_definition" "joinpublicip" {
   depends_on = [azurerm_user_assigned_identity.managedidentity["create"]]
-  name       = "${var.prefix***REMOVED*** - Public IP join role"
-  scope      = "${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"
+  name       = "${var.prefix} - Public IP join role"
+  scope      = "${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"
   permissions {
     actions     = ["Microsoft.Network/publicIPAddresses/join/action"]
     not_actions = []
-  ***REMOVED***
-  assignable_scopes = ["${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"]
-***REMOVED***
+  }
+  assignable_scopes = ["${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"]
+}
 
 resource "azurerm_role_assignment" "joinpublicipassignment" {
-  for_each = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  for_each = var.managedidentity_id == "" ? { create = true } : {}
   depends_on = [
     azurerm_user_assigned_identity.managedidentity["create"],
     azurerm_role_definition.joinpublicip
   ]
-  scope = "${var.subscription_id***REMOVED***/resourceGroups/${var.internet_inbound.public_ip_rg***REMOVED***"
+  scope = "${var.subscription_id}/resourceGroups/${var.internet_inbound.public_ip_rg}"
   # Reference the role by its resource ID, not its name: a freshly created custom
   # role definition is not immediately queryable by name, which otherwise fails
   # with "listing role definitions: could not find role '<name>'".
   role_definition_id = azurerm_role_definition.joinpublicip.role_definition_resource_id
   principal_id       = try(azurerm_user_assigned_identity.managedidentity["create"].principal_id, null)
-***REMOVED***
+}
 
 # Azure RBAC is eventually consistent: the custom "Public IP join role" assignment
 # above takes a minute or two to propagate. Without this wait, the managed-app
 # deployment's referenced-resource access check fails with
 # NvaReferencedResourceAccessCheckFailed on Microsoft.Network/publicIPAddresses/join/action.
 resource "time_sleep" "wait_for_rbac" {
-  for_each        = var.managedidentity_id == "" ? { create = true ***REMOVED*** : {***REMOVED***
+  for_each        = var.managedidentity_id == "" ? { create = true } : {}
   depends_on      = [azurerm_role_assignment.joinpublicipassignment]
   create_duration = "180s"
-***REMOVED***
+}
 
 resource "azapi_resource" "fgtinvhub" {
   depends_on = [time_sleep.wait_for_rbac]
@@ -71,14 +71,14 @@ resource "azapi_resource" "fgtinvhub" {
     create = "120m"
     update = "120m"
     delete = "120m"
-  ***REMOVED***
+  }
 
   identity {
     type = "UserAssigned"
     identity_ids = [
       var.managedidentity_id != "" ? var.managedidentity_id : azurerm_user_assigned_identity.managedidentity["create"].id
     ]
-  ***REMOVED***
+  }
   body = {
     kind = "MarketPlace",
     plan = {
@@ -86,81 +86,81 @@ resource "azapi_resource" "fgtinvhub" {
       product   = var.plan.product
       publisher = var.plan.publisher
       version   = var.plan.version
-    ***REMOVED***,
+    },
     properties = {
-      managedResourceGroupId = "${var.subscription_id***REMOVED***/resourcegroups/${var.managed_resource_group_name***REMOVED***",
+      managedResourceGroupId = "${var.subscription_id}/resourcegroups/${var.managed_resource_group_name}",
       parameters = {
         adminUsername = {
           value = var.username
-        ***REMOVED***
+        }
         adminPassword = {
           value = var.password
-        ***REMOVED***
+        }
         fortiGateNamePrefix = {
           value = var.prefix
-        ***REMOVED***
+        }
         vwandeploymentSKU = {
-          value = "${var.fgt_vwan_deployment_type***REMOVED***-${var.fgt_image_sku***REMOVED***"
-        ***REMOVED***
+          value = "${var.fgt_vwan_deployment_type}-${var.fgt_image_sku}"
+        }
         managedApplicationPlan = {
           value = var.plan.name
-        ***REMOVED***
+        }
         vwandeploymentType = {
           value = var.fgt_vwan_deployment_type
-        ***REMOVED***
+        }
         fortiGateImageVersion = {
           value = var.fgt_version
-        ***REMOVED***
+        }
         hubId = {
           value = var.vhub_id
-        ***REMOVED***
+        }
         fortiGateASN = {
           value = tostring(var.fgt_asn)
-        ***REMOVED***
-        ***REMOVED***
+        }
+        tags = {
           value = var.tags
-        ***REMOVED***
+        }
         scaleUnit = {
           value = var.fgt_scaleunit
-        ***REMOVED***
+        }
         hubRouters = {
           value = [
             var.vhub_virtual_router_ip1,
             var.vhub_virtual_router_ip2
           ]
-        ***REMOVED***
+        }
         hubASN = {
           value = tostring(var.vhub_virtual_router_asn)
-        ***REMOVED***
+        }
         location = {
           value = var.location
-        ***REMOVED***
+        }
         fortiManagerIP = {
           value = var.fortimanager_host
-        ***REMOVED***
+        }
         fortiManagerSerial = {
           value = var.fortimanager_serial
-        ***REMOVED***
+        }
         internetInboundCheck = {
           value = var.internet_inbound.enabled
-        ***REMOVED***
+        }
         slbpiprg = {
           value = var.internet_inbound.public_ip_rg
-        ***REMOVED***
+        }
         slbpipname = {
           value = var.internet_inbound.public_ip_name
-        ***REMOVED***
+        }
         slbPIpNewOrExisting = {
           value = "existing"
-        ***REMOVED***
+        }
         slbpublicIpDns = {
           value = ""
-        ***REMOVED***
+        }
         slbpublicIpSku = {
           value = "Standard"
-        ***REMOVED***
-      ***REMOVED***
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+        }
+      }
+    }
+  }
+}
 ##############################################################################################################

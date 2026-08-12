@@ -8,22 +8,22 @@
 # Resource Group
 ##############################################################################################################
 resource "azurerm_resource_group" "resourcegroup" {
-  name     = "${var.prefix***REMOVED***-rg"
+  name     = "${var.prefix}-rg"
   location = var.location
-***REMOVED***
+}
 
 ##############################################################################################################
 # Virtual Network - VNET
 ##############################################################################################################
 resource "azurerm_virtual_network" "vnet" {
-  name                = "${var.prefix***REMOVED***-vnet"
+  name                = "${var.prefix}-vnet"
   address_space       = var.vnet
   location            = azurerm_resource_group.resourcegroup.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-***REMOVED***
+}
 
 resource "azurerm_subnet" "subnets" {
-  for_each = { for s in var.subnets : s.name => s ***REMOVED***
+  for_each = { for s in var.subnets : s.name => s }
 
   name                            = each.key
   resource_group_name             = azurerm_resource_group.resourcegroup.name
@@ -34,51 +34,51 @@ resource "azurerm_subnet" "subnets" {
   depends_on = [
     azurerm_virtual_network.vnet
   ]
-***REMOVED***
+}
 
 resource "azurerm_public_ip" "fgt_pip" {
-  name                = "${var.prefix***REMOVED***-fgt-pip"
+  name                = "${var.prefix}-fgt-pip"
   resource_group_name = azurerm_resource_group.resourcegroup.name
   location            = azurerm_resource_group.resourcegroup.location
   allocation_method   = "Static"
   sku                 = "Standard"
-***REMOVED***
+}
 
 ##############################################################################################################
 # Public IP for management interface of the FortiGate
 ##############################################################################################################
 resource "azurerm_public_ip" "fgtamgmtpip" {
-  name                = "${var.prefix***REMOVED***-fgt-a-mgmt-pip"
+  name                = "${var.prefix}-fgt-a-mgmt-pip"
   location            = var.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
   allocation_method   = "Static"
-  domain_name_label   = "${var.prefix***REMOVED***-fgt-a-mgmt-pip"
+  domain_name_label   = "${var.prefix}-fgt-a-mgmt-pip"
   sku                 = "Standard"
-***REMOVED***
+}
 
 resource "azurerm_public_ip" "fgtbmgmtpip" {
-  name                = "${var.prefix***REMOVED***-fgt-b-mgmt-pip"
+  name                = "${var.prefix}-fgt-b-mgmt-pip"
   location            = var.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
   allocation_method   = "Static"
-  domain_name_label   = "${var.prefix***REMOVED***-fgt-b-mgmt-pip"
+  domain_name_label   = "${var.prefix}-fgt-b-mgmt-pip"
   sku                 = "Standard"
-***REMOVED***
+}
 
 ##############################################################################################################
 # Route Table
 ##############################################################################################################
 
 resource "azurerm_route_table" "protected_subnet_rt" {
-  name                = "${var.prefix***REMOVED***-routetable-protectedsubnet"
+  name                = "${var.prefix}-routetable-protectedsubnet"
   location            = var.location
   resource_group_name = azurerm_resource_group.resourcegroup.name
-  ***REMOVED***
+  tags = {
     publisher = "Fortinet"
     template  = "Active-Passive-SDN"
     provider  = "6EB3B02F-50E5-4A3E-8CB8-2E12925APSDN"
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 resource "azurerm_route" "to_default" {
   name                   = "toDefault"
@@ -87,7 +87,7 @@ resource "azurerm_route" "to_default" {
   address_prefix         = "0.0.0.0/0"
   next_hop_type          = "VirtualAppliance"
   next_hop_in_ip_address = local.fgt_a_vars.fgt_internal_ipaddr
-***REMOVED***
+}
 
 ##############################################################################################################
 # FortiGate
@@ -121,6 +121,6 @@ module "fgt" {
   fgt_datadisk_size                  = var.fgt_datadisk_size
   fgt_datadisk_count                 = var.fgt_datadisk_count
 
-***REMOVED***
+}
 
 ##############################################################################################################

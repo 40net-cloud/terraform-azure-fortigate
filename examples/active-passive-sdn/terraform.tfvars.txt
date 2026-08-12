@@ -3,19 +3,19 @@
 ############################################################################################################################################
 
 # Added name to each deployed resource
-***REMOVED***
+prefix = ""
 
 # Azure region
-***REMOVED***
+location = ""
 
 # Username for FortiGate admin
-***REMOVED***
+username = ""
 
 # Password for FortiGate admin
-***REMOVED***
+password = ""
 
 # Azure subscription ID
-***REMOVED***
+subscription_id = ""
 
 # Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')
 fgt_image_offer = "fortinet_fortigate-vm"
@@ -57,6 +57,6 @@ fgt_ssh_public_key_file = ""
 fgt_fortimanager_ip = ""
 
 # Serial number of the FortiManager (optional)
-fgt_***REMOVED***
+fgt_fortimanager_serial = ""
 
 

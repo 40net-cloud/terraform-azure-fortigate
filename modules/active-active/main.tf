@@ -12,17 +12,17 @@ locals {
       hostname = vars.fgt_vm_name,
       customdata = base64encode(
         templatefile(
-          "${path.module***REMOVED***/fgt-customdata.tftpl",
+          "${path.module}/fgt-customdata.tftpl",
           vars
         )
       )
-    ***REMOVED***
-  ***REMOVED***
+    }
+  }
 
   vm_datadisk_count_map = {
     for fgt_key, data in local.fgt_customdata :
     fgt_key => var.fgt_datadisk_count
-  ***REMOVED***
+  }
 
   datadisk_lun_map = flatten([
     for fgt_key, count in local.vm_datadisk_count_map : [
@@ -35,14 +35,14 @@ locals {
           i,
         )
         lun = i
-      ***REMOVED***
+      }
     ]
   ])
 
   datadisk_attachments = {
     for d in local.datadisk_lun_map :
     d.datadisk_name => d
-  ***REMOVED***
+  }
 
   lb_pools_ip_addresses = { for lb_pool in flatten([
     for zonek, zonev in var.fgt_ip_configuration : [
@@ -55,12 +55,12 @@ locals {
             zone_key                = zonek
             ipconfig_key            = ipck
             lb_key                  = lbk
-          ***REMOVED***
+          }
         ]
       ]
     ]
-  ]) : "${lb_pool.name***REMOVED***-${lb_pool.zone_key***REMOVED***-${lb_pool.ipconfig_key***REMOVED***-${lb_pool.lb_key***REMOVED***" => lb_pool ***REMOVED***
-***REMOVED***
+  ]) : "${lb_pool.name}-${lb_pool.zone_key}-${lb_pool.ipconfig_key}-${lb_pool.lb_key}" => lb_pool }
+}
 
 resource "azurerm_availability_set" "fgtavset" {
   count               = var.fgt_availability_set ? 1 : 0
@@ -68,7 +68,7 @@ resource "azurerm_availability_set" "fgtavset" {
   location            = var.location
   managed             = true
   resource_group_name = var.resource_group_name
-***REMOVED***
+}
 
 resource "azurerm_lb_backend_address_pool_address" "fgtifcext2elbbackendpool" {
   for_each                = local.lb_pools_ip_addresses
@@ -80,7 +80,7 @@ resource "azurerm_lb_backend_address_pool_address" "fgtifcext2elbbackendpool" {
     azurerm_network_interface.fgtifcext,
     azurerm_linux_virtual_machine.fgtvm
   ]
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtifcext" {
   for_each              = local.fgt_customdata
@@ -100,9 +100,9 @@ resource "azurerm_network_interface" "fgtifcext" {
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
       primary                                            = ip_configuration.value.is_primary_ipconfiguration
       gateway_load_balancer_frontend_ip_configuration_id = try(ip_configuration.value.gateway_load_balancer_frontend_ip_configuration_resource_id, null)
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtifcextnsg" {
   for_each                  = local.fgt_customdata
@@ -112,7 +112,7 @@ resource "azurerm_network_interface_security_group_association" "fgtifcextnsg" {
     azurerm_network_interface.fgtifcext,
     azurerm_network_security_group.fgtnsg
   ]
-***REMOVED***
+}
 
 resource "azurerm_network_interface" "fgtifcint" {
   for_each              = local.fgt_customdata
@@ -131,15 +131,15 @@ resource "azurerm_network_interface" "fgtifcint" {
       private_ip_address                                 = ip_configuration.value.private_ip_address == null ? null : ip_configuration.value.private_ip_address
       private_ip_address_version                         = ip_configuration.value.private_ip_address_version
       subnet_id                                          = ip_configuration.value.private_ip_subnet_resource_id
-    ***REMOVED***
-  ***REMOVED***
-***REMOVED***
+    }
+  }
+}
 
 resource "azurerm_network_interface_security_group_association" "fgtifcintnsg" {
   for_each                  = local.fgt_customdata
   network_interface_id      = azurerm_network_interface.fgtifcint[each.key].id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
-***REMOVED***
+}
 
 resource "azurerm_linux_virtual_machine" "fgtvm" {
   for_each              = local.fgt_customdata
@@ -153,26 +153,26 @@ resource "azurerm_linux_virtual_machine" "fgtvm" {
 
   identity {
     type = "SystemAssigned"
-  ***REMOVED***
+  }
 
   source_image_reference {
     publisher = "fortinet"
     offer     = var.fgt_image_offer
     sku       = var.fgt_image_sku
     version   = var.fgt_version
-  ***REMOVED***
+  }
 
   plan {
     publisher = "fortinet"
     product   = var.fgt_image_offer
     name      = var.fgt_image_sku
-  ***REMOVED***
+  }
 
   os_disk {
-    name                 = "${each.value.hostname***REMOVED***-osdisk"
+    name                 = "${each.value.hostname}-osdisk"
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
-  ***REMOVED***
+  }
 
   admin_username                  = var.username
   admin_password                  = var.password
@@ -181,20 +181,20 @@ resource "azurerm_linux_virtual_machine" "fgtvm" {
 
   dynamic "boot_diagnostics" {
     for_each = var.fgt_serial_console ? [1] : []
-    content {***REMOVED***
-  ***REMOVED***
+    content {}
+  }
 
   tags = var.fortinet_tags
 
   lifecycle {
     ignore_changes = [custom_data]
-  ***REMOVED***
+  }
 
   depends_on = [
     azurerm_network_interface_security_group_association.fgtifcextnsg,
     azurerm_network_interface_security_group_association.fgtifcintnsg
   ]
-***REMOVED***
+}
 
 resource "azurerm_managed_disk" "managed_disk" {
   for_each             = toset([for j in local.datadisk_lun_map : j.datadisk_name])
@@ -205,7 +205,7 @@ resource "azurerm_managed_disk" "managed_disk" {
   storage_account_type = var.fgt_datadisk_storage_account_type
   create_option        = "Empty"
   disk_size_gb         = var.fgt_datadisk_size
-***REMOVED***
+}
 
 resource "azurerm_virtual_machine_data_disk_attachment" "managed_disk_attach" {
   for_each           = local.datadisk_attachments
@@ -213,6 +213,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "managed_disk_attach" {
   virtual_machine_id = azurerm_linux_virtual_machine.fgtvm[each.value.fgt_key].id
   lun                = each.value.lun
   caching            = "ReadWrite"
-***REMOVED***
+}
 
 

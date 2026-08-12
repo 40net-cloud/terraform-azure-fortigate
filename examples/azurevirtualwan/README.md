@@ -36,7 +36,7 @@ In the Managed Resource Group (name ends with -mrg):
 output "fortigate-azurevirtualwan-managed_application" {
   value = module.fgt_nva.fortigate-azurevirtualwan-managed_application
   sensitive = true
-***REMOVED***
+}
 </code></pre>
 
 ### Instructions
@@ -83,7 +83,7 @@ To disable public internet access:
 <code><pre>
 internet_inbound = {
    enabled        = false
-***REMOVED***
+}
 </code></pre>
 ## Support
 

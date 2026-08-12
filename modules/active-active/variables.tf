@@ -10,22 +10,22 @@
 variable "prefix" {
   description = "Added name to each deployed resource"
   type        = string
-***REMOVED***
+}
 
 variable "location" {
   description = "Azure region"
   type        = string
-***REMOVED***
+}
 
 variable "username" {
   description = "Admin username for the FortiGate VM"
   type        = string
-***REMOVED***
+}
 
 variable "password" {
   description = "Admin password for the FortiGate VM"
   type        = string
-***REMOVED***
+}
 
 ##############################################################################################################
 # Names and data sources of linked Azure resource
@@ -34,18 +34,18 @@ variable "password" {
 variable "resource_group_name" {
   description = "Resource group for all deployed resources"
   type        = string
-***REMOVED***
+}
 
 variable "virtual_network_id" {
   description = "ID of the VNET to deploy the FortiGate into"
   type        = string
-***REMOVED***
+}
 
 variable "virtual_network_address_space" {
   description = "Address space of the VNET to deploy the FortiGate into"
   type        = list(string)
   default     = []
-***REMOVED***
+}
 
 variable "subnet_names" {
   type        = list(string)
@@ -53,8 +53,8 @@ variable "subnet_names" {
   validation {
     condition     = length(var.subnet_names) == 2
     error_message = "Please provide exactly 2 subnet names (external, internal)."
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 ##############################################################################################################
 # FortiGate
@@ -63,35 +63,35 @@ variable "subnet_names" {
 variable "fgt_image_offer" {
   description = "Azure Marketplace FortiGate Offer (new: 'fortinet_fortigate-vm', old: 'fortinet_fortigate-vm_v5')"
   default     = "fortinet_fortigate-vm"
-***REMOVED***
+}
 
 variable "fgt_image_sku" {
   description = "Azure Marketplace SKU (new: fortinet_fg-vm_[byol|payg]_[major-minor-version] e.g. fortinet_fg-vm_byol_80, old: PAYG 'fortinet_fg-vm_payg_2023' or byol 'fortinet_fg-vm')"
   default     = "fortinet_fg-vm_byol_76"
-***REMOVED***
+}
 
 variable "fgt_version" {
   description = "FortiGate version by default the 'latest' available version in the Azure Marketplace is selected"
   default     = "7.6.6"
-***REMOVED***
+}
 
 variable "fgt_byol_license_files" {
   description = "Map of license files keyed by hostname"
   type        = map(string)
-  default     = {***REMOVED***
-***REMOVED***
+  default     = {}
+}
 
 variable "fgt_byol_fortiflex_license_tokens" {
   description = "Map of FortiFlex license tokens keyed by hostname"
   type        = map(string)
-  default     = {***REMOVED***
-***REMOVED***
+  default     = {}
+}
 
 variable "fgt_ssh_public_key_file" {
   description = "Optional SSH public key file for authentication"
   type        = string
   default     = ""
-***REMOVED***
+}
 
 variable "fgt_count" {
   description = "Number of FortiGate instances to deploy"
@@ -101,26 +101,26 @@ variable "fgt_count" {
   validation {
     condition     = var.fgt_count >= 2 && var.fgt_count <= 8
     error_message = "The number of FortiGate instances must be between 2 and 8."
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 variable "fgt_vmsize" {
   description = "Azure VM size for FortiGate"
   type        = string
   default     = "Standard_F4s"
-***REMOVED***
+}
 
 variable "fgt_accelerated_networking" {
   description = "Enable accelerated networking for NICs"
   type        = bool
   default     = true
-***REMOVED***
+}
 
 variable "fgt_availability_set" {
   description = "Deploy FortiGate in a new Availability Set"
   type        = bool
   default     = true
-***REMOVED***
+}
 
 variable "fgt_availability_zone" {
   description = "Availability Zones for FortiGate VMs"
@@ -130,38 +130,38 @@ variable "fgt_availability_zone" {
   validation {
     condition     = length(var.fgt_availability_zone) <= 3
     error_message = "You can specify up to 3 availability zones only (0 to 3 entries)."
-  ***REMOVED***
-***REMOVED***
+  }
+}
 
 variable "fgt_datadisk_size" {
   description = "Size in GB for FortiGate data disks"
   type        = number
   default     = 64
-***REMOVED***
+}
 
 variable "fgt_datadisk_count" {
   description = "Number of data disks to attach to each FortiGate"
   type        = number
   default     = 1
-***REMOVED***
+}
 
 variable "fgt_datadisk_storage_account_type" {
   description = "Storage account type for FortiGate data disks"
   type        = string
   default     = "Premium_LRS"
-***REMOVED***
+}
 
 variable "fgt_config_ha" {
   description = "Enable HA configuration via cloud-init"
   type        = bool
   default     = true
-***REMOVED***
+}
 
 variable "fgt_additional_custom_data" {
   description = "Additional FortiGate configuration appended to cloud-init"
   type        = string
   default     = ""
-***REMOVED***
+}
 
 variable "fgt_customdata_variables" {
   description = "FortiGate configuration appended to cloud-init"
@@ -183,59 +183,59 @@ variable "fgt_customdata_variables" {
     fgt_additional_custom_data = string
     fgt_fortimanager_ip        = string
     fgt_fortimanager_serial    = string
-  ***REMOVED***))
-***REMOVED***
+  }))
+}
 
 variable "fgt_serial_console" {
   description = "Enable serial console on FortiGate VMs"
   type        = bool
   default     = true
-***REMOVED***
+}
 
 variable "fgt_fortimanager_ip" {
   description = "FortiManager IP address"
   type        = string
   default     = ""
-***REMOVED***
+}
 
 variable "fgt_fortimanager_serial" {
   description = "FortiManager serial number"
   type        = string
   default     = ""
-***REMOVED***
+}
 
 variable "fgt_ip_configuration" {
   type = object({
     external = map(object({
       ipconfig1 = object({
         name                                                        = string
-        app_gateway_backend_pools                                   = optional(map(object({ app_gateway_backend_pool_resource_id = string ***REMOVED***)), {***REMOVED***)
+        app_gateway_backend_pools                                   = optional(map(object({ app_gateway_backend_pool_resource_id = string })), {})
         gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
         is_primary_ipconfiguration                                  = optional(bool, true)
-        load_balancer_backend_pools                                 = optional(map(object({ load_balancer_backend_pool_resource_id = string ***REMOVED***)), {***REMOVED***)
-        load_balancer_nat_rules                                     = optional(map(object({ load_balancer_nat_rule_resource_id = string ***REMOVED***)), {***REMOVED***)
+        load_balancer_backend_pools                                 = optional(map(object({ load_balancer_backend_pool_resource_id = string })), {})
+        load_balancer_nat_rules                                     = optional(map(object({ load_balancer_nat_rule_resource_id = string })), {})
         private_ip_address                                          = optional(string)
         private_ip_address_allocation                               = optional(string, "Dynamic")
         private_ip_address_version                                  = optional(string, "IPv4")
         private_ip_subnet_resource_id                               = optional(string)
-      ***REMOVED***)
-    ***REMOVED***))
+      })
+    }))
     internal = map(object({
       ipconfig1 = object({
         name                                                        = string
-        app_gateway_backend_pools                                   = optional(map(object({ app_gateway_backend_pool_resource_id = string ***REMOVED***)), {***REMOVED***)
+        app_gateway_backend_pools                                   = optional(map(object({ app_gateway_backend_pool_resource_id = string })), {})
         gateway_load_balancer_frontend_ip_configuration_resource_id = optional(string)
         is_primary_ipconfiguration                                  = optional(bool, true)
-        load_balancer_backend_pools                                 = optional(map(object({ load_balancer_backend_pool_resource_id = string ***REMOVED***)), {***REMOVED***)
-        load_balancer_nat_rules                                     = optional(map(object({ load_balancer_nat_rule_resource_id = string ***REMOVED***)), {***REMOVED***)
+        load_balancer_backend_pools                                 = optional(map(object({ load_balancer_backend_pool_resource_id = string })), {})
+        load_balancer_nat_rules                                     = optional(map(object({ load_balancer_nat_rule_resource_id = string })), {})
         private_ip_address                                          = optional(string)
         private_ip_address_allocation                               = optional(string, "Dynamic")
         private_ip_address_version                                  = optional(string, "IPv4")
         private_ip_subnet_resource_id                               = optional(string)
-      ***REMOVED***)
-    ***REMOVED***))
-  ***REMOVED***)
-***REMOVED***
+      })
+    }))
+  })
+}
 
 variable "fortinet_tags" {
   description = "Tags to associate with FortiGate resources"
@@ -244,5 +244,5 @@ variable "fortinet_tags" {
     publisher = "Fortinet"
     template  = "Active-Active-ELB-ILB"
     provider  = "7EB3B02F-50E5-4A3E-8CB8-2E12925831AP"
-  ***REMOVED***
-***REMOVED***
+  }
+}

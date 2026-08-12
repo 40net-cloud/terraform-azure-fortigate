@@ -9,6 +9,6 @@
 
 output "fortigate-azurevirtualwan-managed_application" {
   value = azapi_resource.fgtinvhub
-***REMOVED***
+}
 
 ##############################################################################################################
