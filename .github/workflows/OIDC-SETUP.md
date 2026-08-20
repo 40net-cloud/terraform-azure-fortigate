@@ -49,9 +49,9 @@ az ad app federated-credential create --id "$APP_ID" --parameters "$(cat <<JSON
 {
   "name": "github-main",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:${REPO***REMOVED***:ref:refs/heads/main",
+  "subject": "repo:${REPO}:ref:refs/heads/main",
   "audiences": ["api://AzureADTokenExchange"]
-***REMOVED***
+}
 JSON
 )"
 
@@ -60,9 +60,9 @@ az ad app federated-credential create --id "$APP_ID" --parameters "$(cat <<JSON
 {
   "name": "github-pull-request",
   "issuer": "https://token.actions.githubusercontent.com",
-  "subject": "repo:${REPO***REMOVED***:pull_request",
+  "subject": "repo:${REPO}:pull_request",
   "audiences": ["api://AzureADTokenExchange"]
-***REMOVED***
+}
 JSON
 )"
 ```

@@ -23,7 +23,7 @@ on:
         default: false
 
 concurrency:
-  group: ${{ github.workflow ***REMOVED******REMOVED***-${{ github.ref ***REMOVED******REMOVED***
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false # never cancel: a killed deploy run would skip its destroy/cleanup
 
 jobs:
@@ -35,7 +35,7 @@ jobs:
     with:
       example: single
       prefix: fortiqa-sgl # lowercase: prefix may be used in DNS labels
-      deploy: ${{ inputs.deploy == true ***REMOVED******REMOVED*** # only ever true on manual dispatch; push = plan only
+      deploy: ${{ inputs.deploy == true }} # only ever true on manual dispatch; push = plan only
       marketplace_offer: fortinet_fortigate-vm
       marketplace_sku: fortinet_fg-vm_byol_76
       ssh_test_output: FGT-MGMT-IP # after apply: SSH in and run status commands

@@ -79,26 +79,26 @@ on:
 
 jobs:
   terraform:
-    name: "Terraform ${{ inputs.example ***REMOVED******REMOVED***${{ inputs.deploy && ' (deploy)' || '' ***REMOVED******REMOVED***"
+    name: "Terraform ${{ inputs.example }}${{ inputs.deploy && ' (deploy)' || '' }}"
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ inputs.timeout_minutes ***REMOVED******REMOVED***
+    timeout-minutes: ${{ inputs.timeout_minutes }}
     permissions:
       id-token: write # mint the GitHub OIDC token for Azure federated login
       contents: read
     env:
-      TFPath: examples/${{ inputs.example ***REMOVED******REMOVED***
+      TFPath: examples/${{ inputs.example }}
       TF_IN_AUTOMATION: 'true'
-      TF_VAR_prefix: "${{ inputs.prefix ***REMOVED******REMOVED***-${{ github.run_number ***REMOVED******REMOVED***"
-      TF_VAR_location: "${{ inputs.location ***REMOVED******REMOVED***"
+      TF_VAR_prefix: "${{ inputs.prefix }}-${{ github.run_number }}"
+      TF_VAR_location: "${{ inputs.location }}"
       TF_VAR_username: "azureuser"
-      TF_VAR_password: "${{ secrets.PASSWORD ***REMOVED******REMOVED***"
-      TF_VAR_subscription_id: "${{ secrets.ARM_SUBSCRIPTION_ID ***REMOVED******REMOVED***"
+      TF_VAR_password: "${{ secrets.PASSWORD }}"
+      TF_VAR_subscription_id: "${{ secrets.ARM_SUBSCRIPTION_ID }}"
       # OIDC (federated) auth — no client secret. The azurerm provider picks up
       # the GitHub OIDC token automatically when ARM_USE_OIDC=true.
       ARM_USE_OIDC: 'true'
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID ***REMOVED******REMOVED***
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID ***REMOVED******REMOVED***
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID ***REMOVED******REMOVED***
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
     steps:
       - name: "Checkout"
@@ -111,10 +111,10 @@ jobs:
 
       - name: "Write extra tfvars"
         if: inputs.extra_tfvars != ''
-        run: printf '%s\n' "${EXTRA_TFVARS***REMOVED***" > ci.auto.tfvars
+        run: printf '%s\n' "${EXTRA_TFVARS}" > ci.auto.tfvars
         env:
-          EXTRA_TFVARS: ${{ inputs.extra_tfvars ***REMOVED******REMOVED***
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+          EXTRA_TFVARS: ${{ inputs.extra_tfvars }}
+        working-directory: ${{ env.TFPath }}
 
       # CI-only Terraform override (merged by Terraform at load time, never committed:
       # *_override.tf is gitignored). Exists for the whole job, so it applies to
@@ -122,35 +122,35 @@ jobs:
       - name: "Write CI override file"
         if: inputs.ci_override_path != '' && inputs.ci_override_hcl != ''
         run: |
-          printf '%s\n' "${CI_OVERRIDE***REMOVED***" > '${{ inputs.ci_override_path ***REMOVED******REMOVED***'
-          echo "Wrote ${{ inputs.ci_override_path ***REMOVED******REMOVED***:"
-          cat '${{ inputs.ci_override_path ***REMOVED******REMOVED***'
+          printf '%s\n' "${CI_OVERRIDE}" > '${{ inputs.ci_override_path }}'
+          echo "Wrote ${{ inputs.ci_override_path }}:"
+          cat '${{ inputs.ci_override_path }}'
         env:
-          CI_OVERRIDE: ${{ inputs.ci_override_hcl ***REMOVED******REMOVED***
+          CI_OVERRIDE: ${{ inputs.ci_override_hcl }}
 
       - name: "Terraform Init"
         id: init
         run: terraform init -input=false
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
 
       - name: "Terraform Format"
         id: format
         run: terraform fmt -check -diff -recursive
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
 
       - name: "Terraform Validate"
         id: validate
         run: terraform validate
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
 
       - name: "Terraform Plan"
         id: plan
         run: terraform plan -input=false -out plan.tfplan
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
 
       - name: "Plan Summary"
         run: terraform show -no-color plan.tfplan | tail -n 20
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
 
       # ── Deployment steps below only run when deploy=true ────────────────────
 
@@ -160,40 +160,40 @@ jobs:
         if: inputs.deploy
         uses: azure/login@v3
         with:
-          client-id: ${{ secrets.ARM_CLIENT_ID ***REMOVED******REMOVED***
-          tenant-id: ${{ secrets.ARM_TENANT_ID ***REMOVED******REMOVED***
-          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID ***REMOVED******REMOVED***
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
       - name: "Accept Marketplace Terms"
         if: inputs.deploy && inputs.marketplace_offer != '' && inputs.marketplace_sku != ''
         run: |
           az vm image terms accept \
             --publisher fortinet \
-            --offer "${{ inputs.marketplace_offer ***REMOVED******REMOVED***" \
-            --plan "${{ inputs.marketplace_sku ***REMOVED******REMOVED***" \
+            --offer "${{ inputs.marketplace_offer }}" \
+            --plan "${{ inputs.marketplace_sku }}" \
             --output none
-          echo "Marketplace terms accepted for ${{ inputs.marketplace_offer ***REMOVED******REMOVED*** / ${{ inputs.marketplace_sku ***REMOVED******REMOVED***"
+          echo "Marketplace terms accepted for ${{ inputs.marketplace_offer }} / ${{ inputs.marketplace_sku }}"
 
       - name: "Terraform Apply"
         id: apply
         if: inputs.deploy
         run: terraform apply -input=false -auto-approve plan.tfplan
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
 
       - name: "Test - SSH login to FortiGate"
         if: inputs.deploy && inputs.ssh_test_output != '' && steps.apply.outcome == 'success'
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
         run: |
           # Mirror everything below to a report file as well as the console, so it
           # can be uploaded as an artifact (captures output even when the step fails).
-          REPORT="$RUNNER_TEMP/fgt-test-report-${{ inputs.example ***REMOVED******REMOVED***.txt"
+          REPORT="$RUNNER_TEMP/fgt-test-report-${{ inputs.example }}.txt"
           exec > >(tee -a "$REPORT") 2>&1
-          echo "FortiGate verification report - example=${{ inputs.example ***REMOVED******REMOVED*** run=${{ github.run_number ***REMOVED******REMOVED*** ($(date -u +%FT%TZ))"
+          echo "FortiGate verification report - example=${{ inputs.example }} run=${{ github.run_number }} ($(date -u +%FT%TZ))"
           sudo apt-get -qq update >/dev/null && sudo apt-get -qq install -y sshpass >/dev/null
           FAIL=0
-          for SPEC in ${{ inputs.ssh_test_output ***REMOVED******REMOVED***; do
-            OUT="${SPEC%%:****REMOVED***"
-            PORT="${SPEC#*:***REMOVED***"
+          for SPEC in ${{ inputs.ssh_test_output }}; do
+            OUT="${SPEC%%:*}"
+            PORT="${SPEC#*:}"
             [ "$PORT" = "$SPEC" ] && PORT=22
             IP=$(terraform output -raw "$OUT")
             echo "=== Testing $OUT -> $IP port $PORT ==="
@@ -219,7 +219,7 @@ jobs:
                   fi
                 done
 
-                if [ "${{ inputs.ha_test ***REMOVED******REMOVED***" = "true" ]; then
+                if [ "${{ inputs.ha_test }}" = "true" ]; then
                   printf '\n===== get system ha status =====\n'
                   # HA may still be negotiating right after boot: retry up to 3 minutes
                   HA_OK=0
@@ -255,27 +255,27 @@ jobs:
           done
           exit $FAIL
         env:
-          SSHPASS: ${{ secrets.PASSWORD ***REMOVED******REMOVED***
+          SSHPASS: ${{ secrets.PASSWORD }}
 
       - name: "Upload FortiGate test report"
         # Runs even if the SSH test failed, so the captured output is always available.
         if: always() && inputs.deploy && inputs.ssh_test_output != '' && steps.apply.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
-          name: fgt-test-report-${{ inputs.example ***REMOVED******REMOVED***
-          path: ${{ runner.temp ***REMOVED******REMOVED***/fgt-test-report-${{ inputs.example ***REMOVED******REMOVED***.txt
+          name: fgt-test-report-${{ inputs.example }}
+          path: ${{ runner.temp }}/fgt-test-report-${{ inputs.example }}.txt
           if-no-files-found: warn
 
       - name: "Test - post-deploy checks"
         if: inputs.deploy && inputs.post_test != '' && steps.apply.outcome == 'success'
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
         run: |
           # Already logged in via the "Azure Login (OIDC)" step above.
-          ${{ inputs.post_test ***REMOVED******REMOVED***
+          ${{ inputs.post_test }}
 
       # Destroy always runs after an apply attempt (success OR failure),
       # so partially created resources are cleaned up and nothing keeps billing.
       - name: "Terraform Destroy"
         if: always() && inputs.deploy && contains(fromJSON('["success", "failure"]'), steps.apply.outcome)
         run: terraform destroy -input=false -auto-approve
-        working-directory: ${{ env.TFPath ***REMOVED******REMOVED***
+        working-directory: ${{ env.TFPath }}
