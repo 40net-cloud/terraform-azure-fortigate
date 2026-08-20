@@ -47,10 +47,20 @@ variable "virtual_network_address_space" {
 
 variable "subnet_names" {
   type        = list(string)
-  description = "Names of four existing subnets to be connected to FortiGate VMs (external, internal, heartbeat, management)"
+  description = "Names of existing subnets to be connected to FortiGate VMs (external, internal, heartbeat, [management]). Provide 4 names (external, internal, heartbeat, management) when fgt_ha_port_mode is \"4-NIC\", or 3 (external, internal, heartbeat) when \"3-NIC\"."
   validation {
-    condition     = length(var.subnet_names) == 4
-    error_message = "Please provide exactly 4 subnet names (external, internal, heartbeat, management)."
+    condition     = length(var.subnet_names) == 3 || length(var.subnet_names) == 4
+    error_message = "Please provide exactly 4 subnet names (external, internal, heartbeat, management) for 4-NIC mode, or 3 (external, internal, heartbeat) for 3-NIC mode."
+  }
+}
+
+variable "fgt_ha_port_mode" {
+  description = "FGCP HA port mode. \"4-NIC\" (default) keeps HA sync (port3) and HA management (port4) on separate interfaces. \"3-NIC\" combines HA sync and HA management onto port3 (requires FortiOS 7.0.1+, bug id 670058), which allows deploying on instance types with only 3 NICs."
+  type        = string
+  default     = "4-NIC"
+  validation {
+    condition     = contains(["4-NIC", "3-NIC"], var.fgt_ha_port_mode)
+    error_message = "fgt_ha_port_mode must be either \"4-NIC\" or \"3-NIC\"."
   }
 }
 

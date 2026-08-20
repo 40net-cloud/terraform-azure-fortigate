@@ -144,6 +144,7 @@ resource "azurerm_network_interface_security_group_association" "fgtaifchasyncns
 }
 
 resource "azurerm_network_interface" "fgtaifchamgmt" {
+  count                          = var.fgt_ha_port_mode == "4-NIC" ? 1 : 0
   name                           = "${local.fgt_a_name}-nic4-mgmt"
   location                       = var.location
   resource_group_name            = var.resource_group_name
@@ -166,18 +167,22 @@ resource "azurerm_network_interface" "fgtaifchamgmt" {
 }
 
 resource "azurerm_network_interface_security_group_association" "fgtaifchamgmtnsg" {
-  network_interface_id      = azurerm_network_interface.fgtaifchamgmt.id
+  count                     = var.fgt_ha_port_mode == "4-NIC" ? 1 : 0
+  network_interface_id      = azurerm_network_interface.fgtaifchamgmt[0].id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
 resource "azurerm_linux_virtual_machine" "fgtavm" {
-  name                  = local.fgt_a_name
-  location              = var.location
-  resource_group_name   = var.resource_group_name
-  network_interface_ids = [azurerm_network_interface.fgtaifcext.id, azurerm_network_interface.fgtaifcint.id, azurerm_network_interface.fgtaifchasync.id, azurerm_network_interface.fgtaifchamgmt.id]
-  size                  = var.fgt_vmsize
-  availability_set_id   = var.fgt_availability_set ? azurerm_availability_set.fgtavset[0].id : null
-  zone                  = var.fgt_availability_set ? null : var.fgt_availability_zone[0]
+  name                = local.fgt_a_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  network_interface_ids = concat(
+    [azurerm_network_interface.fgtaifcext.id, azurerm_network_interface.fgtaifcint.id, azurerm_network_interface.fgtaifchasync.id],
+    azurerm_network_interface.fgtaifchamgmt[*].id
+  )
+  size                = var.fgt_vmsize
+  availability_set_id = var.fgt_availability_set ? azurerm_availability_set.fgtavset[0].id : null
+  zone                = var.fgt_availability_set ? null : var.fgt_availability_zone[0]
 
   identity {
     type = "SystemAssigned"
@@ -329,6 +334,7 @@ resource "azurerm_network_interface_security_group_association" "fgtbifchasyncns
 }
 
 resource "azurerm_network_interface" "fgtbifchamgmt" {
+  count                          = var.fgt_ha_port_mode == "4-NIC" ? 1 : 0
   name                           = "${local.fgt_b_name}-nic4-mgmt"
   location                       = var.location
   resource_group_name            = var.resource_group_name
@@ -351,18 +357,22 @@ resource "azurerm_network_interface" "fgtbifchamgmt" {
 }
 
 resource "azurerm_network_interface_security_group_association" "fgtbifchamgmtnsg" {
-  network_interface_id      = azurerm_network_interface.fgtbifchamgmt.id
+  count                     = var.fgt_ha_port_mode == "4-NIC" ? 1 : 0
+  network_interface_id      = azurerm_network_interface.fgtbifchamgmt[0].id
   network_security_group_id = azurerm_network_security_group.fgtnsg.id
 }
 
 resource "azurerm_linux_virtual_machine" "fgtbvm" {
-  name                  = local.fgt_b_name
-  location              = var.location
-  resource_group_name   = var.resource_group_name
-  network_interface_ids = [azurerm_network_interface.fgtbifcext.id, azurerm_network_interface.fgtbifcint.id, azurerm_network_interface.fgtbifchasync.id, azurerm_network_interface.fgtbifchamgmt.id]
-  size                  = var.fgt_vmsize
-  availability_set_id   = var.fgt_availability_set ? azurerm_availability_set.fgtavset[0].id : null
-  zone                  = var.fgt_availability_set ? null : var.fgt_availability_zone[1]
+  name                = local.fgt_b_name
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  network_interface_ids = concat(
+    [azurerm_network_interface.fgtbifcext.id, azurerm_network_interface.fgtbifcint.id, azurerm_network_interface.fgtbifchasync.id],
+    azurerm_network_interface.fgtbifchamgmt[*].id
+  )
+  size                = var.fgt_vmsize
+  availability_set_id = var.fgt_availability_set ? azurerm_availability_set.fgtavset[0].id : null
+  zone                = var.fgt_availability_set ? null : var.fgt_availability_zone[1]
 
   identity {
     type = "SystemAssigned"

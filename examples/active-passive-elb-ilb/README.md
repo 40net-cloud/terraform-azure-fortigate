@@ -24,6 +24,8 @@ The Terraform code provisions a resource group that includes the following resou
    - A Public IP address attached to FGT-a mgmt interface used for management
    - A Public IP address attached to FGT-b mgmt interface used for management
 
+By default (`fgt_ha_port_mode = "4-NIC"`), hasync and mgmt are kept on separate interfaces and subnets, as described above. Setting `fgt_ha_port_mode = "3-NIC"` combines hasync and mgmt onto a single interface (port3, requires FortiOS 7.0.1 or later): the dedicated mgmt subnet is not deployed, and each FortiGate's management public IP is attached directly to port3's private IP instead of a dedicated port4 interface. This allows deployment on Azure instance types that only support 3 NICs.
+
 ### Instructions
 
 Follow these steps to deploy:

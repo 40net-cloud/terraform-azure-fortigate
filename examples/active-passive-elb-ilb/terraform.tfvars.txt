@@ -32,6 +32,9 @@ fgt_availability_set = false
 # Azure VM size for FortiGate instances
 fgt_vmsize = "Standard_F4s"
 
+# FGCP HA port mode: "4-NIC" (default, separate hasync/mgmt interfaces) or "3-NIC" (combined hasync+mgmt on port3, allows 3-NIC instance types)
+fgt_ha_port_mode = "4-NIC"
+
 # Size in GB for FortiGate data disks
 fgt_datadisk_size = 64
 

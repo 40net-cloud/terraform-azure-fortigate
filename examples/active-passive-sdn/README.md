@@ -25,6 +25,8 @@ The Terraform code provisions a resource group that includes the following resou
 - Custom role assignment to the system-assigned managed identity of both FortiGates at the subscription level. This enables automated updates to UDR and public IP associations during failover. [Learn more here](https://docs.fortinet.com/document/fortigate-public-cloud/7.6.0/azure-administration-guide/430141/access-control)
 - Reader role assignment to the system-assigned managed identity at the subscription scope. This allows the SDN connector to resolve private and/or public IP addresses using various Azure metadata properties, such as tags, VM names, NSGs, resource groups, and regions.  
 
+By default (`fgt_ha_port_mode = "4-NIC"`), HA sync (port3) and HA management (port4) are kept on separate interfaces and subnets, as described above. Setting `fgt_ha_port_mode = "3-NIC"` combines HA sync and HA management onto port3 (requires FortiOS 7.0.1 or later): the dedicated management subnet is not deployed, and each FortiGate's management public IP is attached directly to port3's private IP instead of a dedicated port4 interface. This allows deployment on Azure instance types that only support 3 NICs.
+
 ***Post-deployment configuration steps***
 
 - Configure an IPv4 outbound policy on the FortiGate VM from port2 (internal) to port1 (external). This is required for the SDN connector to resolve IP addresses.

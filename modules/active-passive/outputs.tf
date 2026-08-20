@@ -22,7 +22,8 @@ output "fortigate-a-network-interface-hasync" {
   value = azurerm_network_interface.fgtaifchasync
 }
 output "fortigate-a-network-interface-hamgmt" {
-  value = azurerm_network_interface.fgtaifchamgmt
+  description = "Only set when fgt_ha_port_mode is \"4-NIC\"; null in \"3-NIC\" mode."
+  value       = one(azurerm_network_interface.fgtaifchamgmt)
 }
 output "fortigate-b-virtual-machine" {
   value = azurerm_linux_virtual_machine.fgtbvm
@@ -37,7 +38,8 @@ output "fortigate-b-network-interface-hasync" {
   value = azurerm_network_interface.fgtbifchasync
 }
 output "fortigate-b-network-interface-hamgmt" {
-  value = azurerm_network_interface.fgtbifchamgmt
+  description = "Only set when fgt_ha_port_mode is \"4-NIC\"; null in \"3-NIC\" mode."
+  value       = one(azurerm_network_interface.fgtbifchamgmt)
 }
 output "fortigate-network-security-group" {
   value = azurerm_network_security_group.fgtnsg

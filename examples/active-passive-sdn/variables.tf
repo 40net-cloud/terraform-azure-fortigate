@@ -125,6 +125,16 @@ variable "fgt_vmsize" {
   default     = "Standard_F4s"
 }
 
+variable "fgt_ha_port_mode" {
+  description = "FGCP HA port mode. \"4-NIC\" (default) keeps HA sync (port3) and HA management (port4) on separate interfaces and subnets. \"3-NIC\" combines HA sync and HA management onto port3 (requires FortiOS 7.0.1+), drops the dedicated management subnet, and attaches the management public IP directly to port3 - allowing deployment on instance types with only 3 NICs."
+  type        = string
+  default     = "4-NIC"
+  validation {
+    condition     = contains(["4-NIC", "3-NIC"], var.fgt_ha_port_mode)
+    error_message = "fgt_ha_port_mode must be either \"4-NIC\" or \"3-NIC\"."
+  }
+}
+
 ##############################################################################################################
 # Deployment in Microsoft Azure
 ##############################################################################################################
@@ -181,6 +191,10 @@ locals {
   fgt_a_name = "${var.prefix}-fgt-a"
   fgt_b_name = "${var.prefix}-fgt-b"
 
+  # In 3-NIC mode HA sync and HA management share port3, so the dedicated
+  # management subnet is not deployed.
+  effective_subnets = var.fgt_ha_port_mode == "3-NIC" ? [for s in var.subnets : s if s.name != "subnet-hamgmt"] : var.subnets
+
   fgt_a_vars = {
     fgt_vm_name                = "${local.fgt_a_name}"
     subscription_id            = var.subscription_id
@@ -206,11 +220,12 @@ locals {
     fgt_hasync_ipaddr          = local.fgt_ip_configuration["hasync"]["fgt-a"]["ipconfig1"].private_ip_address
     fgt_hasync_mask            = tostring(cidrnetmask(azurerm_subnet.subnets["subnet-hasync"].address_prefixes[0]))
     fgt_hasync_gw              = tostring(cidrhost(azurerm_subnet.subnets["subnet-hasync"].address_prefixes[0], 1))
-    fgt_mgmt_ipaddr            = local.fgt_ip_configuration["hamgmt"]["fgt-a"]["ipconfig1"].private_ip_address
-    fgt_mgmt_mask              = tostring(cidrnetmask(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0]))
-    fgt_mgmt_gw                = tostring(cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1))
+    fgt_mgmt_ipaddr            = var.fgt_ha_port_mode == "4-NIC" ? local.fgt_ip_configuration["hamgmt"]["fgt-a"]["ipconfig1"].private_ip_address : ""
+    fgt_mgmt_mask              = var.fgt_ha_port_mode == "4-NIC" ? tostring(cidrnetmask(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0])) : ""
+    fgt_mgmt_gw                = var.fgt_ha_port_mode == "4-NIC" ? tostring(cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1)) : ""
     fgt_ha_peerip              = local.fgt_ip_configuration["hasync"]["fgt-b"]["ipconfig1"].private_ip_address
     fgt_ha_priority            = "255"
+    fgt_ha_port_mode           = var.fgt_ha_port_mode
     vnet_network               = tostring(tolist(azurerm_virtual_network.vnet.address_space)[0])
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
@@ -242,18 +257,19 @@ locals {
     fgt_hasync_ipaddr          = local.fgt_ip_configuration["hasync"]["fgt-b"]["ipconfig1"].private_ip_address
     fgt_hasync_mask            = cidrnetmask(azurerm_subnet.subnets["subnet-hasync"].address_prefixes[0])
     fgt_hasync_gw              = cidrhost(azurerm_subnet.subnets["subnet-hasync"].address_prefixes[0], 1)
-    fgt_mgmt_ipaddr            = local.fgt_ip_configuration["hamgmt"]["fgt-b"]["ipconfig1"].private_ip_address
-    fgt_mgmt_mask              = cidrnetmask(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0])
-    fgt_mgmt_gw                = cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1)
+    fgt_mgmt_ipaddr            = var.fgt_ha_port_mode == "4-NIC" ? local.fgt_ip_configuration["hamgmt"]["fgt-b"]["ipconfig1"].private_ip_address : ""
+    fgt_mgmt_mask              = var.fgt_ha_port_mode == "4-NIC" ? cidrnetmask(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0]) : ""
+    fgt_mgmt_gw                = var.fgt_ha_port_mode == "4-NIC" ? cidrhost(azurerm_subnet.subnets["subnet-hamgmt"].address_prefixes[0], 1) : ""
     fgt_ha_peerip              = local.fgt_ip_configuration["hasync"]["fgt-a"]["ipconfig1"].private_ip_address
     fgt_ha_priority            = "1"
+    fgt_ha_port_mode           = var.fgt_ha_port_mode
     vnet_network               = tostring(tolist(azurerm_virtual_network.vnet.address_space)[0])
     fgt_additional_custom_data = var.fgt_additional_custom_data
     fgt_fortimanager_ip        = var.fgt_fortimanager_ip
     fgt_fortimanager_serial    = var.fgt_fortimanager_serial
     fgt_ha_internal_vip        = true
   }
-  fgt_ip_configuration = {
+  fgt_ip_configuration = merge({
     external = {
       fgt-a = {
         ipconfig1 = {
@@ -310,6 +326,7 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-hasync"].id
           is_primary_ipconfiguration    = true
+          public_ip_address_resource_id = var.fgt_ha_port_mode == "3-NIC" ? azurerm_public_ip.fgtamgmtpip.id : null
         }
       }
       fgt-b = {
@@ -319,9 +336,11 @@ locals {
           private_ip_address_allocation = "Static"
           private_ip_subnet_resource_id = azurerm_subnet.subnets["subnet-hasync"].id
           is_primary_ipconfiguration    = true
+          public_ip_address_resource_id = var.fgt_ha_port_mode == "3-NIC" ? azurerm_public_ip.fgtbmgmtpip.id : null
         }
       }
     }, # HASYNC
+    }, var.fgt_ha_port_mode == "4-NIC" ? {
     hamgmt = {
       fgt-a = {
         ipconfig1 = {
@@ -344,7 +363,7 @@ locals {
         }
       }
     } # MGMT
-  }
+  } : {})
 }
 
 ##############################################################################################################

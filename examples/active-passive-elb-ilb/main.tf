@@ -23,7 +23,7 @@ resource "azurerm_virtual_network" "vnet" {
 }
 
 resource "azurerm_subnet" "subnets" {
-  for_each = { for s in var.subnets : s.name => s }
+  for_each = { for s in local.effective_subnets : s.name => s }
 
   name                            = each.key
   resource_group_name             = azurerm_resource_group.resourcegroup.name
@@ -177,7 +177,8 @@ module "fgt" {
   password                           = var.password
   virtual_network_id                 = azurerm_virtual_network.vnet.id
   virtual_network_address_space      = azurerm_virtual_network.vnet.address_space
-  subnet_names                       = slice([for s in var.subnets : s.name], 0, 4)
+  subnet_names                       = [for s in local.effective_subnets : s.name]
+  fgt_ha_port_mode                   = var.fgt_ha_port_mode
   fgt_image_offer                    = var.fgt_image_offer
   fgt_image_sku                      = var.fgt_image_sku
   fgt_version                        = var.fgt_version
