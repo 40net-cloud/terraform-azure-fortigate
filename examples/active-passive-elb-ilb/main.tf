@@ -39,48 +39,106 @@ resource "azurerm_subnet" "subnets" {
 ##############################################################################################################
 # Load Balancers
 ##############################################################################################################
-module "elb" {
-  source                       = "Azure/loadbalancer/azurerm"
-  resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix}-externalloadbalancer"
-  type                         = "public"
-  lb_floating_ip_enabled       = true
-  lb_probe_interval            = 5
-  lb_probe_unhealthy_threshold = 2
-  lb_sku                       = "Standard"
-  pip_name                     = "${var.prefix}-elb-pip"
-  pip_sku                      = "Standard"
-
-  lb_port = {
-    http     = ["80", "Tcp", "80"]
-    udp10551 = ["10551", "Udp", "10551"]
-  }
-  lb_probe = {
-    lbprobe = ["Tcp", "8008", ""]
-  }
-  tags       = var.fortinet_tags
-  depends_on = [azurerm_resource_group.resourcegroup]
+resource "azurerm_public_ip" "elb_pip" {
+  name                = "${var.prefix}-elb-pip"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = var.fortinet_tags
 }
 
-module "ilb" {
-  source                       = "Azure/loadbalancer/azurerm"
-  resource_group_name          = azurerm_resource_group.resourcegroup.name
-  name                         = "${var.prefix}-internalloadbalancer"
-  type                         = "private"
-  lb_floating_ip_enabled       = true
-  lb_probe_interval            = 5
-  lb_probe_unhealthy_threshold = 2
-  lb_sku                       = "Standard"
-  frontend_subnet_id           = azurerm_subnet.subnets["subnet-internal"].id
+resource "azurerm_lb" "elb" {
+  name                = "${var.prefix}-externalloadbalancer"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  sku                 = "Standard"
+  tags                = var.fortinet_tags
 
-  lb_port = {
-    haports = ["0", "All", "0"]
+  frontend_ip_configuration {
+    name                 = "LoadBalancerFrontEnd"
+    public_ip_address_id = azurerm_public_ip.elb_pip.id
   }
-  lb_probe = {
-    lbprobe = ["Tcp", "8008", ""]
+}
+
+resource "azurerm_lb_backend_address_pool" "elb_pool" {
+  name            = "${var.prefix}-externalloadbalancer-bepool"
+  loadbalancer_id = azurerm_lb.elb.id
+}
+
+resource "azurerm_lb_probe" "elb_probe" {
+  name                = "lbprobe"
+  loadbalancer_id     = azurerm_lb.elb.id
+  protocol            = "Tcp"
+  port                = 8008
+  interval_in_seconds = 5
+  number_of_probes    = 2
+}
+
+resource "azurerm_lb_rule" "elb_http" {
+  name                           = "http"
+  loadbalancer_id                = azurerm_lb.elb.id
+  frontend_ip_configuration_name = "LoadBalancerFrontEnd"
+  protocol                       = "Tcp"
+  frontend_port                  = 80
+  backend_port                   = 80
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.elb_pool.id]
+  probe_id                       = azurerm_lb_probe.elb_probe.id
+  floating_ip_enabled            = true
+  idle_timeout_in_minutes        = 5
+}
+
+resource "azurerm_lb_rule" "elb_udp10551" {
+  name                           = "udp10551"
+  loadbalancer_id                = azurerm_lb.elb.id
+  frontend_ip_configuration_name = "LoadBalancerFrontEnd"
+  protocol                       = "Udp"
+  frontend_port                  = 10551
+  backend_port                   = 10551
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.elb_pool.id]
+  probe_id                       = azurerm_lb_probe.elb_probe.id
+  floating_ip_enabled            = true
+  idle_timeout_in_minutes        = 5
+}
+
+resource "azurerm_lb" "ilb" {
+  name                = "${var.prefix}-internalloadbalancer"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.resourcegroup.name
+  sku                 = "Standard"
+  tags                = var.fortinet_tags
+
+  frontend_ip_configuration {
+    name      = "LoadBalancerFrontEnd"
+    subnet_id = azurerm_subnet.subnets["subnet-internal"].id
   }
-  tags       = var.fortinet_tags
-  depends_on = [azurerm_resource_group.resourcegroup]
+}
+
+resource "azurerm_lb_backend_address_pool" "ilb_pool" {
+  name            = "${var.prefix}-internalloadbalancer-bepool"
+  loadbalancer_id = azurerm_lb.ilb.id
+}
+
+resource "azurerm_lb_probe" "ilb_probe" {
+  name                = "lbprobe"
+  loadbalancer_id     = azurerm_lb.ilb.id
+  protocol            = "Tcp"
+  port                = 8008
+  interval_in_seconds = 5
+  number_of_probes    = 2
+}
+
+resource "azurerm_lb_rule" "ilb_haports" {
+  name                           = "haports"
+  loadbalancer_id                = azurerm_lb.ilb.id
+  frontend_ip_configuration_name = "LoadBalancerFrontEnd"
+  protocol                       = "All"
+  frontend_port                  = 0
+  backend_port                   = 0
+  backend_address_pool_ids       = [azurerm_lb_backend_address_pool.ilb_pool.id]
+  probe_id                       = azurerm_lb_probe.ilb_probe.id
+  floating_ip_enabled            = true
+  idle_timeout_in_minutes        = 5
 }
 
 ##############################################################################################################

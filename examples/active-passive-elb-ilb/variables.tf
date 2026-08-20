@@ -131,7 +131,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">=2.0.0"
+      version = ">=4.0.0, <5.0.0"
     }
   }
 }
@@ -244,7 +244,7 @@ locals {
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
             lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
+              load_balancer_backend_pool_resource_id = azurerm_lb_backend_address_pool.elb_pool.id
             }
           }
         }
@@ -258,7 +258,7 @@ locals {
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
             lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.elb.azurerm_lb_backend_address_pool_id
+              load_balancer_backend_pool_resource_id = azurerm_lb_backend_address_pool.elb_pool.id
             }
           }
         }
@@ -274,7 +274,7 @@ locals {
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
             lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
+              load_balancer_backend_pool_resource_id = azurerm_lb_backend_address_pool.ilb_pool.id
             }
           }
         }
@@ -288,7 +288,7 @@ locals {
           is_primary_ipconfiguration    = true
           load_balancer_backend_pools = {
             lb_pool_1 = {
-              load_balancer_backend_pool_resource_id = module.ilb.azurerm_lb_backend_address_pool_id
+              load_balancer_backend_pool_resource_id = azurerm_lb_backend_address_pool.ilb_pool.id
             }
           }
         }
